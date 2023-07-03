@@ -6,3 +6,12 @@ services:
     ports:
       - 8545:8545
     restart: always
+
+  main-server:
+    container_name: main-server
+    build: 
+      context: ./main-server
+      dockerfile: Dockerfile
+    ports:
+      - 4000:4000
+    restart: always
