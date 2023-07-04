@@ -10,8 +10,14 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
-	"time"
+
+	"go.uber.org/zap"
 )
+
+func init() {
+	logger := loaders.MustInitLogger()
+	zap.ReplaceGlobals(logger)
+}
 
 func main() {
 	port := flag.String("p", "8080", "port to listen on")
@@ -19,17 +25,19 @@ func main() {
 
 	mustValidatePort(*port)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	/*
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
-	db := <-loaders.MustConnectPostgresWithRetry(ctx, "postgres://postgres:postgres@postgres:5432/plohub?sslmode=disable&connect_timeout=10")
-	if db == nil {
-		log.Fatal("Failed to connect to postgres")
-	}
-	if err := db.Ping(); err != nil {
-		log.Fatal("Failed to ping postgres: ", err)
-	}
-	log.Println("Connected to postgres")
+			db := <-loaders.MustConnectPostgresWithRetry(ctx, "postgres://postgres:postgres@postgres:5432/plohub?sslmode=disable&connect_timeout=10")
+			if db == nil {
+				log.Fatal("Failed to connect to postgres")
+			}
+			if err := db.Ping(); err != nil {
+				log.Fatal("Failed to ping postgres: ", err)
+			}
+			log.Println("Connected to postgres")
+	*/
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthcheck", func(w http.ResponseWriter, _ *http.Request) {
@@ -54,11 +62,11 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("Failed to listen and serve: ", err)
+			zap.L().Panic("Failed to listen and serve", zap.Error(err))
 		}
 	}()
 
-	log.Printf("Server listening on port %s", *port)
+	zap.L().Info("Server started", zap.String("port", *port))
 
 	go func() {
 		defer func() {
@@ -70,25 +78,25 @@ func main() {
 
 	<-stop
 
-	log.Println("Shutting down server...")
+	zap.L().Info("Shutting down server...")
 	if err := srv.Shutdown(context.Background()); err != nil {
 		log.Fatal("Failed to shutdown server: ", err)
 	}
 
-	log.Println("Server gracefully stopped")
+	zap.L().Info("Server gracefully stopped")
 }
 
 func mustValidatePort(port string) {
 	if port == "" {
-		log.Fatal("Port is required")
+		zap.L().Panic("Port is required")
 	}
 
 	n, err := strconv.Atoi(port)
 	if err != nil {
-		log.Fatal("Port must be a number")
+		zap.L().Panic("Port must be a number")
 	}
 
 	if n < 1 || n > 65535 {
-		log.Fatal("Port must be between 1 and 65535")
+		zap.L().Panic("Port must be between 1 and 65535")
 	}
 }
