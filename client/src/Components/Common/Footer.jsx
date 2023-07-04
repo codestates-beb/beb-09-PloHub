@@ -2,9 +2,11 @@ import React from 'react';
 
 const Footer = () => {
     return (
-        <>
-            <h1>Footer</h1>
-        </>
+        <footer className='relative bottom-0 w-full flex justify-center h-4/12'>
+            <div>
+                Copyright &copy;
+            </div>
+        </footer>
     )
 
 }

@@ -7,21 +7,21 @@ const Toggle = ({ isOn, handleToggle }) => {
         <div className={
             `absolute
             top-8 
-            left-12 
-            border-2
+            left-8 
+            border
             p-2
             rounded
             border-solid
-            border-black
+            border-gray
             transition-all 
             duration-500 
             ease-in-out 
             transform ${isOn ? 'translate-x-64' : 'translate-x-0'} ...`
         } onClick={handleToggle}>
         {isOn ? (
-            <FiX style={{ fontSize: '2rem' }} />
+            <FiX style={{ fontSize: '1.5rem', color: '#999' }} />
         ) : (
-            <FiMenu style={{ fontSize: '2rem' }} />
+            <FiMenu style={{ fontSize: '1.5rem', color: '#999' }} />
         )}
         </div>
     );
