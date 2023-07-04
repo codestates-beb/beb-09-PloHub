@@ -14,15 +14,20 @@ const Header = () => {
                 </div>
                 <div className='flex items-center gap-5 col-end-5 px-8'>
                     <div className='border border-solid rounded p-2 hover:bg-white hover:text-black transition-all duration-300'>
-                        <button>Sign In</button>
+                        <Link href='/signin'>
+                            <button>Sign In</button>
+                        </Link>
                     </div>
                     <div className='border border-solid rounded p-2 hover:bg-white hover:text-black transition-all duration-300'>
-                        <button>Sign Up</button>
+                        <Link href='/signup'>
+                            <button>Sign Up</button>
+                        </Link>
                     </div>
                 </div>
             </div>
         </>
     );
 }
+
 
 export default Header;
