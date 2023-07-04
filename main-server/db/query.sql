@@ -2,10 +2,10 @@
 INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id;
 
 -- name: GetUserByEmail :one
-SELECT (id, email, level, address, eth_amount, token_amount, daily_token) FROM users WHERE email = $1;
+SELECT (id, email, nickname, level, address, eth_amount, token_amount, daily_token) FROM users WHERE email = $1;
 
 -- name: GetUserByID :one
-SELECT (id, email, level, address, eth_amount, token_amount, daily_token) FROM users WHERE id = $1;
+SELECT (id, email, nickname, level, address, eth_amount, token_amount, daily_token) FROM users WHERE id = $1;
 
 -- name: UpdateUser :exec
 UPDATE users SET nickname = $1, level = $2, address = $3, eth_amount = $4, token_amount = $5, latest_login_date = $6, daily_token = $7, updated_at = now() WHERE id = $8;
@@ -45,6 +45,9 @@ DELETE FROM media WHERE id = $1;
 
 -- name: CreateComment :exec
 INSERT INTO comments (post_id, user_id, content, reward_token) VALUES ($1, $2, $3, $4);
+
+-- name: GetCommentByID :one
+SELECT (id, post_id, user_id, content, reward_token) FROM comments WHERE id = $1;
 
 -- name: GetCommentsByPostID :many
 SELECT (id, post_id, user_id, content, reward_token) FROM comments WHERE post_id = $1;
