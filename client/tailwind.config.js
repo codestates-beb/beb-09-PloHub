@@ -16,10 +16,13 @@ module.exports = {
             desktop: "1280px",
         },
     extend: {
-        backgroundImage: {
-            'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-            'gradient-conic':
-            'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        colors: {
+            blue: {
+                white: '#F5EFE7',
+                skin: '#D8C4B6',
+                main: '#4F709C',
+                dark: '#213555'
+            }
         },
     fontFamily: {
         common: ['Pretendard','sans-serif'],

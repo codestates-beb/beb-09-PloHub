@@ -6,7 +6,7 @@ import { logoWhite } from '../Reference';
 const Header = () => {
     return (
         <>
-            <div className="h-24 bg-green-700 text-white py-4 px-6 grid grid-cols-2 content-center overflow-hidden">
+            <div className="h-24 bg-blue-dark text-white py-4 px-6 grid grid-cols-2 content-center overflow-hidden">
                 <div className='flex justify-start items-center h-24'>
 					<Link href='/'>
 						<Image src={logoWhite} alt="Logo" width={200} height="auto"/>
