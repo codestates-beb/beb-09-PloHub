@@ -6,7 +6,7 @@ type Querier interface {
 	CreateComment(ctx context.Context, arg CreateCommentParams) error
 	CreateMedia(ctx context.Context, arg CreateMediaParams) error
 	CreatePost(ctx context.Context, arg CreatePostParams) error
-	CreateUser(ctx context.Context, arg CreateUserParams) error
+	CreateUser(ctx context.Context, arg CreateUserParams) (int32, error)
 	DeleteComment(ctx context.Context, id int32) error
 	DeleteMedia(ctx context.Context, id int32) error
 	DeletePost(ctx context.Context, id int32) error

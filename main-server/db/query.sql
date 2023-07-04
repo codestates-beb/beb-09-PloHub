@@ -1,5 +1,5 @@
--- name: CreateUser :exec
-INSERT INTO users (email, hashed_password) VALUES ($1, $2);
+-- name: CreateUser :one
+INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id;
 
 -- name: GetUserByEmail :one
 SELECT (id, email, level, address, eth_amount, token_amount, daily_token) FROM users WHERE email = $1;

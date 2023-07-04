@@ -69,8 +69,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
-const createUser = `-- name: CreateUser :exec
-INSERT INTO users (email, hashed_password) VALUES ($1, $2)
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id
 `
 
 type CreateUserParams struct {
@@ -78,9 +78,11 @@ type CreateUserParams struct {
 	HashedPassword string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser, arg.Email, arg.HashedPassword)
-	return err
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
 const deleteComment = `-- name: DeleteComment :exec
