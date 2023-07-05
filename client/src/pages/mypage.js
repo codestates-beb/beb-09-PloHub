@@ -74,7 +74,7 @@ const mypage = () => {
         <>
             <Header />
             <div className='flex flex-col justify-center gap-6 mx-auto w-[90%]'>
-                <div className='w-full border rounded-lg border-gray-300 mx-auto my-6'>
+                <div className='w-full border-b rounded-lg border-gray-300 mx-auto my-6'>
                     <div className='grid grid-cols-3 items-center py-3 px-5 text-center'>
                         <div className='flex gap-4 font-bold text-2xl pl-5'>
                         {isEditing ? (
