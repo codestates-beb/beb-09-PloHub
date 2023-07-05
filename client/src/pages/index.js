@@ -97,16 +97,19 @@ export default function Home() {
                             ))}
                         </tbody>
                         </table>
-                    <div className='w-full mt-20 flex justify-center'>
+                    <div className='w-full mt-16 flex justify-center'>
                         페이지네이션 자리
                     </div>
-                    <div className='w-full mt-20 flex justify-center items-center'>
-                        <div className='mr-12'>
-                            옵션
-                        </div>
-                        <input className='border rounded-lg border-black py-3 px-4 w-5/12' type="text" placeholder='검색'/>
-                        <div className='ml-12'>
-                            <button type="button">검색</button>
+                    <div className='w-full mt-16 mb-5 flex justify-center items-center'>
+                        <select class="border border-black py-2 px-4 pr-6 rounded mr-5 text-sm">
+                            <option className="text-sm" value="option1">제목 + 내용</option>
+                            <option className="text-sm" value="option2">제목</option>
+                            <option className="text-sm" value="option3">내용</option>
+                            <option className="text-sm" value="option3">작성자</option>
+                        </select>
+                        <input className='border rounded-lg border-black py-2 px-4 w-5/12' type="text" placeholder='게시글 검색'/>
+                        <div className='ml-5'>
+                            <button className='border rounded-lg py-2 px-6 bg-blue-dark text-white hover:bg-blue-main transition duration-300' type="button">검색</button>
                         </div>
                     </div>
                 </div>
