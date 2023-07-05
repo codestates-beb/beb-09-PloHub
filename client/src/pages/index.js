@@ -26,41 +26,31 @@ export default function Home() {
 
     return (
         <DefaultLayout>
-            <div className='flex justify-center w-full overflow-hidden'>
                 <Nav />
+            <div className='flex justify-center items-center w-full min-h-screen overflow-hidden'>
                 <div className={
-                    `mx-auto 
-                    w-8/12  
-                    h-full 
-                    my-7
+                    `w-8/12 
+                    h-full
                     `
                 }>
-                    <div className='w-full flex justify-end'>
+                    <div className='flex justify-end'>
                         <button className='
                             border 
                             rounded-2xl 
                             p-3 
                             w-1/12 
-                            mb-5 
+                            mb-8 
                             bg-blue-dark 
                             text-white 
                             font-semibold 
                             hover:bg-blue-main 
                             transition-all 
                             duration-300 
-                            text-lg' 
+                            text-md' 
                             type="button">
                             글쓰기
                         </button>
                     </div>
-                    {/* <div className="flex flex-col space-y-4">
-                        {posts.map((post) => (
-                            <div key={post.id} className="border p-4 rounded shadow hover:bg-gray-200 transition-all duration-300 cursor-pointer">
-                                <h2 className="text-2xl font-bold mb-2">{post.title}</h2>
-                                <p className="text-gray-600">Written by {post.author}</p>
-                            </div>
-                        ))}
-                    </div> */}
                     <table className="w-full text-center border-collapse ">
                         <thead className='border-b'>
                             <tr>
@@ -75,22 +65,22 @@ export default function Home() {
                         <tbody>
                             {posts.map((post) => (
                             <tr key={post.id} className="hover:bg-gray-200 transition-all duration-300 cursor-pointer">
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-xl font-semibold">{post.id}</p>
                                 </td>
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-gray-600"> {post.category}</p>
                                 </td>
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-gray-600"> {post.title}</p>
                                 </td>
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-gray-600"> {post.content}</p>
                                 </td>
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-gray-600"> {post.writer}</p>
                                 </td>
-                                <td className="border-b p-4">
+                                <td className="border-b p-6">
                                     <p className="text-gray-600"> {post.date}</p>
                                 </td>
                             </tr>
