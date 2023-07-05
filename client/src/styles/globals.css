@@ -20,6 +20,10 @@
   @apply font-common;
 }
 
+input {
+  outline: none;
+}
+
 select {
   appearance: none;
   background-image: url('../assets/image/down-filled-triangular-arrow.png');
