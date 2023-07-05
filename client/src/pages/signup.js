@@ -67,12 +67,13 @@ const signup = () => {
                                     type="email" 
                                     name="email" 
                                     id='email'
+                                    required
                                     placeholder="example@gmail.com" />
                                 <button className='border rounded-lg p-3 ml-3 bg-blue-main text-white hover:bg-blue-dark transition duration-300'> Confirm </button>
                             </div>
                         </div>
                         <div className='flex flex-col w-4/12'>
-                            <label className='cursor-pointer text-xl text-left font-semibold mb-2'  htmlFor='password'>Password:</label>
+                            <label className='cursor-pointer text-xl text-left font-semibold mb-2'  htmlFor='password'>Password *</label>
                             <div className='flex flex-col'>
                                 <input className='border rounded-xl px-2 py-3 w-full' 
                                     type="password" 
@@ -80,12 +81,13 @@ const signup = () => {
                                     id='password'
                                     value={password} 
                                     onChange={passwordChange}
+                                    required
                                     placeholder='비밀번호를 입력하세요' />
                                 {password.length > 0 && <div className='text-left text-red-600'>{passwordError}</div>}
                             </div>
                         </div>
                         <div className='flex flex-col w-4/12'>
-                            <label className='cursor-pointer text-xl text-left font-semibold mb-2'  htmlFor='password'>Password Confirm:</label>
+                            <label className='cursor-pointer text-xl text-left font-semibold mb-2'  htmlFor='password'>Password Confirm *</label>
                             <div className='flex flex-col'>
                                 <input className='border rounded-xl px-2 py-3 w-full' 
                                     type="password" 
@@ -93,6 +95,7 @@ const signup = () => {
                                     id='password' 
                                     value={pwConfirm}
                                     onChange={passwordConfirmChange}
+                                    required
                                     placeholder='비밀번호를 입력하세요' />
                                 <span className='text-left text-red-600'>{pwConfirmError}</span>
                                 <span className='text-left text-blue-600'>{pwConfirmMessage}</span>
