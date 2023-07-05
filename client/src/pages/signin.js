@@ -3,54 +3,6 @@ import Link from 'next/link';
 import { Header, Footer } from '../Components/Reference';
 
 const signin = () => {
-    const [password, setPassword] = useState('');
-    const [pwConfirm, setPwConfirm] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [pwConfirmError, setPwConfirmError] = useState('');
-    const [pwConfirmMessage, setPwConfirmMessage] = useState('');
-
-    const passwordChange = (e) => {
-        setPassword(e.target.value)
-    };
-
-    const passwordConfirmChange = (e) => {
-        setPwConfirm(e.target.value);
-    }
-    
-    const validatePassword = () => {
-        const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        if (password.length < 8) {
-            setPasswordError('비밀번호는 최소 8자 이상이어야 합니다.');
-        } else if (!passwordRegex.test(password)) {
-            setPasswordError('비밀번호는 영문 대문자, 영문 소문자, 숫자, 특수기호를 모두 포함해야 합니다.');
-        } else {
-            setPasswordError('');
-        }
-    };
-
-    const passwordConfirm = () => {
-        if (pwConfirm.length === 0) {
-        }
-        if (password.length <= 0 && pwConfirm.length <= 0 ) {
-            setPwConfirmError('');
-            setPwConfirmMessage('');
-        } else if (password === pwConfirm) {
-            setPwConfirmMessage('비밀번호가 일치합니다.');
-            setPwConfirmError('');
-        } else if (password !== pwConfirm) {
-            setPwConfirmError('비밀번호가 일치하지 않습니다.');
-            setPwConfirmMessage('');
-        }
-    }
-
-    useEffect(() => {
-        validatePassword();
-    }, [password]);
-
-    useEffect(() => {
-        passwordConfirm();
-    }, [pwConfirm]);
-
     return (
         <>
             <Header />
@@ -79,11 +31,8 @@ const signin = () => {
                                         type="password" 
                                         name="password" 
                                         id='password'
-                                        value={password} 
-                                        onChange={passwordChange}
                                         required
                                         placeholder='비밀번호를 입력하세요' />
-                                    {password.length > 0 && <div className='text-left text-red-600'>{passwordError}</div>}
                                 </div>
                             </div>
                         </div>
