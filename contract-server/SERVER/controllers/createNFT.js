@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const abiSource = require('../../contract/build/contracts/NFTLootBox.json');
-const models = require('../models');
-const varEnv = require('../config/var');
+const models = require('../models.js');
+const varEnv = require('../config/var.js');
 const pinataSDK = require('@pinata/sdk');
 
 //nftCreate
@@ -64,11 +64,12 @@ exports.createNFT = async(req,res) => {
             console.log('Photo uploaded successfully. IPFS Hash:', photoResult.IpfsHash)  ; 
 
             // NFT 메타 데이터 생성 및 Pinata에 업로드
+            // TODO : 이 객체 형식은 opensea에서만 유효한가??
             const nftMetadata = {
                 name: name,
                 description: description,
                 token_metadata: `ipfs://${photoResult.IpfsHash}`,
-                image_url: photoUrl,
+                image_url: image,
               };
 
             const metadataResult = await pinata.pinJSONToIPFS(nftMetadata); //pinata에 업로드. -> 완료시 아래 코드에서 반환된 IpfsHash 출력. 
@@ -82,7 +83,7 @@ exports.createNFT = async(req,res) => {
                 const createNFTData = await models.nfts.create({
                     user_id: user_id,
                     owner_address: data.address,
-                    token_id: mintResult,
+                    token_id: mintResult, //TODO : 이 값이 토큰 id를 반환하는지 확인 해야함!
                     token_uri: tokenURI,
                     price: 20,
                 })
