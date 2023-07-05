@@ -94,6 +94,8 @@ exports.createNFT = async(req,res) => {
                     console.log('data upload is failed..');
                     res.status(400).json({message: 'data upload is failed..'});
                 }
+            //TODO : 토큰을 썻기 떄문에 사용자의 토큰 수량 wallet에 업데이트, main-server 데이터 베이스에도 업로드
+            //해줘야 하기 때문에 response에 업데이트 후 사용자 토큰 수량 전송!! 이 부분 만들어야함
             }
         }
 
