@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+type authContextKey string
+
+const UserIDKey authContextKey = "UserID"
+
 func AccessTokenRequired(authSrv auth.Service) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +44,7 @@ func AccessTokenRequired(authSrv auth.Service) func(next http.Handler) http.Hand
 			}
 
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, "UserID", user.ID)
+			ctx = context.WithValue(ctx, UserIDKey, user.ID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

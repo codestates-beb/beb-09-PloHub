@@ -16,3 +16,16 @@ type UserInfo struct {
 	TokenAmount string `json:"token_amount"`
 	DailyToken  int32  `json:"daily_token"`
 }
+
+type CheckEmailRequest struct {
+	Email string `json:"email"`
+}
+
+type LoginResponse struct {
+	UserInfoResponse
+	AccessTokenResponse
+}
+
+type UserInfoResponse struct {
+	UserInfo UserInfo `json:"user_info"`
+}
