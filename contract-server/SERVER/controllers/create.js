@@ -2,9 +2,7 @@ const Web3 = require('web3');
 const crypto = require('crypto');
 const abiSource = require('../../contract/build/contracts/ICToken.json');
 const models = require('../models');
-const sequelize = require('sequelize');
 const varEnv = require('../config/var');
-require('dotenv').config();
 
 // 회원가입 처리 함수
 exports.createWallet = async (req, res) => {
