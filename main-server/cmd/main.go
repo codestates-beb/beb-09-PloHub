@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -25,29 +26,23 @@ func main() {
 
 	mustValidatePort(*port)
 
-	/*
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-			db := <-loaders.MustConnectPostgresWithRetry(ctx, "postgres://postgres:postgres@postgres:5432/plohub?sslmode=disable&connect_timeout=10")
-			if db == nil {
-				log.Fatal("Failed to connect to postgres")
-			}
-			if err := db.Ping(); err != nil {
-				log.Fatal("Failed to ping postgres: ", err)
-			}
-			log.Println("Connected to postgres")
-	*/
+	db := <-loaders.MustConnectPostgresWithRetry(ctx, "postgres://postgres:postgres@localhost:5432/plohub?sslmode=disable&connect_timeout=10")
+	if db == nil {
+		log.Fatal("Failed to connect to postgres")
+	}
+	if err := db.Ping(); err != nil {
+		log.Fatal("Failed to ping postgres: ", err)
+	}
+	log.Println("Connected to postgres")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthcheck", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+	router := loaders.NewMainRouter(db)
 
 	srv := &http.Server{
 		Addr:    ":" + *port,
-		Handler: mux,
+		Handler: router,
 	}
 
 	stop := make(chan struct{})
