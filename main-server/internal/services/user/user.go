@@ -15,6 +15,7 @@ var (
 type Service interface {
 	EmailExists(ctx context.Context, email string) (bool, error)
 	Login(ctx context.Context, email, password string) (*models.UserInfo, error)
+	MyInfo(ctx context.Context, userID int32) (*models.UserInfo, error)
 	MyPage(ctx context.Context, userID int32) (*models.MyPageInfo, error)
 	SignUp(ctx context.Context, email, password string) error
 	Withdraw(ctx context.Context, userID int32) error
@@ -84,6 +85,28 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 		if !user.LatestLoginDate.Valid || !checkUserLoggedInToday(user.LatestLoginDate.Time) {
 			// TODO: request reward
 		}
+
+		return nil
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return userInfo, nil
+}
+
+func (s *service) MyInfo(ctx context.Context, userID int32) (*models.UserInfo, error) {
+	userInfo := &models.UserInfo{}
+
+	fn := func(q plohub.Querier) error {
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		userInfo = extractUserInfo(user)
 
 		return nil
 	}

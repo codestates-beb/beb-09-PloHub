@@ -76,6 +76,14 @@ func (s *service) VerifyToken(tokenString string, role models.TokenRole) (*model
 	var u models.JWTUser
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if iss, ok := claims["iss"].(string); !ok || iss != s.issuer {
+			return nil, ErrInvalidToken
+		}
+
+		if aud, ok := claims["aud"].(string); !ok || aud != s.audience {
+			return nil, ErrInvalidToken
+		}
+
 		if sub, ok := claims["sub"].(string); ok {
 			id, err := strconv.Atoi(sub)
 			if err != nil {
@@ -143,6 +151,8 @@ func (s *service) getAccessTokenClaims(u models.JWTUser) jwt.MapClaims {
 
 func (s *service) getRefreshTokenClaims(u models.JWTUser) jwt.MapClaims {
 	return jwt.MapClaims{
+		"iss": s.issuer,
+		"aud": s.audience,
 		"sub": fmt.Sprint(u.ID),
 		"exp": time.Now().Add(s.refreshTokenExpiry).UTC().Unix(),
 		"iat": time.Now().UTC().Unix(),
