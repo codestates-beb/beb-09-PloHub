@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const abiSource = require('../../contract/build/contracts/ICToken.json');
-const models = require('../models');
-const varEnv = require('../config/var');
+const models = require('../models.js');
+const varEnv = require('../config/var.js');
 
 exports.reward = async (req, res) => {
     const abi = abiSource.abi;
@@ -23,6 +23,7 @@ exports.reward = async (req, res) => {
 
     console.log('데이터 가져오기 성공. 보상을 지급합니다!');
     //reward type
+    // 0 = 회원가입 : 5token
     // 1 = 로그인 : 1token
     // 2 = 게시물 작성 : 3token
     // 3 = 댓글 작성
@@ -42,7 +43,7 @@ exports.reward = async (req, res) => {
             }
         })
         console.log(updateWallet);
-        res.status(200).json({reward_amount: 1});
+        res.status(200).json({reward_amount: 1, token_amount: token_amount});
     }
     //게시물 작성
     if (reward_type === "2"){
@@ -58,6 +59,6 @@ exports.reward = async (req, res) => {
             }
         })
         console.log(updateWallet);
-        res.status(200).json({reward_amount: 3});
+        res.status(200).json({reward_amount: 3, token_amount: token_amount});
     }
 }
