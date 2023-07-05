@@ -37,7 +37,7 @@ func (ur *userRouter) Route() http.Handler {
 		r.Group(func(sr chi.Router) {
 			sr.Use(middlewares.AccessTokenRequired(ur.authSrv))
 			sr.Get("/myinfo", ur.myInfo)
-			sr.Get("/mypage", ur.myPage)
+			sr.Get("/mypage", ur.myPage) // TODO: implement this
 		})
 	})
 
@@ -85,7 +85,8 @@ func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// set refresh token to cookie
-	refreshCookie := ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.Domain, tokenPair.RefreshTokenExpiry)
+	// TODO: set domain
+	refreshCookie := ur.newRefreshCookie(tokenPair.RefreshToken, "", tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
@@ -151,7 +152,8 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// set refresh token to cookie
-	refreshCookie = ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.Domain, tokenPair.RefreshTokenExpiry)
+	// TODO: set domain
+	refreshCookie = ur.newRefreshCookie(tokenPair.RefreshToken, "", tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response

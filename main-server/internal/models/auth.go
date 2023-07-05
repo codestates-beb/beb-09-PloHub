@@ -10,7 +10,6 @@ const (
 )
 
 type TokenPair struct {
-	Domain             string        `json:"domain"`
 	AccessToken        string        `json:"access_token"`
 	RefreshToken       string        `json:"refresh_token"`
 	AccessTokenExpiry  time.Duration `json:"access_token_expiry"`
