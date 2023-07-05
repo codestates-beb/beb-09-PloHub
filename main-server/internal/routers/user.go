@@ -11,20 +11,24 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 type userRouter struct {
-	userSrv user.Service
-	authSrv auth.Service
+	domain  string
+	userSvc user.Service
+	authSvc auth.Service
 }
 
-func NewUserRouter(userSrv user.Service, authSrv auth.Service) Router {
+func NewUserRouter(domain string, userSvc user.Service, authSvc auth.Service) Router {
 	return &userRouter{
-		userSrv: userSrv,
-		authSrv: authSrv,
+		domain:  domain,
+		userSvc: userSvc,
+		authSvc: authSvc,
 	}
 }
 
+// Route returns a http.Handler that handles user related requests
 func (ur *userRouter) Route() http.Handler {
 	mux := chi.NewRouter()
 
@@ -36,7 +40,7 @@ func (ur *userRouter) Route() http.Handler {
 		r.Post("/check-email", ur.checkEmail)
 
 		r.Group(func(sr chi.Router) {
-			sr.Use(middlewares.AccessTokenRequired(ur.authSrv))
+			sr.Use(middlewares.AccessTokenRequired(ur.authSvc))
 			sr.Get("/myinfo", ur.myInfo)
 			sr.Get("/mypage", ur.myPage) // TODO: implement this
 		})
@@ -45,49 +49,66 @@ func (ur *userRouter) Route() http.Handler {
 	return mux
 }
 
+// signUp handles POST /users/signup
 func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 	// get email and password from form data
 	email, password := r.FormValue("email"), r.FormValue("password")
 
+	// validate email and password
+	if !utils.ValidateEmail(email) {
+		utils.ErrorJSON(w, errors.New("invalid email"), http.StatusBadRequest)
+		return
+	}
+
+	if !utils.ValidatePassword(password) {
+		utils.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
+		return
+	}
+
 	// create user
-	err := ur.userSrv.SignUp(r.Context(), email, password)
+	err := ur.userSvc.SignUp(r.Context(), email, password)
 	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		zap.L().Error("failed to sign up", zap.Error(err))
+		utils.ErrorJSON(w, errors.New("unable to sign up, please try again"), http.StatusBadRequest)
 		return
 	}
 
 	// send response
-	resp := models.CommonResponse{
-		Status:  http.StatusCreated,
-		Message: "Successfully signed up",
-	}
+	var resp models.CommonResponse
+	resp.Status = http.StatusOK
+	resp.Message = "Successfully signed up"
 
-	utils.WriteJSON(w, http.StatusCreated, resp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
+// login handles POST /users/login
 func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
+	// get email and password from form data
 	email, password := r.FormValue("email"), r.FormValue("password")
 
-	userInfo, err := ur.userSrv.Login(r.Context(), email, password)
+	// try to login
+	userInfo, err := ur.userSvc.Login(r.Context(), email, password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		zap.L().Error("failed to login", zap.Error(err), zap.String("email", email))
+		utils.ErrorJSON(w, errors.New("unable to login, please check your email and password"), http.StatusBadRequest)
 		return
 	}
 
+	// generate jwt user
 	jwtUser := models.JWTUser{
 		ID:    userInfo.ID,
 		Email: userInfo.Email,
 	}
 
-	tokenPair, err := ur.authSrv.GenerateTokenPair(jwtUser)
+	// generate token pair
+	tokenPair, err := ur.authSvc.GenerateTokenPair(jwtUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// set refresh token to cookie
-	// TODO: set domain
-	refreshCookie := ur.newRefreshCookie(tokenPair.RefreshToken, "", tokenPair.RefreshTokenExpiry)
+	refreshCookie := ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
@@ -95,13 +116,14 @@ func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
 	resp.UserInfo = *userInfo
 	resp.AccessToken = tokenPair.AccessToken
 
-	utils.WriteJSON(w, http.StatusOK, resp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	// get refresh token from cookie
 	var refreshCookie *http.Cookie
 
+	// find refresh token cookie
 	for _, cookie := range r.Cookies() {
 		if cookie.Name == "refresh_token" {
 			refreshCookie = cookie
@@ -109,61 +131,56 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var resp models.CommonResponse
-
+	// check if refresh token cookie exists
 	if refreshCookie == nil {
-		resp.Status = http.StatusUnauthorized
-		resp.Message = "Refresh token not found"
-		utils.WriteJSON(w, http.StatusUnauthorized, resp)
+		utils.ErrorJSON(w, errors.New("refresh token not found"), http.StatusUnauthorized)
 		return
 	}
 
-	// validate refresh token
+	// verify refresh token
 	refreshToken := refreshCookie.Value
 
-	jwtUser, err := ur.authSrv.VerifyToken(refreshToken, models.TokenRoleRefresh)
+	jwtUser, err := ur.authSvc.VerifyToken(refreshToken, models.TokenRoleRefresh)
 	if err != nil {
-		resp.Status = http.StatusUnauthorized
-		resp.Message = "Invalid refresh token"
-		utils.WriteJSON(w, http.StatusUnauthorized, resp)
+		zap.L().Error("failed to verify refresh token", zap.Error(err), zap.String("refresh_token", refreshToken))
+		utils.ErrorJSON(w, errors.New("invalid refresh token"), http.StatusUnauthorized)
 		return
 	}
 
 	// get user info
-	userInfo, err := ur.userSrv.UserInfo(r.Context(), jwtUser.ID)
+	userInfo, err := ur.userSvc.UserInfo(r.Context(), jwtUser.ID)
 	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		resp.Message = "Failed to get user info"
-		utils.WriteJSON(w, http.StatusInternalServerError, resp)
+		zap.L().Error("failed to get user info", zap.Error(err), zap.Int32("user_id", jwtUser.ID))
+		utils.ErrorJSON(w, errors.New("unable to get user info"), http.StatusInternalServerError)
 		return
 	}
 
-	// generate new token pair
+	// generate new jwt user
 	newJwtUser := models.JWTUser{
 		ID:    userInfo.ID,
 		Email: userInfo.Email,
 	}
 
-	tokenPair, err := ur.authSrv.GenerateTokenPair(newJwtUser)
+	// generate new token pair
+	tokenPair, err := ur.authSvc.GenerateTokenPair(newJwtUser)
 	if err != nil {
-		resp.Status = http.StatusInternalServerError
-		resp.Message = "Failed to generate token pair"
-		utils.WriteJSON(w, http.StatusInternalServerError, resp)
+		zap.L().Error("failed to generate token pair", zap.Error(err), zap.Int32("user_id", jwtUser.ID))
+		utils.ErrorJSON(w, errors.New("unable to generate token pair"), http.StatusInternalServerError)
 		return
 	}
 
 	// set refresh token to cookie
-	// TODO: set domain
-	refreshCookie = ur.newRefreshCookie(tokenPair.RefreshToken, "", tokenPair.RefreshTokenExpiry)
+	refreshCookie = ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
-	var tokenResp models.AccessTokenResponse
-	tokenResp.AccessToken = tokenPair.AccessToken
+	var resp models.AccessTokenResponse
+	resp.AccessToken = tokenPair.AccessToken
 
-	utils.WriteJSON(w, http.StatusOK, tokenResp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
+// logout handles POST /users/logout
 func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
 	// delete refresh token from cookie
 	http.SetCookie(w, ur.newExpiredRefreshCookie())
@@ -173,63 +190,75 @@ func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
 	resp.Status = http.StatusOK
 	resp.Message = "Successfully logged out"
 
-	utils.WriteJSON(w, http.StatusOK, resp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
+// myInfo handles GET /users/myinfo
 func (ur *userRouter) myInfo(w http.ResponseWriter, r *http.Request) {
+	// get user id from context (set by AccessTokenRequired middleware)
 	userID := r.Context().Value(middlewares.UserIDKey).(int32)
 
-	userInfo, err := ur.userSrv.UserInfo(r.Context(), userID)
+	// get user info
+	userInfo, err := ur.userSvc.UserInfo(r.Context(), userID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		zap.L().Error("failed to get user info", zap.Error(err), zap.Int32("user_id", userID))
+		utils.ErrorJSON(w, errors.New("unable to get user info"), http.StatusInternalServerError)
 		return
 	}
 
 	// send response
-	resp := models.UserInfoResponse{}
+	var resp models.UserInfoResponse
 	resp.UserInfo = *userInfo
 
-	utils.WriteJSON(w, http.StatusOK, resp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
+// myPage handles GET /users/mypage
 func (ur *userRouter) myPage(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement this
 	w.WriteHeader(http.StatusOK)
 }
 
+// checkEmail handles POST /users/check-email
 func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	var req models.CheckEmailRequest
 
+	// read request body
 	err := utils.ReadJSON(w, r, &req)
 	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		zap.L().Error("failed to read request body", zap.Error(err))
+		utils.ErrorJSON(w, errors.New("unable to read request body"), http.StatusBadRequest)
 		return
 	}
 
-	exists, err := ur.userSrv.EmailExists(r.Context(), req.Email)
+	// check if email exists
+	exists, err := ur.userSvc.EmailExists(r.Context(), req.Email)
 	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		zap.L().Error("failed to check if email exists", zap.Error(err))
+		utils.ErrorJSON(w, errors.New("unable to check if email exists"), http.StatusInternalServerError)
 		return
 	}
 
+	// if email exists, return error
 	if exists {
 		utils.ErrorJSON(w, errors.New("email already exists"), http.StatusConflict)
 		return
 	}
 
-	resp := models.CommonResponse{
-		Status:  http.StatusOK,
-		Message: "Email is available",
-	}
+	// send response
+	var resp models.CommonResponse
+	resp.Status = http.StatusOK
+	resp.Message = "Email is available"
 
-	utils.WriteJSON(w, http.StatusOK, resp)
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
-func (ur *userRouter) newRefreshCookie(token, domain string, expiry time.Duration) *http.Cookie {
+// newRefreshCookie returns a new refresh token cookie
+func (ur *userRouter) newRefreshCookie(token string, expiry time.Duration) *http.Cookie {
 	return &http.Cookie{
 		Name:     "refresh_token",
 		Value:    token,
-		Domain:   domain,
+		Domain:   ur.domain,
 		Path:     "/",
 		Expires:  time.Now().Add(expiry),
 		MaxAge:   int(expiry.Seconds()),
@@ -239,6 +268,7 @@ func (ur *userRouter) newRefreshCookie(token, domain string, expiry time.Duratio
 	}
 }
 
+// newExpiredRefreshCookie returns an expired refresh token cookie
 func (ur *userRouter) newExpiredRefreshCookie() *http.Cookie {
 	return &http.Cookie{
 		Name:     "refresh_token",

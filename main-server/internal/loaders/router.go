@@ -22,7 +22,7 @@ func NewMainRouter(db *sql.DB) http.Handler {
 		panic(err)
 	}
 
-	userRouter := routers.NewUserRouter(userSrv, authSrv)
+	userRouter := routers.NewUserRouter("plohub.com", userSrv, authSrv)
 
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
