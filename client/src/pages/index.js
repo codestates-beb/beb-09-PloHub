@@ -86,7 +86,7 @@ export default function Home() {
                             </tr>
                             ))}
                         </tbody>
-                        </table>
+                    </table>
                     <div className='w-full mt-16 flex justify-center'>
                         페이지네이션 자리
                     </div>
