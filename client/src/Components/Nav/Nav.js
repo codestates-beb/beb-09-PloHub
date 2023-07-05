@@ -9,7 +9,7 @@ const Navbar = () => {
     };
 
     return (
-        <div className='relative max-h-screen'>
+        <div className='relative h-full'>
             <div className={
                 `w-12
                 h-12
@@ -36,10 +36,11 @@ const Navbar = () => {
                     <FiMenu style={{ fontSize: '1.5rem', color: '#999' }} />
                 )}
             </div>
-            <nav className={
+            <div className={
                 `absolute 
                 top-0 
                 left-0 
+                bottom-0 
                 transition-all 
                 duration-500 
                 ease-in-out 
@@ -62,7 +63,7 @@ const Navbar = () => {
                         <Link href='/review'>참여 후기</Link>
                     </li>
                 </ul>
-            </nav>
+            </div>
         </div>
     );
 };
