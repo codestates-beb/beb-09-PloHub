@@ -33,7 +33,6 @@ exports.reward = async (req, res) => {
     if (reward_type === "1"){
         const result = await contract.methods.transfer(data.address,1).send({from: varEnv.senderAddress});
         const token_amount = await contract.methods.balanceOf(data.address).call()
-
         console.log('로그인 보상 지급 완료!');
         console.log(`${data.address}의 현재 토큰 수량 : ${token_amount}`);
     
