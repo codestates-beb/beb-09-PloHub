@@ -3,7 +3,7 @@ import { Header, Footer } from "../Reference/index";
 
 const DefaultLayout = ({ children }) => {
     return (
-        <div className='max-h-screen'>
+        <div className='min-h-screen'>
             <Header />
                 {children}
             <Footer />
