@@ -85,7 +85,7 @@ exports.createWallet = async (req, res) => {
         token_amount: token_amount,
       });
       console.log(createdWallet)
-      res.status(200).json({ success: '회원가입 성공!' });
+      res.status(200).json({ success: '회원가입 성공!', address: walletAddress, token_amount: token_amount });
     } else {
       // 회원가입 실패 응답
       res.status(500).json({ error: '회원가입에 실패했습니다.' });
