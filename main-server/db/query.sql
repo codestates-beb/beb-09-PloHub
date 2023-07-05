@@ -2,10 +2,10 @@
 INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id;
 
 -- name: GetUserByEmail :one
-SELECT (id, email, nickname, level, address, eth_amount, token_amount, daily_token) FROM users WHERE email = $1;
+SELECT * FROM users WHERE email = $1;
 
 -- name: GetUserByID :one
-SELECT (id, email, nickname, level, address, eth_amount, token_amount, daily_token) FROM users WHERE id = $1;
+SELECT * FROM users WHERE id = $1;
 
 -- name: UpdateUser :exec
 UPDATE users SET nickname = $1, level = $2, address = $3, eth_amount = $4, token_amount = $5, latest_login_date = $6, daily_token = $7, updated_at = now() WHERE id = $8;
@@ -17,16 +17,16 @@ DELETE FROM users WHERE id = $1;
 INSERT INTO posts (user_id, title, content, category, reward_token) VALUES ($1, $2, $3, $4, $5);
 
 -- name: GetPostByID :one
-SELECT (id, user_id, title, content, category, reward_token, nftnized) FROM posts WHERE id = $1;
+SELECT * FROM posts WHERE id = $1;
 
 -- name: GetPosts :many
-SELECT (id, user_id, title, content, category, reward_token, nftnized) FROM posts limit $1 offset $2;
+SELECT * FROM posts limit $1 offset $2;
 
 -- name: GetPostsByUserID :many
-SELECT (id, user_id, title, content, category, reward_token, nftnized) FROM posts WHERE user_id = $1;
+SELECT * FROM posts WHERE user_id = $1;
 
 -- name: GetPostsByCategory :many
-SELECT (id, user_id, title, content, category, reward_token, nftnized) FROM posts WHERE category = $1 limit $2 offset $3;
+SELECT * FROM posts WHERE category = $1 limit $2 offset $3;
 
 -- name: UpdatePost :exec
 UPDATE posts SET title = $1, content = $2, category = $3, reward_token = $4, nftnized = $5, updated_at = now() WHERE id = $6;
@@ -38,7 +38,7 @@ DELETE FROM posts WHERE id = $1;
 INSERT INTO media (post_id, type, url) VALUES ($1, $2, $3);
 
 -- name: GetMediaByPostID :many
-SELECT (id, post_id, type, url) FROM media WHERE post_id = $1;
+SELECT * FROM media WHERE post_id = $1;
 
 -- name: DeleteMedia :exec
 DELETE FROM media WHERE id = $1;
@@ -47,13 +47,13 @@ DELETE FROM media WHERE id = $1;
 INSERT INTO comments (post_id, user_id, content, reward_token) VALUES ($1, $2, $3, $4);
 
 -- name: GetCommentByID :one
-SELECT (id, post_id, user_id, content, reward_token) FROM comments WHERE id = $1;
+SELECT * FROM comments WHERE id = $1;
 
 -- name: GetCommentsByPostID :many
-SELECT (id, post_id, user_id, content, reward_token) FROM comments WHERE post_id = $1;
+SELECT * FROM comments WHERE post_id = $1;
 
 -- name: GetCommentsByUserID :many
-SELECT (id, post_id, user_id, content, reward_token) FROM comments WHERE user_id = $1;
+SELECT * FROM comments WHERE user_id = $1;
 
 -- name: UpdateComment :exec
 UPDATE comments SET content = $1 WHERE id = $2;

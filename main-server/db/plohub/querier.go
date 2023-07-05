@@ -11,15 +11,16 @@ type Querier interface {
 	DeleteMedia(ctx context.Context, id int32) error
 	DeletePost(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
-	GetCommentsByPostID(ctx context.Context, postID int32) ([]CommentInfo, error)
-	GetCommentsByUserID(ctx context.Context, userID int32) ([]CommentInfo, error)
+	GetCommentByID(ctx context.Context, id int32) (Comment, error)
+	GetCommentsByPostID(ctx context.Context, postID int32) ([]Comment, error)
+	GetCommentsByUserID(ctx context.Context, userID int32) ([]Comment, error)
 	GetMediaByPostID(ctx context.Context, postID int32) ([]Medium, error)
-	GetPostByID(ctx context.Context, id int32) (PostInfo, error)
-	GetPosts(ctx context.Context, arg GetPostsParams) ([]PostInfo, error)
-	GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]PostInfo, error)
-	GetPostsByUserID(ctx context.Context, userID int32) ([]PostInfo, error)
-	GetUserByEmail(ctx context.Context, email string) (UserInfo, error)
-	GetUserByID(ctx context.Context, id int32) (UserInfo, error)
+	GetPostByID(ctx context.Context, id int32) (Post, error)
+	GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, error)
+	GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]Post, error)
+	GetPostsByUserID(ctx context.Context, userID int32) ([]Post, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id int32) (User, error)
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) error
 	UpdatePost(ctx context.Context, arg UpdatePostParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
