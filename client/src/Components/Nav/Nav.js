@@ -27,13 +27,14 @@ const Navbar = () => {
                 transition-all 
                 duration-500 
                 ease-in-out 
-                transform ${isNavOpen ? 'translate-x-64' : 'translate-x-0'}`
+                transform ${isNavOpen ? 'translate-x-64' : 'translate-x-0'}
+                cursor-pointer`
             } onClick={handleToggle}>
-            {isNavOpen ? (
-                <FiX style={{ fontSize: '1.5rem', color: '#999' }} />
-            ) : (
-                <FiMenu style={{ fontSize: '1.5rem', color: '#999' }} />
-            )}
+                {isNavOpen ? (
+                    <FiX style={{ fontSize: '1.5rem', color: '#999' }} />
+                ) : (
+                    <FiMenu style={{ fontSize: '1.5rem', color: '#999' }} />
+                )}
             </div>
             <nav className={
                 `absolute 

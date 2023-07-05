@@ -19,3 +19,11 @@
 * {
   @apply font-common;
 }
+
+select {
+  appearance: none;
+  background-image: url('../assets/image/down-filled-triangular-arrow.png');
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+}
