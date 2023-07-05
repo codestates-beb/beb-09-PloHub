@@ -6,5 +6,4 @@ const varEnv = {
     senderAddress: process.env.SENDER,
     senderPrivate: process.env.SENDER_PRIVATE,
 }
-console.log(varEnv);
 module.exports = varEnv;

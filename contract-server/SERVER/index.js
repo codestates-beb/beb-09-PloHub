@@ -5,6 +5,7 @@ const app = express();
 const {connectToDatabase} = require('./loaders/connectDB');
 
 const createWallet = require('./routes/create');
+const reward = require('./routes/reward');
 
 // const mainRouter = require('./router/main');
 
@@ -18,6 +19,7 @@ app.use( //cors설정
 app.use(express.json()); //json으로 이루어진 Request Body를 받는다.
 
 app.use('/api/v1', createWallet);
+app.use('/api/v1', reward);
 
 connectToDatabase;
 
