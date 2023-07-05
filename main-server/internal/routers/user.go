@@ -1,11 +1,11 @@
 package routers
 
 import (
-	"main-server/internal/helpers"
 	"main-server/internal/middlewares"
 	"main-server/internal/models"
 	"main-server/internal/services/auth"
 	"main-server/internal/services/user"
+	"main-server/internal/utils"
 	"net/http"
 	"time"
 
@@ -51,7 +51,7 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 	// create user
 	err := ur.userSrv.SignUp(r.Context(), email, password)
 	if err != nil {
-		helpers.ErrorJSON(w, err, http.StatusInternalServerError)
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 		Message: "Successfully signed up",
 	}
 
-	helpers.WriteJSON(w, http.StatusCreated, resp)
+	utils.WriteJSON(w, http.StatusCreated, resp)
 }
 
 func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
 	resp.UserInfo = *userInfo
 	resp.AccessToken = tokenPair.AccessToken
 
-	helpers.WriteJSON(w, http.StatusOK, resp)
+	utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +112,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	if refreshCookie == nil {
 		resp.Status = http.StatusUnauthorized
 		resp.Message = "Refresh token not found"
-		helpers.WriteJSON(w, http.StatusUnauthorized, resp)
+		utils.WriteJSON(w, http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -123,7 +123,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = http.StatusUnauthorized
 		resp.Message = "Invalid refresh token"
-		helpers.WriteJSON(w, http.StatusUnauthorized, resp)
+		utils.WriteJSON(w, http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = http.StatusInternalServerError
 		resp.Message = "Failed to get user info"
-		helpers.WriteJSON(w, http.StatusInternalServerError, resp)
+		utils.WriteJSON(w, http.StatusInternalServerError, resp)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp.Status = http.StatusInternalServerError
 		resp.Message = "Failed to generate token pair"
-		helpers.WriteJSON(w, http.StatusInternalServerError, resp)
+		utils.WriteJSON(w, http.StatusInternalServerError, resp)
 		return
 	}
 
@@ -158,7 +158,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	var tokenResp models.AccessTokenResponse
 	tokenResp.AccessToken = tokenPair.AccessToken
 
-	helpers.WriteJSON(w, http.StatusOK, tokenResp)
+	utils.WriteJSON(w, http.StatusOK, tokenResp)
 }
 
 func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
@@ -170,7 +170,7 @@ func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
 	resp.Status = http.StatusOK
 	resp.Message = "Successfully logged out"
 
-	helpers.WriteJSON(w, http.StatusOK, resp)
+	utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (ur *userRouter) myInfo(w http.ResponseWriter, r *http.Request) {
@@ -186,7 +186,7 @@ func (ur *userRouter) myInfo(w http.ResponseWriter, r *http.Request) {
 	resp := models.UserInfoResponse{}
 	resp.UserInfo = *userInfo
 
-	helpers.WriteJSON(w, http.StatusOK, resp)
+	utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (ur *userRouter) myPage(w http.ResponseWriter, r *http.Request) {
@@ -197,20 +197,20 @@ func (ur *userRouter) myPage(w http.ResponseWriter, r *http.Request) {
 func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	var req models.CheckEmailRequest
 
-	err := helpers.ReadJSON(w, r, &req)
+	err := utils.ReadJSON(w, r, &req)
 	if err != nil {
-		helpers.ErrorJSON(w, err, http.StatusBadRequest)
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	exists, err := ur.userSrv.EmailExists(r.Context(), req.Email)
 	if err != nil {
-		helpers.ErrorJSON(w, err, http.StatusInternalServerError)
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	if exists {
-		helpers.ErrorJSON(w, err, http.StatusConflict)
+		utils.ErrorJSON(w, err, http.StatusConflict)
 		return
 	}
 
@@ -219,7 +219,7 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 		Message: "Email is available",
 	}
 
-	helpers.WriteJSON(w, http.StatusOK, resp)
+	utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (ur *userRouter) newRefreshCookie(token, domain string, expiry time.Duration) *http.Cookie {

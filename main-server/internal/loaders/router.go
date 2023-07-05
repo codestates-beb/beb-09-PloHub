@@ -2,7 +2,6 @@ package loaders
 
 import (
 	"database/sql"
-	"fmt"
 	"main-server/db/plohub"
 	"main-server/internal/routers"
 	"main-server/internal/services/auth"
@@ -33,10 +32,6 @@ func NewMainRouter(db *sql.DB) http.Handler {
 	})
 
 	mux.Mount("/api/v1", userRouter.Route())
-
-	for _, r := range mux.Routes() {
-		fmt.Println(r.Pattern)
-	}
 
 	return mux
 }
