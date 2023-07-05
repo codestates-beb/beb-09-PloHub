@@ -16,16 +16,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
-      encrypted_private_key: {
+      private_key: {
         type: DataTypes.STRING,
         allowNull: false
       },
       eth_amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         defaultValue: 0
       },
       token_amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         defaultValue: 0
       },
       created_at: {

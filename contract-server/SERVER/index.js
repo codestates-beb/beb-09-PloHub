@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const port = 8080;
 const app = express();
+const {connectToDatabase} = require('./loaders/connectDB');
 
 const createWallet = require('./routes/create');
 
@@ -18,23 +19,7 @@ app.use(express.json()); //json으로 이루어진 Request Body를 받는다.
 
 app.use('/api/v1', createWallet);
 
-
-const db = require('./models');
-const sequelize = db.sequelize;
-
-async function connectToDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log('db 연결 성공');
-  } catch (error) {
-    console.error('db 연결 실패:', error);
-  }
-}
-
-connectToDatabase();
-
-
-
+connectToDatabase;
 
 // 에러처리
 app.use((err, req, res, next) => { //에러발생시 처리 next(err)
