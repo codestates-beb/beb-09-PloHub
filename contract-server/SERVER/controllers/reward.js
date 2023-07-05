@@ -10,16 +10,6 @@ exports.reward = async (req, res) => {
     const {user_id, email, reward_type} = req.body;
     const web3 = new Web3('http://127.0.0.1:7545');
     const contract = new web3.eth.Contract(abi, varEnv.contractAddress);
-
-    const findWallets = await models.Wallets.findOne({
-        where : {user_id : user_id}
-    });
-
-    if (findWallets) {
-        console.log(findWallets.dataValues);
-    }else{
-        console.log('데이터 탐색 실패!');
-    }
     //reward type
     // 0 = 회원가입
     // 1 = 로그인
