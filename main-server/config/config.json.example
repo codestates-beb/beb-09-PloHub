@@ -1,0 +1,22 @@
+{
+  "postgres": {
+    "host": "",
+    "port": "",
+    "user": "",
+    "password": "",
+    "database": "",
+    "ssl_mode": "",
+    "timezone": "",
+    "timeout": ""
+  },
+  "jwt": {
+    "issuer": "",
+    "audience": "",
+    "access_token_secret": "",
+    "refresh_token_secret": ""
+  },
+  "server": {
+    "port": "",
+    "domain": ""
+  }
+}
