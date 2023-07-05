@@ -24,6 +24,7 @@ type Querier interface {
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) error
 	UpdatePost(ctx context.Context, arg UpdatePostParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	EmailExists(ctx context.Context, email string) (bool, error)
 }
 
 var _ Querier = (*Queries)(nil)

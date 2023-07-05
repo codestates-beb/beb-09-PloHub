@@ -10,12 +10,12 @@ import (
 )
 
 type Comment struct {
-	ID          int32
-	PostID      int32
-	UserID      int32
-	Content     string
-	RewardToken int32
-	CreatedAt   time.Time
+	ID           int32
+	PostID       int32
+	UserID       int32
+	Content      string
+	RewardAmount int32
+	CreatedAt    time.Time
 }
 
 type Medium struct {
@@ -26,16 +26,15 @@ type Medium struct {
 }
 
 type Post struct {
-	ID          int32
-	UserID      int32
-	IsAdmin     bool
-	Title       string
-	Content     string
-	Category    int16
-	RewardToken int32
-	Nftnized    bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID           int32
+	UserID       int32
+	Title        string
+	Content      string
+	Category     int16
+	RewardAmount int32
+	Nftnized     bool
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type User struct {
@@ -44,9 +43,10 @@ type User struct {
 	HashedPassword  string
 	Nickname        string
 	Level           int16
+	IsAdmin         bool
 	Address         string
-	EthAmount       int64
-	TokenAmount     int64
+	EthAmount       string
+	TokenAmount     string
 	LatestLoginDate sql.NullTime
 	DailyToken      int32
 	CreatedAt       time.Time

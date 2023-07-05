@@ -11,14 +11,14 @@ import (
 )
 
 const createComment = `-- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, content, reward_token) VALUES ($1, $2, $3, $4)
+INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4)
 `
 
 type CreateCommentParams struct {
-	PostID      int32
-	UserID      int32
-	Content     string
-	RewardToken int32
+	PostID       int32
+	UserID       int32
+	Content      string
+	RewardAmount int32
 }
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) error {
@@ -26,7 +26,7 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) er
 		arg.PostID,
 		arg.UserID,
 		arg.Content,
-		arg.RewardToken,
+		arg.RewardAmount,
 	)
 	return err
 }
@@ -47,15 +47,15 @@ func (q *Queries) CreateMedia(ctx context.Context, arg CreateMediaParams) error 
 }
 
 const createPost = `-- name: CreatePost :exec
-INSERT INTO posts (user_id, title, content, category, reward_token) VALUES ($1, $2, $3, $4, $5)
+INSERT INTO posts (user_id, title, content, category, reward_amount) VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreatePostParams struct {
-	UserID      int32
-	Title       string
-	Content     string
-	Category    int16
-	RewardToken int32
+	UserID       int32
+	Title        string
+	Content      string
+	Category     int16
+	RewardAmount int32
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
@@ -64,7 +64,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 		arg.Title,
 		arg.Content,
 		arg.Category,
-		arg.RewardToken,
+		arg.RewardAmount,
 	)
 	return err
 }
@@ -121,8 +121,19 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 	return err
 }
 
+const emailExists = `-- name: EmailExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)
+`
+
+func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, emailExists, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getCommentByID = `-- name: GetCommentByID :one
-SELECT id, post_id, user_id, content, reward_token, created_at FROM comments WHERE id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE id = $1
 `
 
 func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error) {
@@ -133,14 +144,14 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 		&i.PostID,
 		&i.UserID,
 		&i.Content,
-		&i.RewardToken,
+		&i.RewardAmount,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
-SELECT id, post_id, user_id, content, reward_token, created_at FROM comments WHERE post_id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE post_id = $1
 `
 
 func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comment, error) {
@@ -157,7 +168,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 			&i.PostID,
 			&i.UserID,
 			&i.Content,
-			&i.RewardToken,
+			&i.RewardAmount,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -174,7 +185,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 }
 
 const getCommentsByUserID = `-- name: GetCommentsByUserID :many
-SELECT id, post_id, user_id, content, reward_token, created_at FROM comments WHERE user_id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE user_id = $1
 `
 
 func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comment, error) {
@@ -191,7 +202,7 @@ func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comm
 			&i.PostID,
 			&i.UserID,
 			&i.Content,
-			&i.RewardToken,
+			&i.RewardAmount,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -240,7 +251,7 @@ func (q *Queries) GetMediaByPostID(ctx context.Context, postID int32) ([]Medium,
 }
 
 const getPostByID = `-- name: GetPostByID :one
-SELECT id, user_id, is_admin, title, content, category, reward_token, nftnized, created_at, updated_at FROM posts WHERE id = $1
+SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE id = $1
 `
 
 func (q *Queries) GetPostByID(ctx context.Context, id int32) (Post, error) {
@@ -249,11 +260,10 @@ func (q *Queries) GetPostByID(ctx context.Context, id int32) (Post, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.IsAdmin,
 		&i.Title,
 		&i.Content,
 		&i.Category,
-		&i.RewardToken,
+		&i.RewardAmount,
 		&i.Nftnized,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -262,7 +272,7 @@ func (q *Queries) GetPostByID(ctx context.Context, id int32) (Post, error) {
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, user_id, is_admin, title, content, category, reward_token, nftnized, created_at, updated_at FROM posts limit $1 offset $2
+SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts limit $1 offset $2
 `
 
 type GetPostsParams struct {
@@ -282,11 +292,10 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
-			&i.IsAdmin,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardToken,
+			&i.RewardAmount,
 			&i.Nftnized,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -305,7 +314,7 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 }
 
 const getPostsByCategory = `-- name: GetPostsByCategory :many
-SELECT id, user_id, is_admin, title, content, category, reward_token, nftnized, created_at, updated_at FROM posts WHERE category = $1 limit $2 offset $3
+SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE category = $1 limit $2 offset $3
 `
 
 type GetPostsByCategoryParams struct {
@@ -326,11 +335,10 @@ func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategory
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
-			&i.IsAdmin,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardToken,
+			&i.RewardAmount,
 			&i.Nftnized,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -349,7 +357,7 @@ func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategory
 }
 
 const getPostsByUserID = `-- name: GetPostsByUserID :many
-SELECT id, user_id, is_admin, title, content, category, reward_token, nftnized, created_at, updated_at FROM posts WHERE user_id = $1
+SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE user_id = $1
 `
 
 func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]Post, error) {
@@ -364,11 +372,10 @@ func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]Post, e
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
-			&i.IsAdmin,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardToken,
+			&i.RewardAmount,
 			&i.Nftnized,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -387,7 +394,7 @@ func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]Post, e
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, hashed_password, nickname, level, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE email = $1
+SELECT id, email, hashed_password, nickname, level, is_admin, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -399,6 +406,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.HashedPassword,
 		&i.Nickname,
 		&i.Level,
+		&i.IsAdmin,
 		&i.Address,
 		&i.EthAmount,
 		&i.TokenAmount,
@@ -411,7 +419,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, hashed_password, nickname, level, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE id = $1
+SELECT id, email, hashed_password, nickname, level, is_admin, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
@@ -423,6 +431,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 		&i.HashedPassword,
 		&i.Nickname,
 		&i.Level,
+		&i.IsAdmin,
 		&i.Address,
 		&i.EthAmount,
 		&i.TokenAmount,
@@ -449,16 +458,15 @@ func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) er
 }
 
 const updatePost = `-- name: UpdatePost :exec
-UPDATE posts SET title = $1, content = $2, category = $3, reward_token = $4, nftnized = $5, updated_at = now() WHERE id = $6
+UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, updated_at = now() WHERE id = $5
 `
 
 type UpdatePostParams struct {
-	Title       string
-	Content     string
-	Category    int16
-	RewardToken int32
-	Nftnized    bool
-	ID          int32
+	Title    string
+	Content  string
+	Category int16
+	Nftnized bool
+	ID       int32
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
@@ -466,7 +474,6 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
 		arg.Title,
 		arg.Content,
 		arg.Category,
-		arg.RewardToken,
 		arg.Nftnized,
 		arg.ID,
 	)
@@ -481,8 +488,8 @@ type UpdateUserParams struct {
 	Nickname        string
 	Level           int16
 	Address         string
-	EthAmount       int64
-	TokenAmount     int64
+	EthAmount       string
+	TokenAmount     string
 	LatestLoginDate sql.NullTime
 	DailyToken      int32
 	ID              int32
