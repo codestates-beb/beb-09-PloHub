@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"main-server/internal/middlewares"
 	"main-server/internal/models"
 	"main-server/internal/services/auth"
@@ -212,7 +213,7 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if exists {
-		utils.ErrorJSON(w, err, http.StatusConflict)
+		utils.ErrorJSON(w, errors.New("email already exists"), http.StatusConflict)
 		return
 	}
 

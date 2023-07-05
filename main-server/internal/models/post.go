@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"main-server/db/plohub"
+	"time"
+)
 
 type PostInfo struct {
 	ID           int32     `json:"id"`
@@ -28,4 +31,26 @@ type MediumInfo struct {
 	PostID int32  `json:"post_id"`
 	Type   int16  `json:"type"`
 	Url    string `json:"url"`
+}
+
+func ToPostInfo(post plohub.Post) *PostInfo {
+	postInfo := &PostInfo{}
+	postInfo.ID = post.ID
+	postInfo.UserID = post.UserID
+	postInfo.Title = post.Title
+	postInfo.Content = post.Content
+	postInfo.Category = post.Category
+	postInfo.RewardAmount = post.RewardAmount
+	postInfo.Nftnized = post.Nftnized
+	postInfo.CreatedAt = post.CreatedAt
+	postInfo.UpdatedAt = post.UpdatedAt
+	return postInfo
+}
+
+func ToPostInfos(posts []plohub.Post) []PostInfo {
+	postInfos := make([]PostInfo, len(posts))
+	for i, post := range posts {
+		postInfos[i] = *ToPostInfo(post)
+	}
+	return postInfos
 }

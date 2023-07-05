@@ -1,5 +1,7 @@
 package models
 
+import "main-server/db/plohub"
+
 type MyPageInfo struct {
 	UserInfo UserInfo   `json:"user_info"`
 	Posts    []PostInfo `json:"posts"`
@@ -28,4 +30,17 @@ type LoginResponse struct {
 
 type UserInfoResponse struct {
 	UserInfo UserInfo `json:"user_info"`
+}
+
+func ToUserInfo(user plohub.User) *UserInfo {
+	userInfo := &UserInfo{}
+	userInfo.ID = user.ID
+	userInfo.Email = user.Email
+	userInfo.Nickname = user.Nickname
+	userInfo.Level = user.Level
+	userInfo.Address = user.Address
+	userInfo.EthAmount = user.EthAmount
+	userInfo.TokenAmount = user.TokenAmount
+	userInfo.DailyToken = user.DailyToken
+	return userInfo
 }

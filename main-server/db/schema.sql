@@ -5,7 +5,7 @@ CREATE TABLE "users" (
   "nickname" varchar NOT NULL DEFAULT 'unnamed',
   "level" smallint NOT NULL DEFAULT 1,
   "is_admin" boolean DEFAULT false NOT NULL,
-  "address" varchar NOT NULL,
+  "address" varchar NOT NULL DEFAULT '',
   "eth_amount" decimal(20,0) DEFAULT 0 NOT NULL,
   "token_amount" decimal(20,0) DEFAULT 0 NOT NULL,
   "latest_login_date" date,
