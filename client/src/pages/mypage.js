@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns'
@@ -11,7 +11,8 @@ const mypage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState('Test');
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
+    const [currentItems, setCurrentItems] = useState([]); // currentItems를 state로 변경해주세요.
+
 
     const handleNicknameChange = (e) => {
         setNickname(e.target.value);
@@ -28,6 +29,7 @@ const mypage = () => {
 
     const formatDate = format(currentDate, 'yyyy-MM-dd');
 
+    const postsPerPage = 5;
     const posts = [
         { id: 1, category: 'all', title: 'Post 1', content: 'Author 1', writer: 'test', date: formatDate },
         { id: 2, category: 'all', title: 'Post 2', content: 'Author 2', writer: 'test', date: formatDate },
@@ -37,20 +39,35 @@ const mypage = () => {
         { id: 6, category: 'all', title: 'Post 6', content: 'Author 6', writer: 'test', date: formatDate },
         { id: 7, category: 'all', title: 'Post 7', content: 'Author 7', writer: 'test', date: formatDate },
         { id: 8, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 9, category: 'all', title: 'Post 9', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 10, category: 'all', title: 'Post 10', content: 'Author 8', writer: 'test', date: formatDate },
+        { id: 9, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
+        { id: 10, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
+        { id: 11, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
+        { id: 12, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
+        { id: 13, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
+        { id: 14, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
+        { id: 15, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
+        { id: 16, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
+        { id: 17, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
+        { id: 18, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
+        { id: 19, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
     ];
 
-
-    // Calculate pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = posts.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(posts.length / itemsPerPage);
-
-    const changePage = (pageNumber) => {
+    
+    const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
+    
+    useEffect(() => {
+        // currentPage가 바뀔 때마다 실행되도록 설정
+        const indexOfLastPost = currentPage * postsPerPage;
+        const indexOfFirstPost = indexOfLastPost - postsPerPage;
+        setCurrentItems(posts.slice(indexOfFirstPost, indexOfLastPost));
+    }, [currentPage]); // currentPage를 dependency로 추가해주세요.
+
+
+    // Calculate total pages
+    const totalPages = Math.ceil(posts.length / postsPerPage);
+
 
 
     return (
@@ -153,20 +170,19 @@ const mypage = () => {
                         </table>
                     </div>
                     <div className='w-full mt-10 flex justify-center'>
-                        {/* Pagination */}
-                        <ul className='flex gap-2'>
-                            {Array.from({ length: totalPages }, (_, index) => (
-                                <li
-                                    key={index + 1}
-                                    className={`${
-                                        currentPage === index + 1 ? 'font-bold' : ''
-                                    } cursor-pointer`}
-                                    onClick={() => changePage(index + 1)}
-                                >
-                                    {index + 1}
-                                </li>
+                        <div className='flex items-center'>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i + 1}
+                                className={`px-4 py-2 mx-1 rounded ${
+                                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                }`}
+                                onClick={() => handlePageChange(i + 1)}
+                            >
+                                {i + 1}
+                            </button>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 </div>
                 <div className='my-12'>
