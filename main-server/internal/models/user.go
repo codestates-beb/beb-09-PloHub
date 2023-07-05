@@ -16,8 +16,3 @@ type UserInfo struct {
 	TokenAmount int64  `json:"token_amount"`
 	DailyToken  int32  `json:"daily_token"`
 }
-
-type TokenPair struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
