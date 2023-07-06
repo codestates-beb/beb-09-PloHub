@@ -16,6 +16,13 @@ func init() {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			zap.L().Fatal("Recovered in main", zap.Any("reason", r))
+		}
+	}()
+	defer zap.L().Sync()
+
 	// Load config
 	cfg, err := configs.New("./config/config.json")
 	if err != nil {

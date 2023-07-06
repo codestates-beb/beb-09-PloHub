@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 func ConnectPostgres(dsn string) (*sql.DB, error) {
@@ -31,6 +32,11 @@ func MustConnectPostgresWithRetry(ctx context.Context, dsn string) <-chan *sql.D
 					continue
 				}
 
+				if err := conn.Ping(); err != nil {
+					continue
+				}
+
+				zap.L().Info("Connected to postgres")
 				connCh <- conn
 				return
 			}
