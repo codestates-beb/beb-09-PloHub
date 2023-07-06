@@ -132,7 +132,7 @@ export default function Home() {
                         </div>
                     </div>
                     <div className='w-full mt-16 mb-5 flex justify-center items-center'>
-                        <select class="border border-black py-2 px-4 pr-6 rounded mr-5 text-sm">
+                        <select className="border border-black py-2 px-4 pr-6 rounded mr-5 text-sm">
                             <option className="text-sm" value="option1">제목 + 내용</option>
                             <option className="text-sm" value="option2">제목</option>
                             <option className="text-sm" value="option3">내용</option>
