@@ -11,7 +11,12 @@ const mypage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState('Test');
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentItems, setCurrentItems] = useState([]); // currentItems를 state로 변경해주세요.
+    const [currentItems, setCurrentItems] = useState([]);
+    const [activeTab, setActiveTab] = useState('owned');
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+    };
 
 
     const handleNicknameChange = (e) => {
@@ -186,33 +191,75 @@ const mypage = () => {
                     </div>
                 </div>
                 <div className='my-12'>
-                    <div className='mb-6'>
-                        <p className='font-bold text-2xl'>보유한 NFT</p>
+                    <div className="flex items-center gap-4 mb-6">
+                        <button
+                            className={`text-2xl ${
+                                activeTab === 'owned' ? 'text-black font-bold' : 'text-gray-500'
+                            }`}
+                            onClick={() => handleTabChange('owned')}
+                            >
+                            보유중 NFT
+                        </button>
+                        <div className='font-bold'> | </div>
+                        <button
+                            className={`text-2xl ${
+                                activeTab === 'selling' ? 'text-black font-bold' : 'text-gray-500'
+                            }`}
+                            onClick={() => handleTabChange('selling')}
+                            >
+                            판매중 NFT
+                        </button>
                     </div>
                     <div className=''>
-                        <div className="
-                            w-[15%] 
-                            bg-white 
-                            shadow-lg 
-                            border 
-                            rounded-3xl 
-                            transform 
-                            transition-transform 
-                            duration-300 
-                            hover:-translate-y-2 
-                            cursor-pointer">
-                            <div className='border-b-2'>
-                                <Image src={logoBlack} width={'100%'} height={'100%'} />
-                            </div>
-                            <div className='p-6'>
-                                <div className="mb-4">
-                                    <Link href='/nft/detail/:id'>
-                                        <h2 className="text-xl font-bold hover:underline">Card Title</h2>
-                                    </Link>
+                        {activeTab === 'owned' ? (
+                            <div className="
+                                w-[15%] 
+                                bg-white 
+                                shadow-lg 
+                                border 
+                                rounded-3xl 
+                                transform 
+                                transition-transform 
+                                duration-300 
+                                hover:-translate-y-2 
+                                cursor-pointer">
+                                <div className='border-b-2'>
+                                    <Image src={logoBlack} width={'100%'} height={'100%'} />
                                 </div>
-                                <p className="text-gray-700 font-semibold">1 ETH</p>
+                                <div className='p-6'>
+                                    <div className="mb-4">
+                                        <Link href='/nft/detail/:id'>
+                                            <h2 className="text-xl font-bold hover:underline">Card Title</h2>
+                                        </Link>
+                                    </div>
+                                    <p className="text-gray-700 font-semibold">1 ETH</p>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="
+                                w-[15%] 
+                                bg-white 
+                                shadow-lg 
+                                border 
+                                rounded-3xl 
+                                transform 
+                                transition-transform 
+                                duration-300 
+                                hover:-translate-y-2 
+                                cursor-pointer">
+                                <div className='border-b-2'>
+                                    <Image src={logoBlack} width={'100%'} height={'100%'} />
+                                </div>
+                                <div className='p-6'>
+                                    <div className="mb-4">
+                                        <Link href='/nft/detail/:id'>
+                                            <h2 className="text-xl font-bold hover:underline">Card Title2</h2>
+                                        </Link>
+                                    </div>
+                                    <p className="text-gray-700 font-semibold">2 ETH</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
