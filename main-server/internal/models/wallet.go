@@ -34,13 +34,12 @@ type Reward struct {
 	TokenAmount  string     `json:"token_amount"`
 }
 
-type RewardRequest struct {
+type IssueRewardRequest struct {
 	UserID     int32      `json:"user_id"`
 	RewardType RewardType `json:"reward_type"`
 }
 
-type RewardResponse struct {
+type IssueRewardResponse struct {
 	RewardAmount int32  `json:"reward_amount"`
 	TokenAmount  string `json:"token_amount"`
-	EthAmount    string `json:"eth_amount"`
 }
