@@ -6,7 +6,6 @@ import (
 	"main-server/db/plohub"
 	"main-server/internal/models"
 	"math/rand"
-	"net/http"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -27,18 +26,12 @@ type Service interface {
 }
 
 type service struct {
-	client *http.Client
-	repo   plohub.Repository
+	repo plohub.Repository
 }
 
-func NewService(repo plohub.Repository, clients ...*http.Client) Service {
+func NewService(repo plohub.Repository) Service {
 	svc := &service{
-		client: http.DefaultClient,
-		repo:   repo,
-	}
-
-	if len(clients) > 0 && clients[0] != nil {
-		svc.client = clients[0]
+		repo: repo,
 	}
 
 	return svc
