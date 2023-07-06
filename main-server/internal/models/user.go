@@ -32,6 +32,11 @@ type UserInfoResponse struct {
 	UserInfo UserInfo `json:"user_info"`
 }
 
+type ChangeNicknameResponse struct {
+	CommonResponse
+	Nickname string `json:"nickname"`
+}
+
 func ToUserInfo(user plohub.User) *UserInfo {
 	userInfo := &UserInfo{}
 	userInfo.ID = user.ID
