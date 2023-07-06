@@ -1,6 +1,6 @@
 import React from 'react';
-import { Header, Footer } from '../../Components/Referencence'
-import SignIn from '../../Components/User/SignInnIn';
+import { Header, Footer } from '../../Components/Reference'
+import SignIn from '../../Components/User/SignIn';
 
 const SignInPage = () => {
 
