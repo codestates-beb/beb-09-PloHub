@@ -107,5 +107,5 @@ const mergedInitialState = {
  *
  * @type {Object}
  */
-export const store = createStore(userReducer, mergedInitialState, composeWithDevTools());
-// export const store = createStore(userReducer, composeWithDevTools());
+// export const store = createStore(userReducer, mergedInitialState, composeWithDevTools());
+export const store = createStore(userReducer, composeWithDevTools());

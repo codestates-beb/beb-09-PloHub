@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import { format } from 'date-fns'
 import DefaultLayout from '../Components/Layout/DefaultLayout'
 import Nav from '../Components/Nav/Nav';
@@ -7,6 +9,8 @@ import Nav from '../Components/Nav/Nav';
 
 
 export default function Home() {
+    const user = useSelector((state) => state.user);
+    console.log(user)
 
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]); // currentItems를 state로 변경해주세요.
@@ -65,7 +69,7 @@ export default function Home() {
                     `
                 }>
                     <div className='flex justify-end'>
-                        <button className='
+                        <Link className='
                             border 
                             rounded-2xl 
                             p-3 
@@ -77,10 +81,21 @@ export default function Home() {
                             hover:bg-blue-main 
                             transition-all 
                             duration-300 
-                            text-md' 
-                            type="button">
-                            글쓰기
-                        </button>
+                            text-md
+                            text-center' 
+                            href='/posts/create'>
+                            <button type="button"onClick={(e) => {
+                                // user가 없는 경우 (로그인하지 않은 상태)
+                                if (user.account.length === 0) {
+                                    // 클릭 이벤트를 취소하고
+                                    e.preventDefault();
+                                    // 알림을 표시합니다
+                                    alert("로그인이 필요합니다.");
+                                }
+                            }}>
+                                글쓰기
+                            </button>
+                        </Link>
                     </div>
                     <table className="w-full text-center border-collapse ">
                         <thead className='border-b'>
