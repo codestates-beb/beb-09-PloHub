@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const abiSource = require('../../contract/build/contracts/ICToken.json');
-const models = require('../models.js');
-const varEnv = require('../config/var.js');
+const models = require('../models');
+const varEnv = require('../config/var');
 
 exports.reward = async (req, res) => {
     const abi = abiSource.abi;
@@ -37,7 +37,7 @@ exports.reward = async (req, res) => {
         console.log('로그인 보상 지급 완료!');
         console.log(`${data.address}의 현재 토큰 수량 : ${token_amount}`);
     
-        const updateWallet = await models.Wallets.update({token_amount: token_amount},{
+        const updateWallet = await models.Wallets.update({token_amount: token_amount, eth_amount: data.eth_amount},{
             where : {
                 user_id: user_id
             }
@@ -53,7 +53,7 @@ exports.reward = async (req, res) => {
         console.log('게시글 작성 보상 지급 완료!');
         console.log(`${data.address}의 현재 토큰 수량 : ${token_amount}`);
     
-        const updateWallet = await models.Wallets.update({token_amount: token_amount},{
+        const updateWallet = await models.Wallets.update({token_amount: token_amount, eth_amount: data.eth_amount},{
             where : {
                 user_id: user_id
             }

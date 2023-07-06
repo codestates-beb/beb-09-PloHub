@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const abiSource = require('../../contract/build/contracts/NFTLootBox.json');
-const models = require('../models.js');
-const varEnv = require('../config/var.js');
+const models = require('../models');
+const varEnv = require('../config/var');
 const pinataSDK = require('@pinata/sdk');
 
 //nftCreate
@@ -32,9 +32,6 @@ exports.createNFT = async(req,res) => {
 
         // 컨트랙트 객체 생성
         const contract = new web3.eth.Contract(abi, varEnv.erc721ContractAddress);
-
-        // 구매(민팅)에 사용할 토큰 지정
-        const setToken = await contract.methods.setToken(varEnv.contractAddress);
 
         //사용자 정보 찾기
         const findWallets = await models.Wallets.findOne({
@@ -77,7 +74,8 @@ exports.createNFT = async(req,res) => {
 
             const tokenURI = `ifps://${metadataResult.IpfsHash}`;
 
-            const mintResult = await contract.methods.mintNFT(data.address, tokenURI).send({from: varEnv.senderAddress});
+            const mintResult = await contract.methods.mintNFT(data.address, tokenURI).send({from: data.address}); //유저가 가스비 부담 및  트랜잭션 서명 
+            console.log(mintResult);
             if (mintResult){ //민팅에 성공한다면
                 //일단 데이터 베이스에 nft정보들 업로드
                 const createNFTData = await models.nfts.create({
@@ -87,9 +85,18 @@ exports.createNFT = async(req,res) => {
                     token_uri: tokenURI,
                     price: 20,
                 })
+                //가스비 사용했기 
                 if (createNFTData){
                     console.log(createNFTData);
-                    res.status(200).json({message: 'OK', token_id: mintResult})
+                    const token_amount = data.token_amount-20;
+                    const eth_amount = web3.eth.utils.fromWei(await web3.eth.getBalance(data.address), 'wei');
+                    const updateWalletData = await models.Wallets.update({token_amount: token_amount, eth_amount: eth_amount}, {
+                        where : {
+                            user_id: data.user_id
+                        }
+                    });
+                    console.log(updateWalletData);
+                    res.status(200).json({message: 'OK', token_id: mintResult, eth_amount: eth_amount, token_amount: token_amount}); 
                 }else{
                     console.log('data upload is failed..');
                     res.status(400).json({message: 'data upload is failed..'});
