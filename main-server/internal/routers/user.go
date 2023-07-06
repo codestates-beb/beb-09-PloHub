@@ -55,29 +55,30 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 	email, password := r.FormValue("email"), r.FormValue("password")
 
 	// validate email and password
-	if valid, err := utils.ValidateEmail(email); err != nil || !valid {
+	if err := utils.ValidateEmail(email); err != nil {
 		if err != nil {
 			zap.L().Error("failed to validate email", zap.Error(err))
 		}
-		utils.ErrorJSON(w, errors.New("invalid email"), http.StatusBadRequest)
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
-	/*
-		if valid, err := utils.ValidatePassword(password); err != nil || !valid {
-			if err != nil {
-				zap.L().Error("failed to validate password", zap.Error(err))
-			}
-			utils.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
-			return
+	if err := utils.ValidatePassword(password); err != nil {
+		if err != nil {
+			zap.L().Error("failed to validate password", zap.Error(err))
 		}
-	*/
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
 
 	// create user
 	err := ur.userSvc.SignUp(r.Context(), email, password)
 	if err != nil {
 		zap.L().Error("failed to sign up", zap.Error(err))
-		utils.ErrorJSON(w, errors.New("unable to sign up, please try again"), http.StatusBadRequest)
+		if err != user.ErrEmailAlreadyExists {
+			err = errors.New("unable to sign up, please try again")
+		}
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -240,16 +241,13 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if email exists
-	exists, err := ur.userSvc.EmailExists(r.Context(), req.Email)
+	err = ur.userSvc.EmailExists(r.Context(), req.Email)
 	if err != nil {
 		zap.L().Error("failed to check if email exists", zap.Error(err))
-		utils.ErrorJSON(w, errors.New("unable to check if email exists"), http.StatusInternalServerError)
-		return
-	}
-
-	// if email exists, return error
-	if exists {
-		utils.ErrorJSON(w, errors.New("email already exists"), http.StatusConflict)
+		if err != user.ErrEmailAlreadyExists {
+			err = errors.New("unable to check if email exists")
+		}
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 

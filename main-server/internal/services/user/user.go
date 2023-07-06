@@ -14,10 +14,11 @@ import (
 
 var (
 	ErrMismatchedHashAndPassword = errors.New("mismatched hash and password")
+	ErrEmailAlreadyExists        = errors.New("email already exists")
 )
 
 type Service interface {
-	EmailExists(ctx context.Context, email string) (bool, error)
+	EmailExists(ctx context.Context, email string) error
 	Login(ctx context.Context, email, password string) (*models.UserInfo, error)
 	UserInfo(ctx context.Context, userID int32) (*models.UserInfo, error)
 	MyPage(ctx context.Context, userID int32) (*models.MyPageInfo, error)
@@ -44,29 +45,25 @@ func NewService(repo plohub.Repository, clients ...*http.Client) Service {
 }
 
 // EmailExists checks if the email is already registered
-func (s *service) EmailExists(ctx context.Context, email string) (bool, error) {
-	var exists bool
+func (s *service) EmailExists(ctx context.Context, email string) error {
 
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// check if email exists
-		res, err := q.EmailExists(ctx, email)
+		exists, err := q.EmailExists(ctx, email)
 		if err != nil {
 			return err
 		}
 
-		exists = res // assign result to exists
+		if exists {
+			return ErrEmailAlreadyExists
+		}
 
 		return nil
 	}
 
 	// execute transaction
-	err := s.repo.ExecTx(ctx, fn)
-	if err != nil {
-		return false, err
-	}
-	// return result
-	return exists, nil
+	return s.repo.ExecTx(ctx, fn)
 }
 
 // Login logs in the user
@@ -177,6 +174,15 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 func (s *service) SignUp(ctx context.Context, email string, password string) error {
 	// transaction function
 	fn := func(q plohub.Querier) error {
+		exists, err := q.EmailExists(ctx, email)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			return ErrEmailAlreadyExists
+		}
+
 		randCost := rand.Intn(bcrypt.MaxCost)
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), randCost)
 		if err != nil {
