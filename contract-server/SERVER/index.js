@@ -6,12 +6,13 @@ const {connectToDatabase} = require('./loaders/connectDB');
 
 const createWallet = require('./routes/create');
 const reward = require('./routes/reward');
+const createNFT = require('./routes/createNFT')
 
 // const mainRouter = require('./router/main');
 
 app.use( //cors설정
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:4000"],
     methods: ["GET", "POST", "OPTIONS", "DELETE"],
     credentials: true
   })
@@ -20,6 +21,7 @@ app.use(express.json()); //json으로 이루어진 Request Body를 받는다.
 
 app.use('/api/v1/wallets', createWallet);
 app.use('/api/v1/wallets', reward);
+app.use('/api/v1/nft',createNFT);
 
 connectToDatabase;
 

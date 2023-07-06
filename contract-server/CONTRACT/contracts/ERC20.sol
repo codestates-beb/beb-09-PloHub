@@ -10,7 +10,7 @@ interface ERC20Interface {
     
     event Transfer(address indexed from, address indexed to, uint256 amount);
     event Transfer(address indexed spender, address indexed from, address indexed to, uint256 amount);
-    event Approval(address indexed owner, address indexed spender, uint256 oldAmount, uint256 amount);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
 }
 
 contract ICToken is ERC20Interface {
@@ -63,18 +63,16 @@ contract ICToken is ERC20Interface {
     // spender 에게 value 만큼의 토큰을 인출할 권리를 부여. 
     // 이용시 반드시 Approval 이벤트 함수를 호출해야 함.
     function approve(address spender, uint amount) external virtual override returns (bool) {
-        uint256 currentAllownace = _allowances[msg.sender][spender];
-        require(currentAllownace >= amount, "ERC20: Transfer amount exceeds allowance");
-        _approve(msg.sender, spender, currentAllownace, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
     // spender가 거래 가능하도록 양도 받은 토큰을 전송
     function transferFrom(address sender, address recipient, uint256 amount) external virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         emit Transfer(msg.sender, sender, recipient, amount);
-        uint256 currentAllowance = _allowances[sender][msg.sender];
+        _approve(sender, recipient, amount);
+        uint256 currentAllowance = _allowances[sender][recipient];
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        _approve(sender, msg.sender, currentAllowance, currentAllowance - amount);
         return true;
     }
     
@@ -87,10 +85,10 @@ contract ICToken is ERC20Interface {
         _balances[recipient] += amount;
     }
     
-    function _approve(address owner, address spender, uint256 currentAmount, uint256 amount) internal virtual {
+    function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
         _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, currentAmount, amount);
+        emit Approval(owner, spender, amount);
     }
 }
