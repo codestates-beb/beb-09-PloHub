@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Header, Footer } from '../Components/Reference';
 
-const signin = () => {
+const SignIn = () => {
     return (
         <>
-            <Header />
             <div className='w-full mx-auto min-h-screen flex flex-col justify-center items-center bg-gray-200'>
                 <div className='border border-gray-400 rounded-lg w-8/12 h-[1000px] flex flex-col items-center justify-center bg-white'>
                     <div className='w-full h-full grid grid-rows-3 items-center justify-center'>
@@ -47,9 +45,8 @@ const signin = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </>
     );
 };
 
-export default signin;
+export default SignIn;

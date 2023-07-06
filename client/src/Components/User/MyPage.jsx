@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Modal from 'react-modal';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ import { format } from 'date-fns';
 import { logoBlack, ploHub, ModalLayout } from '../Reference'
 
 const MyPage = () => {
-
+    const router = useRouter();
     const currentDate = new Date();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -343,7 +344,10 @@ const MyPage = () => {
                             </thead>
                             <tbody>
                                 {currentItems.map((post) => (
-                                <tr key={post.id} className="hover:bg-gray-200 transition-all duration-300 cursor-pointer">
+                                <tr 
+                                    key={post.id} 
+                                    className="hover:bg-gray-200 transition-all duration-300 cursor-pointer"
+                                    onClick={() => router.push(`/posts/${post.id}`)}>
                                     <td className="border-b p-3">
                                         <p className="text-xl font-semibold">{post.id}</p>
                                     </td>
@@ -372,8 +376,8 @@ const MyPage = () => {
                             {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i + 1}
-                                className={`px-4 py-2 mx-1 rounded ${
-                                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                className={`px-2 py-2 mx-1 ${
+                                currentPage === i + 1 ? 'font-bold' : ''
                                 }`}
                                 onClick={() => handlePageChange(i + 1)}
                             >

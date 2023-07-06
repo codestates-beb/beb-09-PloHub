@@ -1,6 +1,6 @@
 import React from 'react';
-import { Header, Footer } from '../Components/Reference'
-import MyPage from '../Components/MyPage/MyPage';
+import { Header, Footer } from '../../Components/Reference'
+import MyPage from '../../Components/User/MyPage';
 
 const mypage = () => {
 
