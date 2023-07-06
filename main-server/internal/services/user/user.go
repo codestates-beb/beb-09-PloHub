@@ -5,6 +5,7 @@ import (
 	"errors"
 	"main-server/db/plohub"
 	"main-server/internal/models"
+	"main-server/internal/services/wallet"
 	"math/rand"
 	"time"
 
@@ -26,12 +27,14 @@ type Service interface {
 }
 
 type service struct {
-	repo plohub.Repository
+	walletSvc wallet.Service
+	repo      plohub.Repository
 }
 
-func NewService(repo plohub.Repository) Service {
+func NewService(walletSvc wallet.Service, repo plohub.Repository) Service {
 	svc := &service{
-		repo: repo,
+		walletSvc: walletSvc,
+		repo:      repo,
 	}
 
 	return svc

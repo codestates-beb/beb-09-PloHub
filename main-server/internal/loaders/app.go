@@ -9,6 +9,7 @@ import (
 	"main-server/internal/routers"
 	"main-server/internal/services/auth"
 	"main-server/internal/services/user"
+	"main-server/internal/services/wallet"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -22,7 +23,8 @@ func NewApp(ctx context.Context, cfg *configs.Config) *app.App {
 
 	repo := plohub.NewRepository(db)
 
-	userSvc := user.NewService(repo)
+	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
+	userSvc := user.NewService(walletSvc, repo)
 	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
 	if err != nil {
 		zap.L().Panic("Failed to create auth service", zap.Error(err))
