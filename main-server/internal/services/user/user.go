@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"main-server/db/plohub"
 	"main-server/internal/models"
@@ -42,7 +43,6 @@ func NewService(walletSvc wallet.Service, repo plohub.Repository) Service {
 
 // EmailExists checks if the email is already registered
 func (s *service) EmailExists(ctx context.Context, email string) error {
-
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// check if email exists
@@ -88,8 +88,34 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 		userInfo = models.ToUserInfo(user)
 
 		// if user never logged in before or user logged in before but not today
+		// TODO: improve date comparison logic
 		if !user.LatestLoginDate.Valid || !checkUserLoggedInToday(user.LatestLoginDate.Time) {
-			// TODO: request reward
+			reward, err := s.walletSvc.IssueReward(ctx, user.ID, models.RewardTypeLogin)
+			if err != nil {
+				return err
+			}
+
+			// TODO: update user level based on token amount
+
+			err = q.UpdateUser(ctx, plohub.UpdateUserParams{
+				Nickname:    user.Nickname,
+				Level:       user.Level,
+				Address:     user.Address,
+				EthAmount:   user.EthAmount,
+				TokenAmount: reward.TokenAmount,
+				LatestLoginDate: sql.NullTime{
+					Valid: true,
+					Time:  time.Now(),
+				},
+				DailyToken: reward.RewardAmount,
+				ID:         user.ID,
+			})
+			if err != nil {
+				return err
+			}
+
+			userInfo.TokenAmount = reward.TokenAmount
+			userInfo.DailyToken = reward.RewardAmount
 		}
 
 		return nil
@@ -193,10 +219,23 @@ func (s *service) SignUp(ctx context.Context, email string, password string) err
 			return err
 		}
 
-		// TODO: request to create wallet with user id
-		_ = struct{ id int32 }{id: id}
+		wallet, err := s.walletSvc.CreateWallet(ctx, id)
+		if err != nil {
+			return err
+		}
 
-		return nil
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:    wallet.Address,
+			Level:       1,
+			Address:     wallet.Address,
+			EthAmount:   wallet.EthAmount,
+			TokenAmount: wallet.TokenAmount,
+			LatestLoginDate: sql.NullTime{
+				Valid: false,
+			},
+			DailyToken: 0,
+			ID:         id,
+		})
 	}
 
 	// execute transaction
