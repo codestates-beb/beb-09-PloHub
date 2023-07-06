@@ -8,6 +8,7 @@ import (
 	"main-server/internal/models"
 	"main-server/internal/services/wallet"
 	"math/rand"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -16,9 +17,11 @@ import (
 var (
 	ErrMismatchedHashAndPassword = errors.New("mismatched hash and password")
 	ErrEmailAlreadyExists        = errors.New("email already exists")
+	ErrSameNickname              = errors.New("same nickname")
 )
 
 type Service interface {
+	ChangeNickname(ctx context.Context, userID int32, nickname string) error
 	EmailExists(ctx context.Context, email string) error
 	Login(ctx context.Context, email, password string) (*models.UserInfo, error)
 	UserInfo(ctx context.Context, userID int32) (*models.UserInfo, error)
@@ -39,6 +42,43 @@ func NewService(walletSvc wallet.Service, repo plohub.Repository) Service {
 	}
 
 	return svc
+}
+
+// ChangeNickname changes the nickname of the user
+func (s *service) ChangeNickname(ctx context.Context, userID int32, nickname string) error {
+	// transaction function
+	fn := func(q plohub.Querier) error {
+		// get user by id
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		// check if nickname is same
+		if strings.EqualFold(nickname, user.Nickname) {
+			return ErrSameNickname
+		}
+
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        nickname,
+			Level:           user.Level,
+			Address:         user.Address,
+			EthAmount:       user.EthAmount,
+			TokenAmount:     user.TokenAmount,
+			LatestLoginDate: user.LatestLoginDate,
+			DailyToken:      user.DailyToken,
+			ID:              user.ID,
+		})
+	}
+
+	// execute transaction
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return err
+	}
+
+	// return result
+	return nil
 }
 
 // EmailExists checks if the email is already registered
