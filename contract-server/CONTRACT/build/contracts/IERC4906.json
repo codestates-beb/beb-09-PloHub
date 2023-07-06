@@ -333,21 +333,21 @@
     "absolutePath": "project:/node_modules/@openzeppelin/contracts/interfaces/IERC4906.sol",
     "exportedSymbols": {
       "IERC165": [
-        2688
+        2686
       ],
       "IERC4906": [
-        672
+        670
       ],
       "IERC721": [
-        1796
+        1794
       ]
     },
-    "id": 673,
+    "id": 671,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 652,
+        "id": 650,
         "literals": [
           "solidity",
           "^",
@@ -360,11 +360,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/interfaces/IERC165.sol",
         "file": "./IERC165.sol",
-        "id": 653,
+        "id": 651,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 673,
-        "sourceUnit": 651,
+        "scope": 671,
+        "sourceUnit": 649,
         "src": "132:23:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -372,11 +372,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/interfaces/IERC721.sol",
         "file": "./IERC721.sol",
-        "id": 654,
+        "id": 652,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 673,
-        "sourceUnit": 676,
+        "scope": 671,
+        "sourceUnit": 674,
         "src": "156:23:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -386,25 +386,25 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 656,
+              "id": 654,
               "name": "IERC165",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 2688,
+              "referencedDeclaration": 2686,
               "src": "248:7:4"
             },
-            "id": 657,
+            "id": 655,
             "nodeType": "InheritanceSpecifier",
             "src": "248:7:4"
           },
           {
             "baseName": {
-              "id": 658,
+              "id": 656,
               "name": "IERC721",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 1796,
+              "referencedDeclaration": 1794,
               "src": "257:7:4"
             },
-            "id": 659,
+            "id": 657,
             "nodeType": "InheritanceSpecifier",
             "src": "257:7:4"
           }
@@ -413,17 +413,17 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 655,
+          "id": 653,
           "nodeType": "StructuredDocumentation",
           "src": "181:45:4",
           "text": "@title EIP-721 Metadata Update Extension"
         },
         "fullyImplemented": false,
-        "id": 672,
+        "id": 670,
         "linearizedBaseContracts": [
-          672,
-          1796,
-          2688
+          670,
+          1794,
+          2686
         ],
         "name": "IERC4906",
         "nameLocation": "236:8:4",
@@ -432,28 +432,28 @@
           {
             "anonymous": false,
             "documentation": {
-              "id": 660,
+              "id": 658,
               "nodeType": "StructuredDocumentation",
               "src": "271:201:4",
               "text": "@dev This event emits when the metadata of a token is changed.\n So that the third-party platforms such as NFT market could\n timely update the images and related attributes of the NFT."
             },
-            "id": 664,
+            "id": 662,
             "name": "MetadataUpdate",
             "nameLocation": "483:14:4",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 663,
+              "id": 661,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 662,
+                  "id": 660,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "_tokenId",
                   "nameLocation": "506:8:4",
                   "nodeType": "VariableDeclaration",
-                  "scope": 664,
+                  "scope": 662,
                   "src": "498:16:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -462,7 +462,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 661,
+                    "id": 659,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "498:7:4",
@@ -481,28 +481,28 @@
           {
             "anonymous": false,
             "documentation": {
-              "id": 665,
+              "id": 663,
               "nodeType": "StructuredDocumentation",
               "src": "522:212:4",
               "text": "@dev This event emits when the metadata of a range of tokens is changed.\n So that the third-party platforms such as NFT market could\n timely update the images and related attributes of the NFTs."
             },
-            "id": 671,
+            "id": 669,
             "name": "BatchMetadataUpdate",
             "nameLocation": "745:19:4",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 670,
+              "id": 668,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 667,
+                  "id": 665,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "_fromTokenId",
                   "nameLocation": "773:12:4",
                   "nodeType": "VariableDeclaration",
-                  "scope": 671,
+                  "scope": 669,
                   "src": "765:20:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -511,7 +511,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 666,
+                    "id": 664,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "765:7:4",
@@ -524,13 +524,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 669,
+                  "id": 667,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "_toTokenId",
                   "nameLocation": "795:10:4",
                   "nodeType": "VariableDeclaration",
-                  "scope": 671,
+                  "scope": 669,
                   "src": "787:18:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -539,7 +539,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 668,
+                    "id": 666,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "787:7:4",
@@ -556,7 +556,7 @@
             "src": "739:68:4"
           }
         ],
-        "scope": 673,
+        "scope": 671,
         "src": "226:583:4",
         "usedErrors": []
       }
@@ -569,7 +569,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-07-05T11:16:22.660Z",
+  "updatedAt": "2023-07-06T05:03:21.886Z",
   "devdoc": {
     "events": {
       "BatchMetadataUpdate(uint256,uint256)": {

@@ -1,5 +1,6 @@
 const Web3 = require('web3');
 const abiSource = require('../../contract/build/contracts/NFTLootBox.json');
+const abiSourceERC20 = require('../../contract/build/contracts/ICToken.json');
 const models = require('../models');
 const varEnv = require('../config/var');
 const pinataSDK = require('@pinata/sdk');
@@ -26,12 +27,14 @@ exports.createNFT = async(req,res) => {
         const {name, description, image, user_id} = req.body; 
 
         const abi = abiSource.abi;
+        const abiERC20 = abiSourceERC20.abi;
 
          // Ethereum 네트워크에 연결
         const web3 = new Web3('http://127.0.0.1:7545'); // Ganache URL
 
         // 컨트랙트 객체 생성
         const contract = new web3.eth.Contract(abi, varEnv.erc721ContractAddress);
+        const contractERC20 = new web3.eth.Contract(abiERC20, varEnv.contractAddress);
 
         //사용자 정보 찾기
         const findWallets = await models.Wallets.findOne({
@@ -49,13 +52,21 @@ exports.createNFT = async(req,res) => {
             //일단 토큰 URI를 얻어야함
             //구매자는 토큰만 지불! 가스비는 서버 계정이 지불 === 서버 계정이 트랜잭션 서명???
             //createButton을 누르면 메타 마스크처럼 뭔가 창이 하나 떠서 확인버튼을 누를 수 있게끔하면 좋을거 같음
-            const tokenSet = await contract.methods.tokenSet(varEnv.contractAddress).send({from: varEnv.senderAddress});
+            const tokenSet = await contract.methods.setToken(varEnv.contractAddress).send({from: varEnv.senderAddress});
+
+            //만약 토큰이 등록 되었다면 
             if (tokenSet){
                 console.log('토큰 등록 완료!');
             }else{
                 console.log('토큰 등록 실패');
-                res.status(400).json({message: 'tokenSet is failed..'})
+                res.status(400).json({message: 'setToken is failed..'})
             }
+            console.log(await contractERC20.methods.balanceOf(data.address).call());
+            console.log(await contractERC20.methods.allowance(varEnv.senderAddress, data.address).call());
+            //토큰 인출량 허용
+            const tokenApprove = await contractERC20.methods.approve(data.address,20).send({from: varEnv.senderAddress});
+            console.log(`tokenApprove : ${tokenApprove}`);
+
             // 이미지 파일 pinata에 업로드
             const photoResult = await pinata.pinJSONToIPFS({ image_url: image});
             console.log('Photo uploaded successfully. IPFS Hash:', photoResult.IpfsHash)  ; 
@@ -74,7 +85,25 @@ exports.createNFT = async(req,res) => {
 
             const tokenURI = `ifps://${metadataResult.IpfsHash}`;
 
-            const mintResult = await contract.methods.mintNFT(data.address, tokenURI).send({from: data.address}); //유저가 가스비 부담 및  트랜잭션 서명 
+            //여기까지 완료
+
+            // 사용자 지갑과 컨트랙트 객체 연결
+            const userWallet = web3.eth.accounts.privateKeyToAccount(data.private_key);
+            const connectedContract = contract.clone();
+            connectedContract.setProvider(web3.currentProvider);
+            connectedContract.options.address = varEnv.erc721ContractAddress;
+            connectedContract.options.from = userWallet.address;
+
+            // 트랜잭션 서명을 위한 지갑 설정
+            web3.eth.accounts.wallet.add(userWallet);
+
+
+            const mintResult = await contract.methods.mintNFT(data.address, tokenURI).send({from: userWallet.address, gas: 3000000}); //유저가 가스비 부담 및  트랜잭션 서명 
+
+            //지갑 연결 해제
+            web3.eth.accounts.wallet.remove(userWallet);
+
+
             console.log(mintResult);
             if (mintResult){ //민팅에 성공한다면
                 //일단 데이터 베이스에 nft정보들 업로드

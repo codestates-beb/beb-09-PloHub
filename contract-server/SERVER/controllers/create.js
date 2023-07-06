@@ -24,7 +24,7 @@ exports.createWallet = async (req, res) => {
     console.log(wallet);
 
     // ETH faucet 기능 추가
-    const faucetAmount = web3.utils.toWei('0.1', 'ether'); // ETH faucet에서 보낼 금액 (1 ETH)
+    const faucetAmount = web3.utils.toWei('0.1', 'ether'); // ETH faucet에서 보낼 금액 (0.1 ETH)
     const gasPrice = web3.utils.toHex(100 * 10**9); // 예시: 100 Gwei
     const gasLimit = web3.utils.toHex(21000); // 예시: 21000
 
@@ -41,47 +41,36 @@ exports.createWallet = async (req, res) => {
     const faucetReceipt = await web3.eth.sendSignedTransaction(signedFaucetTransaction.rawTransaction);
     if (faucetReceipt) {
         console.log("ETH faucet 성공!!");
-    }else{
+    } else {
         console.log("ETH faucet 실패!!");
     }
 
-    //응답할 eth_amount, token_amount
-    const eth_amount = web3.utils.fromWei(await web3.eth.getBalance(walletAddress), 'wei'); 
+    // // 응답할 eth_amount, token_amount
+    const eth_amount = web3.utils.fromWei(await web3.eth.getBalance(walletAddress), 'wei');
     console.log(eth_amount);
     const token_amount = 5;
-    
-    // ERC20 토큰 전송(회원가입 보상)
-    const result = await contract.methods.transfer(walletAddress,5).send({from: varEnv.senderAddress});
-    console.log(result);
-    contract.methods.balanceOf(walletAddress).call()
-        .then((result)=> {
-            console.log(`새로 생성된 지갑 ${walletAddress}의 토큰 잔액 : ${result}`);
-        })
-    
-    console.log("지갑 생성 후 회원가입 보상 트랜잭션 전송 중.....");
 
-    // 전송 트랜잭션 결과 확인
-    if (result) {
-      // 사용자 정보 데이터베이스에 저장
-      const createdWallet = await models.Wallets.create({
-        user_id: user_id,
-        address: walletAddress,
-        private_key: wallet.privateKey,
-        eth_amount: eth_amount,
-        token_amount: token_amount,
-      });
-      console.log(createdWallet)
-      res.status(200).json({ message: '회원가입 성공!', address: walletAddress, token_amount: token_amount, eth_amount: eth_amount });
-    } else {
-      // 회원가입 실패 응답
-      res.status(500).json({ error: '회원가입에 실패했습니다.' });
-    }
-  } catch (error) {
-    // 회원가입 실패 응답
-    console.error(error);
-    res.status(500).json({ error: '회원가입에 실패했습니다.' });
+    // // ERC20 토큰 전송(회원가입 보상)
+    // const senderAddress = varEnv.senderAddress;
+    // const receiverAddress = walletAddress;
+
+    // const allowance = await contract.methods.allowance(senderAddress, receiverAddress).call();
+    // if (parseInt(allowance) < tokenAmount) {
+    //     const approveResult = await contract.methods.approve(receiverAddress, tokenAmount).send({ from: senderAddress });
+    //     if (!approveResult.status) {
+    //         console.log('토큰 전송 권한 부여 실패!');
+    //         return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
+    //     }
+    // }
+
+    // const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, tokenAmount).send({ from: senderAddress });
+    // if (!transferResult.status) {
+    //     console.log('토큰 전송 실패!');
+    //     return res.status(500).json({ error: 'error!!'});
+    // }
+    res.status(200).json({message: 'OK', address: walletAddress, token_amount: token_amount, eth_amount: eth_amount});
+  }catch(error){
+    console.log(error);
+    res.status(500).json({message: error});
   }
-};
-
-
-
+}

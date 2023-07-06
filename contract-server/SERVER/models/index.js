@@ -7,7 +7,12 @@ const sequelize = new Sequelize(
   config.database,
   config.username,
   config.password,
-  config
+  {
+    dialect: 'mysql',
+    dialectOptions: {
+      port: config.port
+    }
+  }
 ); // 시퀄라이즈 노드랑mysql 연결해주는 역할.
 
 db.Wallets = require('./Wallets')(sequelize, Sequelize);

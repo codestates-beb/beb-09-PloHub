@@ -6,59 +6,106 @@ const varEnv = require('../config/var');
 exports.reward = async (req, res) => {
     const abi = abiSource.abi;
 
-    const {user_id, email, reward_type} = req.body;
+    const { user_id, email, reward_type } = req.body;
     const web3 = new Web3('http://127.0.0.1:7545');
     const contract = new web3.eth.Contract(abi, varEnv.contractAddress);
 
     const findWallets = await models.Wallets.findOne({
-        where : {user_id : user_id}
+        where: { user_id: user_id }
     });
 
-    // if (findWallets) {
-    //     console.log(findWallets.dataValues);
-    // }else{
-    //     console.log('데이터 탐색 실패!');
-    // }
+    if (!findWallets) {
+        console.log('데이터 탐색 실패!');
+        return res.status(400).json({ error: '데이터 탐색 실패!' });
+    }
+
     const data = findWallets.dataValues;
 
     console.log('데이터 가져오기 성공. 보상을 지급합니다!');
-    //reward type
-    // 0 = 회원가입 : 5token
-    // 1 = 로그인 : 1token
-    // 2 = 게시물 작성 : 3token
-    // 3 = 댓글 작성
-    // 서버 계좌에서 transfer 함수 호출로 각 상황에 맞는 보상 토큰 지급 후 response
-    // database update
+// //로그인
+// if (reward_type === "1") {
+//     try {
+//         const senderAddress = varEnv.senderAddress;
+//         const receiverAddress = data.address;
+//         const tokenAmount = 1;
 
-    //로그인
-    if (reward_type === "1"){
-        const result = await contract.methods.transfer(data.address,1).send({from: varEnv.senderAddress});
-        const token_amount = await contract.methods.balanceOf(data.address).call()
-        console.log('로그인 보상 지급 완료!');
-        console.log(`${data.address}의 현재 토큰 수량 : ${token_amount}`);
-    
-        const updateWallet = await models.Wallets.update({token_amount: token_amount, eth_amount: data.eth_amount},{
-            where : {
-                user_id: user_id
-            }
-        })
-        console.log(updateWallet);
-        res.status(200).json({reward_amount: 1, token_amount: token_amount});
-    }
-    //게시물 작성
-    if (reward_type === "2"){
-        const result = await contract.methods.transfer(data.address,3).send({from: varEnv.senderAddress});
-        const token_amount = await contract.methods.balanceOf(data.address).call()
+//         const tokenBalance = await contract.methods.balanceOf(senderAddress).call();
+//         if (parseInt(tokenBalance) < tokenAmount) {
+//             console.log('송신 계정의 토큰 잔액이 부족합니다!');
+//             return res.status(400).json({ error: '송신 계정의 토큰 잔액이 부족합니다!' });
+//         }
 
-        console.log('게시글 작성 보상 지급 완료!');
-        console.log(`${data.address}의 현재 토큰 수량 : ${token_amount}`);
+//         const allowance = await contract.methods.allowance(senderAddress, receiverAddress).call();
+//         if (parseInt(allowance) < tokenAmount) {
+//             const approveResult = await contract.methods.approve(receiverAddress, tokenAmount).send({ from: senderAddress });
+//             if (!approveResult.status) {
+//                 console.log('토큰 전송 권한 부여 실패!');
+//                 return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
+//             }
+//         }
+
+//         const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, tokenAmount).send({ from: senderAddress });
+//         if (!transferResult.status) {
+//             console.log('토큰 전송 실패!');
+//             return res.status(500).json({ error: '토큰 전송 실패!' });
+//         }
+
+//         const updatedTokenBalance = await contract.methods.balanceOf(receiverAddress).call();
+
+//         const updateWallet = await models.Wallets.update({ token_amount: updatedTokenBalance, eth_amount: data.eth_amount }, {
+//             where: {
+//                 user_id: user_id
+//             }
+//         });
+
+//         console.log(updateWallet);
+//         res.status(200).json({ reward_amount: tokenAmount, token_amount: updatedTokenBalance });
+//         } catch (error) {
+//             console.log('보상 지급 중 오류 발생:', error);
+//             return res.status(500).json({ error: '보상 지급 중 오류 발생' });
+//         }
+//     }
+//     //게시물 작성
+//     if (reward_type === "2") {
+//         try {
+//             const senderAddress = varEnv.senderAddress;
+//             const receiverAddress = data.address;
+//             const tokenAmount = 2;
     
-        const updateWallet = await models.Wallets.update({token_amount: token_amount, eth_amount: data.eth_amount},{
-            where : {
-                user_id: user_id
-            }
-        })
-        console.log(updateWallet);
-        res.status(200).json({reward_amount: 3, token_amount: token_amount});
-    }
-}
+//             const tokenBalance = await contract.methods.balanceOf(senderAddress).call();
+//             if (parseInt(tokenBalance) < tokenAmount) {
+//                 console.log('송신 계정의 토큰 잔액이 부족합니다!');
+//                 return res.status(400).json({ error: '송신 계정의 토큰 잔액이 부족합니다!' });
+//             }
+    
+//             const allowance = await contract.methods.allowance(senderAddress, receiverAddress).call();
+//             if (parseInt(allowance) < tokenAmount) {
+//                 const approveResult = await contract.methods.approve(receiverAddress, tokenAmount).send({ from: senderAddress });
+//                 if (!approveResult.status) {
+//                     console.log('토큰 전송 권한 부여 실패!');
+//                     return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
+//                 }
+//             }
+    
+//             const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, tokenAmount).send({ from: senderAddress });
+//             if (!transferResult.status) {
+//                 console.log('토큰 전송 실패!');
+//                 return res.status(500).json({ error: '토큰 전송 실패!' });
+//             }
+    
+//             const updatedTokenBalance = await contract.methods.balanceOf(receiverAddress).call();
+    
+//             const updateWallet = await models.Wallets.update({ token_amount: updatedTokenBalance, eth_amount: data.eth_amount }, {
+//                 where: {
+//                     user_id: user_id
+                // }
+//             });
+    
+//             console.log(updateWallet);
+            res.status(200).json({ reward_amount: tokenAmount, token_amount: 10 });
+            // } catch (error) {
+            //     console.log('보상 지급 중 오류 발생:', error);
+            //     return res.status(500).json({ error: '보상 지급 중 오류 발생' });
+            // }
+        // }
+};
