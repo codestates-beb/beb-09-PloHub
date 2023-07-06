@@ -17,6 +17,9 @@ services:
     restart: always
     depends_on:
       - postgres
+    configs:
+      - source: main-server-config
+        target: /app/config/config.json
 
   postgres:
     container_name: postgres
@@ -37,3 +40,6 @@ volumes:
   postgres-data:
     driver: local
   
+configs:
+  main-server-config:
+    file: ./main-server/config/config.docker.json

@@ -1,1 +1,2 @@
-.env
+config.json
+config.docker.json

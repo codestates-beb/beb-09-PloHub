@@ -2,93 +2,56 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
+	"main-server/internal/configs"
 	"main-server/internal/loaders"
-	"net/http"
-	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
 	"time"
+
+	"go.uber.org/zap"
 )
 
-func main() {
-	port := flag.String("p", "8080", "port to listen on")
-	flag.Parse()
+func init() {
+	logger := loaders.MustInitLogger()
+	zap.ReplaceGlobals(logger)
+}
 
-	mustValidatePort(*port)
+func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			zap.L().Fatal("Recovered in main", zap.Any("reason", r))
+		}
+	}()
+	defer zap.L().Sync()
+
+	// Load config
+	cfg, err := configs.New("./config/config.json")
+	if err != nil {
+		zap.L().Panic("Failed to load config", zap.Error(err))
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	db := <-loaders.MustConnectPostgresWithRetry(ctx, "postgres://postgres:postgres@postgres:5432/plohub?sslmode=disable&connect_timeout=10")
-	if db == nil {
-		log.Fatal("Failed to connect to postgres")
-	}
-	if err := db.Ping(); err != nil {
-		log.Fatal("Failed to ping postgres: ", err)
-	}
-	log.Println("Connected to postgres")
+	// init app
+	app := loaders.NewApp(ctx, cfg)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthcheck", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
-
-	srv := &http.Server{
-		Addr:    ":" + *port,
-		Handler: mux,
+	// start app
+	stop, err := app.Start()
+	if err != nil {
+		zap.L().Panic("Failed to start server", zap.Error(err))
 	}
 
-	stop := make(chan struct{})
-	shutdown := make(chan os.Signal, 1)
+	zap.L().Info("Server started", zap.String("port", cfg.Server.Port))
 
-	signal.Notify(shutdown,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGQUIT,
-	)
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("Failed to listen and serve: ", err)
-		}
-	}()
-
-	log.Printf("Server listening on port %s", *port)
-
-	go func() {
-		defer func() {
-			close(shutdown)
-			close(stop)
-		}()
-		<-shutdown
-	}()
-
+	// block until stop signal
 	<-stop
 
-	log.Println("Shutting down server...")
-	if err := srv.Shutdown(context.Background()); err != nil {
+	zap.L().Info("Shutting down server...")
+
+	// shutdown app
+	if err := app.Shutdown(context.Background()); err != nil {
 		log.Fatal("Failed to shutdown server: ", err)
 	}
 
-	log.Println("Server gracefully stopped")
-}
-
-func mustValidatePort(port string) {
-	if port == "" {
-		log.Fatal("Port is required")
-	}
-
-	n, err := strconv.Atoi(port)
-	if err != nil {
-		log.Fatal("Port must be a number")
-	}
-
-	if n < 1 || n > 65535 {
-		log.Fatal("Port must be between 1 and 65535")
-	}
+	zap.L().Info("Server gracefully stopped")
 }
