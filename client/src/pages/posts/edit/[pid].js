@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router';
-import { Header, Footer } from '../../Components/Reference';
+import { Header, Footer } from '../../../Components/Reference';
 import 'react-quill/dist/quill.snow.css';
 
-const craete = () => {
+const PostEdit = () => {
     const router = useRouter();
 
     const QuillWrapper = dynamic(() => import('react-quill'), {
@@ -85,7 +85,7 @@ const craete = () => {
                         hover:bg-blue-dark 
                         transition 
                         duration-300'
-                        onClick={() => router.push('/')}>
+                        onClick={() => router.back()}>
                         Cancel
                     </button>
                     <button className='
@@ -107,4 +107,4 @@ const craete = () => {
     );
 };
 
-export default craete;
+export default PostEdit;
