@@ -4,9 +4,9 @@ type RewardType int8
 
 const (
 	_ RewardType = iota
-	Login
-	CreatePost
-	LeaveComment
+	RewardTypeLogin
+	RewardTypeCreatePost
+	RewardTypeLeaveComment
 )
 
 type Wallet struct {

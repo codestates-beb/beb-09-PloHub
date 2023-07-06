@@ -2,10 +2,13 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"main-server/db/plohub"
 	"main-server/internal/models"
+	"main-server/internal/services/wallet"
 	"math/rand"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -14,9 +17,11 @@ import (
 var (
 	ErrMismatchedHashAndPassword = errors.New("mismatched hash and password")
 	ErrEmailAlreadyExists        = errors.New("email already exists")
+	ErrSameNickname              = errors.New("same nickname")
 )
 
 type Service interface {
+	ChangeNickname(ctx context.Context, userID int32, nickname string) error
 	EmailExists(ctx context.Context, email string) error
 	Login(ctx context.Context, email, password string) (*models.UserInfo, error)
 	UserInfo(ctx context.Context, userID int32) (*models.UserInfo, error)
@@ -26,20 +31,58 @@ type Service interface {
 }
 
 type service struct {
-	repo plohub.Repository
+	walletSvc wallet.Service
+	repo      plohub.Repository
 }
 
-func NewService(repo plohub.Repository) Service {
+func NewService(walletSvc wallet.Service, repo plohub.Repository) Service {
 	svc := &service{
-		repo: repo,
+		walletSvc: walletSvc,
+		repo:      repo,
 	}
 
 	return svc
 }
 
+// ChangeNickname changes the nickname of the user
+func (s *service) ChangeNickname(ctx context.Context, userID int32, nickname string) error {
+	// transaction function
+	fn := func(q plohub.Querier) error {
+		// get user by id
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		// check if nickname is same
+		if strings.EqualFold(nickname, user.Nickname) {
+			return ErrSameNickname
+		}
+
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        nickname,
+			Level:           user.Level,
+			Address:         user.Address,
+			EthAmount:       user.EthAmount,
+			TokenAmount:     user.TokenAmount,
+			LatestLoginDate: user.LatestLoginDate,
+			DailyToken:      user.DailyToken,
+			ID:              user.ID,
+		})
+	}
+
+	// execute transaction
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return err
+	}
+
+	// return result
+	return nil
+}
+
 // EmailExists checks if the email is already registered
 func (s *service) EmailExists(ctx context.Context, email string) error {
-
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// check if email exists
@@ -85,8 +128,34 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 		userInfo = models.ToUserInfo(user)
 
 		// if user never logged in before or user logged in before but not today
+		// TODO: improve date comparison logic
 		if !user.LatestLoginDate.Valid || !checkUserLoggedInToday(user.LatestLoginDate.Time) {
-			// TODO: request reward
+			reward, err := s.walletSvc.IssueReward(ctx, user.ID, models.RewardTypeLogin)
+			if err != nil {
+				return err
+			}
+
+			// TODO: update user level based on token amount
+
+			err = q.UpdateUser(ctx, plohub.UpdateUserParams{
+				Nickname:    user.Nickname,
+				Level:       user.Level,
+				Address:     user.Address,
+				EthAmount:   user.EthAmount,
+				TokenAmount: reward.TokenAmount,
+				LatestLoginDate: sql.NullTime{
+					Valid: true,
+					Time:  time.Now(),
+				},
+				DailyToken: reward.RewardAmount,
+				ID:         user.ID,
+			})
+			if err != nil {
+				return err
+			}
+
+			userInfo.TokenAmount = reward.TokenAmount
+			userInfo.DailyToken = reward.RewardAmount
 		}
 
 		return nil
@@ -190,10 +259,23 @@ func (s *service) SignUp(ctx context.Context, email string, password string) err
 			return err
 		}
 
-		// TODO: request to create wallet with user id
-		_ = struct{ id int32 }{id: id}
+		wallet, err := s.walletSvc.CreateWallet(ctx, id)
+		if err != nil {
+			return err
+		}
 
-		return nil
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:    wallet.Address,
+			Level:       1,
+			Address:     wallet.Address,
+			EthAmount:   wallet.EthAmount,
+			TokenAmount: wallet.TokenAmount,
+			LatestLoginDate: sql.NullTime{
+				Valid: false,
+			},
+			DailyToken: 0,
+			ID:         id,
+		})
 	}
 
 	// execute transaction

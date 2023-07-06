@@ -43,6 +43,7 @@ func (ur *userRouter) Route() http.Handler {
 			sr.Use(middlewares.AccessTokenRequired(ur.authSvc))
 			sr.Get("/myinfo", ur.myInfo)
 			sr.Get("/mypage", ur.myPage) // TODO: implement this
+			sr.Post("/change-nickname", ur.changeNickname)
 		})
 	})
 
@@ -255,6 +256,36 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	var resp models.CommonResponse
 	resp.Status = http.StatusOK
 	resp.Message = "Email is available"
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
+}
+
+// changeNickname handles POST /users/change-nickname
+func (ur *userRouter) changeNickname(w http.ResponseWriter, r *http.Request) {
+	// get user id from context (set by AccessTokenRequired middleware)
+	userID := r.Context().Value(middlewares.UserIDKey).(int32)
+
+	// get nickname from form data
+	nickname := r.FormValue("nickname")
+
+	// TODO: validate nickname
+
+	// change nickname
+	err := ur.userSvc.ChangeNickname(r.Context(), userID, nickname)
+	if err != nil {
+		zap.L().Error("failed to change nickname", zap.Error(err), zap.Int32("user_id", userID))
+		if err != user.ErrSameNickname {
+			err = errors.New("unable to change nickname")
+		}
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	// send response
+	var resp models.ChangeNicknameResponse
+	resp.Status = http.StatusOK
+	resp.Message = "Successfully changed nickname"
+	resp.Nickname = nickname
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
