@@ -15,19 +15,11 @@ const Header = () => {
 
     const [isMenuOpen, setMenuOpen] = useState(false);
     const [arrowRotation, setArrowRotation] = useState(0);
-    const [menuHeight, setMenuHeight] = useState(0);
 
     const menuToggle = () => {
         setMenuOpen(!isMenuOpen);
         setArrowRotation(arrowRotation + 180);
-        setMenuHeight(isMenuOpen ? 0 : 100); // 메뉴가 열릴 때는 고정된 높이 값을 설정
-
-        // 메뉴가 열리고 닫힐 때 애니메이션을 부드럽게 처리하기 위해 setTimeout을 사용
-        setTimeout(() => {
-            setMenuHeight(isMenuOpen ? 100 : 0); // 메뉴가 닫힐 때는 높이를 0으로 설정
-        }, 0);
     }
-
     return (
         <>
             <div className="h-24 bg-blue-dark text-white py-4 px-6 grid grid-cols-2 content-center overflow-hidden">
@@ -51,84 +43,82 @@ const Header = () => {
                             <div className='relative cursor-pointer' style={{ transform: `rotate(${arrowRotation}deg)`, transition: 'transform 0.4s' }}>
                                 <BiSolidDownArrow onClick={menuToggle} />
                             </div>
-                            <div className="
-                                absolute 
-                                top-16 
-                                right-14 
-                                overflow-hidden 
-                                bg-white 
-                                text-black 
-                                rounded 
-                                shadow-md 
-                                transition-opacity 
-                                duration-400 
-                                ease-out"
-                                style={{ opacity: isMenuOpen ? 1 : 0}}
-                                >
-                                <ul className="text-center">
-                                    <Link href='/mypage'>
+                            {isMenuOpen &&
+                                <div className="
+                                    absolute 
+                                    top-16 
+                                    right-14 
+                                    overflow-hidden 
+                                    bg-white 
+                                    text-black 
+                                    rounded 
+                                    shadow-md"
+                                    >
+                                    <ul className="text-center">
+                                        <Link href='/mypage'>
+                                            <li className="
+                                                flex 
+                                                justify-center 
+                                                items-center 
+                                                gap-2
+                                                border-b 
+                                                p-4 
+                                                hover:bg-gray-300 
+                                                transition 
+                                                duration-300 
+                                                cursor-pointer">
+                                                <BiSolidUser size={20} />
+                                                Profile
+                                            </li>
+                                        </Link>
+                                        <Link href='/posts/create'>
+                                            <li className="
+                                                flex 
+                                                justify-center 
+                                                items-center 
+                                                gap-2
+                                                border-b 
+                                                p-4 
+                                                hover:bg-gray-300 
+                                                transition 
+                                                duration-300 
+                                                cursor-pointer">
+                                                <IoMdCreate size={20} />
+                                                Write
+                                            </li>
+                                        </Link>
+                                        <Link href='/nft/create'>
+                                            <li className="
+                                                flex 
+                                                justify-center 
+                                                items-center 
+                                                gap-2
+                                                border-b 
+                                                p-4 
+                                                hover:bg-gray-300 
+                                                transition 
+                                                duration-300 
+                                                cursor-pointer">
+                                                <IoCreateOutline size={20} />
+                                                NFT Create
+                                            </li>
+                                        </Link>
                                         <li className="
                                             flex 
                                             justify-center 
                                             items-center 
                                             gap-2
-                                            border-b 
                                             p-4 
                                             hover:bg-gray-300 
                                             transition 
                                             duration-300 
                                             cursor-pointer">
-                                            <BiSolidUser size={20} />
-                                            Profile
+                                            <FiLogOut size={20} />
+                                            LogOut
                                         </li>
-                                    </Link>
-                                    <Link href='/posts/create'>
-                                        <li className="
-                                            flex 
-                                            justify-center 
-                                            items-center 
-                                            gap-2
-                                            border-b 
-                                            p-4 
-                                            hover:bg-gray-300 
-                                            transition 
-                                            duration-300 
-                                            cursor-pointer">
-                                            <IoMdCreate size={20} />
-                                            Write
-                                        </li>
-                                    </Link>
-                                    <Link href='/nft/create'>
-                                        <li className="
-                                            flex 
-                                            justify-center 
-                                            items-center 
-                                            gap-2
-                                            border-b 
-                                            p-4 
-                                            hover:bg-gray-300 
-                                            transition 
-                                            duration-300 
-                                            cursor-pointer">
-                                            <IoCreateOutline size={20} />
-                                            NFT Create
-                                        </li>
-                                    </Link>
-                                    <li className="
-                                        flex 
-                                        justify-center 
-                                        items-center 
-                                        gap-2
-                                        p-4 
-                                        hover:bg-gray-300 
-                                        transition 
-                                        duration-300 
-                                        cursor-pointer">
-                                        <FiLogOut size={20} />
-                                        LogOut
-                                    </li>
-                                </ul>
-                            </div>
+                                    </ul>
+                                </div>
+                            }
                         </div>
                     ) : (
                         <>
