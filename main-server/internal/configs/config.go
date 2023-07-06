@@ -1,6 +1,10 @@
 package configs
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Postgres struct {
@@ -25,7 +29,7 @@ type Config struct {
 	} `mapstructure:"server"`
 }
 
-func NewConfig(filename string) (*Config, error) {
+func New(filename string) (*Config, error) {
 	viper.SetConfigFile(filename)
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -39,4 +43,18 @@ func NewConfig(filename string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func (c *Config) GetPostgresDSN() string {
+	return fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s TimeZone=%s connect_timeout=%s",
+		c.Postgres.Host,
+		c.Postgres.Port,
+		c.Postgres.User,
+		c.Postgres.Password,
+		c.Postgres.Database,
+		c.Postgres.SSLMode,
+		c.Postgres.TimeZone,
+		c.Postgres.Timeout,
+	)
 }

@@ -55,15 +55,23 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 	email, password := r.FormValue("email"), r.FormValue("password")
 
 	// validate email and password
-	if !utils.ValidateEmail(email) {
+	if valid, err := utils.ValidateEmail(email); err != nil || !valid {
+		if err != nil {
+			zap.L().Error("failed to validate email", zap.Error(err))
+		}
 		utils.ErrorJSON(w, errors.New("invalid email"), http.StatusBadRequest)
 		return
 	}
 
-	if !utils.ValidatePassword(password) {
-		utils.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
-		return
-	}
+	/*
+		if valid, err := utils.ValidatePassword(password); err != nil || !valid {
+			if err != nil {
+				zap.L().Error("failed to validate password", zap.Error(err))
+			}
+			utils.ErrorJSON(w, errors.New("invalid password"), http.StatusBadRequest)
+			return
+		}
+	*/
 
 	// create user
 	err := ur.userSvc.SignUp(r.Context(), email, password)
