@@ -22,13 +22,9 @@ type service struct {
 	baseURL string
 }
 
-func NewService(baseURL string, clients ...*http.Client) Service {
-	client := http.DefaultClient
-	if len(clients) > 0 || clients[0] != nil {
-		client = clients[0]
-	}
+func NewService(baseURL string) Service {
 	return &service{
-		client:  client,
+		client:  http.DefaultClient,
 		baseURL: baseURL,
 	}
 }
