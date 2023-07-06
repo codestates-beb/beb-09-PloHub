@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import Modal from 'react-modal';
 import { BsFillImageFill } from 'react-icons/bs';
-import { Header, Footer } from '../../Components/Reference';
+import { Header, Footer, ModalLayout } from '../../Components/Reference';
 
 const EXTENSIONS = [
     { type: 'gif' },
@@ -170,43 +170,7 @@ const create = () => {
                     </form>
                 </div>
             </div>
-            <Modal
-                isOpen={modalIsOpen}
-                className='w-[30%]'
-                style={{
-                    overlay: {
-                        display: 'flex',
-                        alignItems: 'center',   // vertical center
-                        justifyContent: 'center', // horizontal center
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                    },
-                    content: {
-                        position: 'relative',
-                        top: 'auto',
-                        left: 'auto',
-                        right: 'auto',
-                        bottom: 'auto',
-                        width: '30%',
-                        height: '25rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        color: 'black',
-                        backgroundColor: 'white',
-                        outline: 'none',
-                        borderRadius: '3rem',
-                    }
-                }}
-                contentLabel="File Size Warning"
-            >
-                <h2 className='font-bold text-3xl border-b border-black w-[90%] text-center p-5'>
-                    {modalTitle}
-                </h2>
-                <p className='h-full flex justify-center items-center'>
-                    {modalBody} 
-                </p>
-            </Modal>
+            <ModalLayout isOpen={modalIsOpen} modalTitle={modalTitle} modalBody={modalBody} />
             <Footer />
         </>
     )
