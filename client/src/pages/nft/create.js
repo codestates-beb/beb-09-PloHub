@@ -69,6 +69,8 @@ const create = () => {
 
     useEffect(() => { if (elements !== undefined) createAssets(); }, [elements]);
 
+    console.log(fileUrl);
+
     return (
         <>
             <Header />
