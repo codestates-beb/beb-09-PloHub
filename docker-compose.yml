@@ -36,8 +36,22 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./main-server/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.33
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=plohub
+    ports:
+      - 3306:3307
+    restart: always
+    volumes:
+      - mysql-data:/var/lib/mysql
+
 volumes:
   postgres-data:
+    driver: local
+  mysql-data:
     driver: local
   
 configs:
