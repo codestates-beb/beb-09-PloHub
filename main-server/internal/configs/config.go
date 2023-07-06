@@ -24,8 +24,9 @@ type Config struct {
 		RefreshTokenSecret string `mapstructure:"refresh_token_secret"`
 	} `mapstructure:"jwt"`
 	Server struct {
-		Port   string `mapstructure:"port"`
-		Domain string `mapstructure:"domain"`
+		Port                  string `mapstructure:"port"`
+		Domain                string `mapstructure:"domain"`
+		ContractServerBaseURL string `mapstructure:"contract_server_base_url"`
 	} `mapstructure:"server"`
 }
 

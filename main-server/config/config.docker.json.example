@@ -17,6 +17,7 @@
   },
   "server": {
     "port": "",
-    "domain": ""
+    "domain": "",
+    "contract_server_base_url": ""
   }
 }
