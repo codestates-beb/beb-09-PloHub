@@ -43,7 +43,7 @@ services:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=plohub
     ports:
-      - 3306:3307
+      - 3307:3306
     restart: always
     volumes:
       - mysql-data:/var/lib/mysql
