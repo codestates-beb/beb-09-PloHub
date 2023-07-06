@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/router';
 import { format } from 'date-fns'
 import DefaultLayout from '../Components/Layout/DefaultLayout'
 import Nav from '../Components/Nav/Nav';
@@ -10,6 +11,7 @@ export default function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]); // currentItems를 state로 변경해주세요.
 
+    const router = useRouter();
     const currentDate = new Date();
 
     const formatDate = format(currentDate, 'yyyy-MM-dd');
@@ -55,7 +57,7 @@ export default function Home() {
 
     return (
         <DefaultLayout>
-                <Nav />
+            <Nav />
             <div className='flex justify-center items-center w-full min-h-screen overflow-hidden'>
                 <div className={
                     `w-8/12 
@@ -93,26 +95,31 @@ export default function Home() {
                         </thead>
                         <tbody>
                             {currentItems.map((post) => (
-                            <tr key={post.id} className="hover:bg-gray-200 transition-all duration-300 cursor-pointer">
-                                <td className="border-b p-6">
-                                    <p className="text-xl font-semibold">{post.id}</p>
-                                </td>
-                                <td className="border-b p-6">
-                                    <p className="text-gray-600"> {post.category}</p>
-                                </td>
-                                <td className="border-b p-6">
-                                    <p className="text-gray-600"> {post.title}</p>
-                                </td>
-                                <td className="border-b p-6">
-                                    <p className="text-gray-600"> {post.content}</p>
-                                </td>
-                                <td className="border-b p-6">
-                                    <p className="text-gray-600"> {post.writer}</p>
-                                </td>
-                                <td className="border-b p-6">
-                                    <p className="text-gray-600"> {post.date}</p>
-                                </td>
-                            </tr>
+                                <tr className="
+                                    hover:bg-gray-200 
+                                    transition-all 
+                                    duration-300 
+                                    cursor-pointer"
+                                    onClick={() => router.push(`/posts/${post.id}`)}>
+                                    <td className="border-b p-6">
+                                        <p className="text-xl font-semibold">{post.id}</p>
+                                    </td>
+                                    <td className="border-b p-6">
+                                        <p className="text-gray-600"> {post.category}</p>
+                                    </td>
+                                    <td className="border-b p-6">
+                                        <p className="text-gray-600"> {post.title}</p>
+                                    </td>
+                                    <td className="border-b p-6">
+                                        <p className="text-gray-600"> {post.content}</p>
+                                    </td>
+                                    <td className="border-b p-6">
+                                        <p className="text-gray-600"> {post.writer}</p>
+                                    </td>
+                                    <td className="border-b p-6">
+                                        <p className="text-gray-600"> {post.date}</p>
+                                    </td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>

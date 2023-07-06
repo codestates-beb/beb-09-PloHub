@@ -74,8 +74,8 @@ const craete = () => {
                     <QuillWrapper modules={modules} formats={formats} theme="snow" placeholder={'내용을 입력해주세요.'} style={{ height: '100%'}}/>
                 </div>
                 <div className='w-full flex gap-3 justify-end mt-16'>
-                    <button className='w-[15%] border rounded-2xl p-3 bg-blue-main text-white hover:bg-blue-dark transition duration-300'>Cancel</button>
-                    <button className='w-[15%] border rounded-2xl p-3 bg-blue-dark text-white hover:bg-blue-main transition duration-300'>Create</button>
+                    <button className='w-[15%] border rounded-2xl p-3 bg-blue-main text-white hover:bg-blue-dark transition duration-300'>Edit</button>
+                    <button className='w-[15%] border rounded-2xl p-3 bg-blue-dark text-white hover:bg-blue-main transition duration-300'>List</button>
                 </div>
             </div>
             <Footer />

@@ -22,12 +22,13 @@ module.exports = {
                 skin: '#D8C4B6',
                 main: '#4F709C',
                 dark: '#213555'
-            }
+            },
         },
-    fontFamily: {
-        common: ['Pretendard','sans-serif'],
+        whitespace: ['responsive', 'hover'],
+        fontFamily: {
+            common: ['Pretendard','sans-serif'],
+            },
         },
-    },
     },
     plugins: [],
 }
