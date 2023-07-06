@@ -12,7 +12,7 @@ const createNFT = require('./routes/createNFT')
 
 app.use( //cors설정
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:4000"],
     methods: ["GET", "POST", "OPTIONS", "DELETE"],
     credentials: true
   })

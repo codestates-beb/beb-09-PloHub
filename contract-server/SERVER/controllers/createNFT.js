@@ -50,7 +50,7 @@ exports.createNFT = async(req,res) => {
         }else{
             //만약 많다면 NFT 발행 가능!
             //일단 토큰 URI를 얻어야함
-            //구매자는 토큰만 지불! 가스비는 서버 계정이 지불 === 서버 계정이 트랜잭션 서명???
+
             //createButton을 누르면 메타 마스크처럼 뭔가 창이 하나 떠서 확인버튼을 누를 수 있게끔하면 좋을거 같음
             const tokenSet = await contract.methods.setToken(varEnv.contractAddress).send({from: varEnv.senderAddress});
 
@@ -61,18 +61,17 @@ exports.createNFT = async(req,res) => {
                 console.log('토큰 등록 실패');
                 res.status(400).json({message: 'setToken is failed..'})
             }
+
             console.log(await contractERC20.methods.balanceOf(data.address).call());
             console.log(await contractERC20.methods.allowance(varEnv.senderAddress, data.address).call());
             //토큰 인출량 허용
             const tokenApprove = await contractERC20.methods.approve(data.address,20).send({from: varEnv.senderAddress});
-            console.log(`tokenApprove : ${tokenApprove}`);
 
             // 이미지 파일 pinata에 업로드
             const photoResult = await pinata.pinJSONToIPFS({ image_url: image});
             console.log('Photo uploaded successfully. IPFS Hash:', photoResult.IpfsHash)  ; 
 
             // NFT 메타 데이터 생성 및 Pinata에 업로드
-            // TODO : 이 객체 형식은 opensea에서만 유효한가??
             const nftMetadata = {
                 name: name,
                 description: description,
@@ -97,35 +96,32 @@ exports.createNFT = async(req,res) => {
             // 트랜잭션 서명을 위한 지갑 설정
             web3.eth.accounts.wallet.add(userWallet);
 
-
-            const mintResult = await contract.methods.mintNFT(data.address, tokenURI).send({from: userWallet.address, gas: 3000000}); //유저가 가스비 부담 및  트랜잭션 서명 
+            const mintResult = await contract.methods.mintNFT(data.address, tokenURI, varEnv.senderAddress).send({from: userWallet.address, gas: 3000000}); //유저가 가스비 부담 및  트랜잭션 서명 
 
             //지갑 연결 해제
             web3.eth.accounts.wallet.remove(userWallet);
 
-
-            console.log(mintResult);
             if (mintResult){ //민팅에 성공한다면
                 //일단 데이터 베이스에 nft정보들 업로드
                 const createNFTData = await models.nfts.create({
                     user_id: user_id,
                     owner_address: data.address,
-                    token_id: mintResult, //TODO : 이 값이 토큰 id를 반환하는지 확인 해야함!
+                    token_id: mintResult.events.Transfer.returnValues.tokenId,
                     token_uri: tokenURI,
                     price: 20,
                 })
                 //가스비 및 토큰 사용했기 때문에 데이터 베이스에 업로드 후 메인 서버로 변동 사항 반환
                 if (createNFTData){
                     console.log(createNFTData);
-                    const token_amount = data.token_amount-20;
-                    const eth_amount = web3.eth.utils.fromWei(await web3.eth.getBalance(data.address), 'wei');
+                    const token_amount = await contractERC20.methods.balanceOf(data.address).call();
+                    const eth_amount = web3.utils.fromWei(await web3.eth.getBalance(data.address), 'wei');
                     const updateWalletData = await models.Wallets.update({token_amount: token_amount, eth_amount: eth_amount}, {
                         where : {
                             user_id: data.user_id
                         }
                     });
                     console.log(updateWalletData);
-                    res.status(200).json({message: 'OK', token_id: mintResult, eth_amount: eth_amount, token_amount: token_amount}); 
+                    res.status(200).json({message: 'OK', token_id: mintResult.events.Transfer.returnValues.tokenId, eth_amount: eth_amount, token_amount: token_amount}); 
                 }else{
                     console.log('data upload is failed..');
                     res.status(400).json({message: 'data upload is failed..'});
@@ -141,4 +137,3 @@ exports.createNFT = async(req,res) => {
         res.status(500).json({ error : 'NFT 민팅에 실패했습니다.'});
     }
 }
-

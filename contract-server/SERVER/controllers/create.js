@@ -47,27 +47,33 @@ exports.createWallet = async (req, res) => {
 
     // // 응답할 eth_amount, token_amount
     const eth_amount = web3.utils.fromWei(await web3.eth.getBalance(walletAddress), 'wei');
-    console.log(eth_amount);
     const token_amount = 5;
 
-    // // ERC20 토큰 전송(회원가입 보상)
-    // const senderAddress = varEnv.senderAddress;
-    // const receiverAddress = walletAddress;
+    // ERC20 토큰 전송(회원가입 보상)
+    const senderAddress = varEnv.senderAddress;
+    const receiverAddress = walletAddress;
 
-    // const allowance = await contract.methods.allowance(senderAddress, receiverAddress).call();
-    // if (parseInt(allowance) < tokenAmount) {
-    //     const approveResult = await contract.methods.approve(receiverAddress, tokenAmount).send({ from: senderAddress });
-    //     if (!approveResult.status) {
-    //         console.log('토큰 전송 권한 부여 실패!');
-    //         return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
-    //     }
-    // }
+    const approveResult = await contract.methods.approve(receiverAddress, token_amount).send({ from: senderAddress });
+        if (!approveResult.status) {
+            console.log('토큰 전송 권한 부여 실패!');
+            return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
+        }
+    
 
-    // const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, tokenAmount).send({ from: senderAddress });
-    // if (!transferResult.status) {
-    //     console.log('토큰 전송 실패!');
-    //     return res.status(500).json({ error: 'error!!'});
-    // }
+    const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, token_amount).send({ from: senderAddress });
+    if (!transferResult.status) {
+        console.log('토큰 전송 실패!');
+        return res.status(500).json({ error: 'error!!'});
+    }
+    const createdWallet = await models.Wallets.create({
+      user_id: user_id,
+      address: walletAddress,
+      private_key: wallet.privateKey,
+      eth_amount: eth_amount,
+      token_amount: token_amount,
+    });
+    console.log(createdWallet)
+
     res.status(200).json({message: 'OK', address: walletAddress, token_amount: token_amount, eth_amount: eth_amount});
   }catch(error){
     console.log(error);
