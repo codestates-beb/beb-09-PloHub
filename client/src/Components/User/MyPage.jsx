@@ -67,6 +67,12 @@ const MyPage = () => {
         { id: 19, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
     ];
 
+    const nfts = [
+        { id: 1, file: logoBlack, title: 'Card Title1', content: '', price: '1'},
+        { id: 2, file: logoBlack, title: 'Card Title2', content: '', price: '2'},
+        { id: 3, file: logoBlack, title: 'Card Title3', content: '', price: '3'},
+    ]
+
     
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -407,56 +413,64 @@ const MyPage = () => {
                             판매중 NFT
                         </button>
                     </div>
-                    <div className=''>
-                        {activeTab === 'owned' ? (
-                            <div className="
-                                w-[15%] 
-                                bg-white 
-                                shadow-lg 
-                                border 
-                                rounded-3xl 
-                                transform 
-                                transition-transform 
-                                duration-300 
-                                hover:-translate-y-2 
-                                cursor-pointer">
-                                <div className='border-b-2'>
-                                    <Image src={logoBlack} width={'100%'} height={'100%'} />
-                                </div>
-                                <div className='p-6'>
-                                    <div className="mb-4">
-                                        <Link href='/nft/detail/:id'>
-                                            <h2 className="text-xl font-bold hover:underline">Card Title</h2>
-                                        </Link>
+                    <div className='flex items-center gap-10'>
+                        {nfts.map((item) => {
+                            return (
+                                activeTab === 'owned' ? (
+                                    <div className="
+                                        w-[15%] 
+                                        bg-white 
+                                        shadow-lg 
+                                        border 
+                                        rounded-3xl 
+                                        transform 
+                                        transition-transform 
+                                        duration-300 
+                                        hover:-translate-y-2 
+                                        cursor-pointer"
+                                        key={item.id}
+                                        onClick={() => router.push(`/nft/${item.id}`)}>
+                                        <div className='border-b-2'>
+                                            <Image src={item.file} width={'100%'} height={'100%'} />
+                                        </div>
+                                        <div className='p-6'>
+                                            <div className="mb-4">
+                                                <Link href='/nft/detail/:id'>
+                                                    <h2 className="text-xl font-bold hover:underline">{item.title}</h2>
+                                                </Link>
+                                            </div>
+                                            <p className="text-gray-700 font-semibold">{item.price} ETH</p>
+                                        </div>
                                     </div>
-                                    <p className="text-gray-700 font-semibold">1 ETH</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="
-                                w-[15%] 
-                                bg-white 
-                                shadow-lg 
-                                border 
-                                rounded-3xl 
-                                transform 
-                                transition-transform 
-                                duration-300 
-                                hover:-translate-y-2 
-                                cursor-pointer">
-                                <div className='border-b-2'>
-                                    <Image src={logoBlack} width={'100%'} height={'100%'} />
-                                </div>
-                                <div className='p-6'>
-                                    <div className="mb-4">
-                                        <Link href='/nft/detail/:id'>
-                                            <h2 className="text-xl font-bold hover:underline">Card Title2</h2>
-                                        </Link>
+                                ) : (
+                                    <div className="
+                                        w-[15%] 
+                                        bg-white 
+                                        shadow-lg 
+                                        border 
+                                        rounded-3xl 
+                                        transform 
+                                        transition-transform 
+                                        duration-300 
+                                        hover:-translate-y-2 
+                                        cursor-pointer"
+                                        key={item.id}
+                                        onClick={() => router.push(`/nft/${item.id}`)}>
+                                        <div className='border-b-2'>
+                                            <Image src={item.file} width={'100%'} height={'100%'} />
+                                        </div>
+                                        <div className='p-6'>
+                                            <div className="mb-4">
+                                                <Link href='/nft/detail/:id'>
+                                                    <h2 className="text-xl font-bold hover:underline">{item.title}</h2>
+                                                </Link>
+                                            </div>
+                                            <p className="text-gray-700 font-semibold">{item.price} ETH</p>
+                                        </div>
                                     </div>
-                                    <p className="text-gray-700 font-semibold">2 ETH</p>
-                                </div>
-                            </div>
-                        )}
+                                )
+                            )
+                        })}
                     </div>
                 </div>
             </div>
