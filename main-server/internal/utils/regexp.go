@@ -5,9 +5,12 @@ import (
 	"regexp"
 )
 
-const (
-	EmailRegex = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+var (
+	ErrInvalidEmail    = errors.New("invalid email")
+	ErrInvalidPassword = errors.New("invalid password")
 )
+
+const EmailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
 func ValidateEmail(email string) error {
 	valid, err := regexp.MatchString(EmailRegex, email)
@@ -16,7 +19,7 @@ func ValidateEmail(email string) error {
 	}
 
 	if !valid {
-		return errors.New("invalid email")
+		return ErrInvalidEmail
 	}
 
 	return nil
@@ -33,7 +36,7 @@ func ValidatePassword(password string) error {
 	}
 
 	if !valid {
-		return errors.New("password must contain at least one lowercase letter")
+		return errors.Join(ErrInvalidPassword, errors.New("password must contain at least one lowercase letter"))
 	}
 
 	valid, err = regexp.MatchString(`([A-Z])+`, password)
@@ -42,7 +45,7 @@ func ValidatePassword(password string) error {
 	}
 
 	if !valid {
-		return errors.New("password must contain at least one uppercase letter")
+		return errors.Join(ErrInvalidPassword, errors.New("password must contain at least one uppercase letter"))
 	}
 
 	valid, err = regexp.MatchString("([!@#$%^&*.?-])+", password)
@@ -51,7 +54,7 @@ func ValidatePassword(password string) error {
 	}
 
 	if !valid {
-		return errors.New("password must contain at least one special character")
+		return errors.Join(ErrInvalidPassword, errors.New("password must contain at least one special character"))
 	}
 
 	return nil
