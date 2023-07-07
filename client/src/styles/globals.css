@@ -30,5 +30,29 @@ select {
   background-repeat: no-repeat;
   background-position: right 6px center;
   background-size: 12px;
+}
 
+.slick-track {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.slick-prev::before,
+.slick-next::before {
+  color: black !important;
+}
+
+.slick-list {
+  width: 100%;
+}
+
+.slick-slide {
+  width: 100%;
+
+}
+
+.slick-slide > div {
+  position: relative;
+  height: 300px;
+  margin: 0 20px;
 }
