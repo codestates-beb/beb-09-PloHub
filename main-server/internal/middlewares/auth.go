@@ -2,8 +2,10 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"main-server/internal/models"
 	"main-server/internal/services/auth"
+	"main-server/internal/utils"
 	"net/http"
 	"strings"
 )
@@ -20,18 +22,18 @@ func AccessTokenRequired(authSrv auth.Service) func(next http.Handler) http.Hand
 			authorization := r.Header.Get("Authorization")
 
 			if authorization == "" {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				utils.ErrorJSON(w, errors.New("authorization header is missing"), http.StatusUnauthorized)
 				return
 			}
 
 			authParts := strings.Split(authorization, " ")
 			if len(authParts) != 2 {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				utils.ErrorJSON(w, errors.New("authorization header is invalid"), http.StatusUnauthorized)
 				return
 			}
 
 			if authParts[0] != "Bearer" {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				utils.ErrorJSON(w, errors.New("authorization header is invalid"), http.StatusUnauthorized)
 				return
 			}
 
@@ -39,12 +41,11 @@ func AccessTokenRequired(authSrv auth.Service) func(next http.Handler) http.Hand
 
 			user, err := authSrv.VerifyToken(token, models.TokenRoleAccess)
 			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				utils.ErrorJSON(w, err, http.StatusUnauthorized)
 				return
 			}
 
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, UserIDKey, user.ID)
+			ctx := context.WithValue(r.Context(), UserIDKey, user.ID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
