@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { format } from 'date-fns'
 import DefaultLayout from '../Components/Layout/DefaultLayout'
 import Nav from '../Components/Nav/Nav';
+import { ModalLayout } from '../Components/Reference';
 
 
 
@@ -13,7 +14,10 @@ export default function Home() {
     console.log(user)
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentItems, setCurrentItems] = useState([]); // currentItems를 state로 변경해주세요.
+    const [currentItems, setCurrentItems] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
 
     const router = useRouter();
     const currentDate = new Date();
@@ -34,14 +38,6 @@ export default function Home() {
         { id: 10, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
         { id: 11, category: 'all', title: 'Post 11', content: 'Author 11', writer: 'test', date: formatDate },
         { id: 12, category: 'all', title: 'Post 12', content: 'Author 12', writer: 'test', date: formatDate },
-        { id: 13, category: 'all', title: 'Post 13', content: 'Author 13', writer: 'test', date: formatDate },
-        { id: 14, category: 'all', title: 'Post 14', content: 'Author 14', writer: 'test', date: formatDate },
-        { id: 15, category: 'all', title: 'Post 15', content: 'Author 15', writer: 'test', date: formatDate },
-        { id: 16, category: 'all', title: 'Post 16', content: 'Author 16', writer: 'test', date: formatDate },
-        { id: 17, category: 'all', title: 'Post 17', content: 'Author 17', writer: 'test', date: formatDate },
-        { id: 18, category: 'all', title: 'Post 18', content: 'Author 18', writer: 'test', date: formatDate },
-        { id: 19, category: 'all', title: 'Post 19', content: 'Author 19', writer: 'test', date: formatDate },
-        { id: 20, category: 'all', title: 'Post 20', content: 'Author 20', writer: 'test', date: formatDate },
     ];
 
     const handlePageChange = (pageNumber) => {
@@ -59,13 +55,27 @@ export default function Home() {
     // Calculate total pages
     const totalPages = Math.ceil(posts.length / postsPerPage);
 
+    const loginCheck = (e) => {
+        
+        if (!user.account) {
+            e.preventDefault();
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+            
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
+
     return (
         <DefaultLayout>
             <Nav />
             <div className='flex justify-center items-center w-full min-h-screen overflow-hidden'>
                 <div className={
                     `w-8/12 
-                    h-full
+                    h-[70rem]
                     `
                 }>
                     <div className='flex justify-end'>
@@ -84,15 +94,7 @@ export default function Home() {
                             text-md
                             text-center' 
                             href='/posts/create'>
-                            <button type="button"onClick={(e) => {
-                                // user가 없는 경우 (로그인하지 않은 상태)
-                                if (user.account.length === 0) {
-                                    // 클릭 이벤트를 취소하고
-                                    e.preventDefault();
-                                    // 알림을 표시합니다
-                                    alert("로그인이 필요합니다.");
-                                }
-                            }}>
+                            <button type="button" onClick={loginCheck}>
                                 글쓰기
                             </button>
                         </Link>
@@ -115,6 +117,7 @@ export default function Home() {
                                     transition-all 
                                     duration-300 
                                     cursor-pointer"
+                                    key={post.id}
                                     onClick={() => router.push(`/posts/${post.id}`)}>
                                     <td className="border-b p-6">
                                         <p className="text-xl font-semibold">{post.id}</p>
@@ -167,7 +170,7 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </DefaultLayout>
     )
 }

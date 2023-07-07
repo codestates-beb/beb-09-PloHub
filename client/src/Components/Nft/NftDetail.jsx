@@ -1,8 +1,32 @@
-import React from 'react';
-import { ploHub, dummy1, dummy2, dummy3 } from '../Reference'
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
+import { ModalLayout } from '../Reference';
+import { ploHub, dummy1, dummy2, dummy3 } from '../Reference'
 
 const NftDetail = () => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
+
+    const user = useSelector((state) => state.user);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!user.account) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.push('/users/signin');
+            }, 3000);
+        }
+    }, [user]);
+
     return (
         <>
             <div className='w-[50%] min-h-screen mx-auto mt-20 flex flex-col gap-20'>
@@ -50,6 +74,7 @@ const NftDetail = () => {
                     </div>
                 </div>
             </div>
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
 

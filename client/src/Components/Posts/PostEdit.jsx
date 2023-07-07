@@ -1,10 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic'
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
+import { ModalLayout } from '../Reference';
 import 'react-quill/dist/quill.snow.css';
 
 const PostEdit = () => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
+
+    const user = useSelector((state) => state.user);
     const router = useRouter();
+
+    useEffect(() => {
+        if (!user.account) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.push('/users/signin');
+            }, 3000);
+        }
+    }, [user]);
 
     const QuillWrapper = dynamic(() => import('react-quill'), {
         ssr: false,
@@ -30,6 +51,7 @@ const PostEdit = () => {
             matchVisual: false,
         },
     }
+
     /*
     * Quill editor formats
     * See https://quilljs.com/docs/formats/
@@ -100,6 +122,7 @@ const PostEdit = () => {
                     </button>
                 </div>
             </div>
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     );
 };
