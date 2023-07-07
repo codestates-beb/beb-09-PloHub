@@ -1,19 +1,23 @@
 import { createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import {
-    SET_ACCOUNT,
+    SET_EMAIL,
+    SET_ADDRESS,
     SET_NICKNAME,
     SET_LEVEL,
     SET_TOKEN_BALANCE,
+    SET_DAILY_TOKEN_BALANCE,
     SET_ETH_BALANCE
 } from './ActionTypes';
 
 const initialState = {
     user: {
-        account: '',
+        email: '',
+        address: '',
         nickname: '',
         level: '',
         tokenBalance: '',
+        dailyTokenBalance: '',
         ethBalance: '',
     },
 };
@@ -48,12 +52,20 @@ export const setAccount = (account) => ({
  */
 export const userReducer = (state = initialState, action) => {
     switch (action.type) {
-        case SET_ACCOUNT:
+        case SET_EMAIL:
             return {
                 ...state,
                 user: {
                     ...state.user,
-                    account: action.payload
+                    email: action.payload
+                }
+            }
+        case SET_ADDRESS:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    address: action.payload
                 }
             }
         case SET_NICKNAME:
@@ -78,6 +90,14 @@ export const userReducer = (state = initialState, action) => {
                 user: {
                     ...state.user,
                     tokenBalance: action.payload
+                }
+            }
+        case SET_DAILY_TOKEN_BALANCE:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    dailyTokenBalance: action.payload
                 }
             }
         case SET_ETH_BALANCE:
