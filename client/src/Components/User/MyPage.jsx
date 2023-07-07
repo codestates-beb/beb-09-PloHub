@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { SET_NICKNAME } from '../Redux/ActionTypes';
 import { useRouter } from 'next/router';
-import Modal from 'react-modal';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
@@ -10,9 +11,12 @@ import { logoBlack, ploHub, ModalLayout } from '../Reference'
 const MyPage = () => {
     const router = useRouter();
     const currentDate = new Date();
+    const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
 
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState('Test');
+    const [errorMessage, setErrorMessage] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]);
     const [activeTab, setActiveTab] = useState('owned');
@@ -35,7 +39,22 @@ const MyPage = () => {
 
     const nicknameSave = () => {
         setIsEditing(false);
+        dispatch({ type: SET_NICKNAME, payload: nickname });
     };
+
+    const validateNickname = () => {
+        if (nickname.length < 2) {
+            setErrorMessage('닉네임은 최소 2자 이상이어야 합니다.');
+        } else if (nickname.length > 8) {
+            setErrorMessage('닉네임은 최대 8자 입니다.');
+        } else {
+            setErrorMessage('');
+        }
+    };
+
+    useEffect(() => {
+        validateNickname();
+    }, [nickname])
 
     const formatDate = format(currentDate, 'yyyy-MM-dd');
 
@@ -255,21 +274,24 @@ const MyPage = () => {
     return (
         <>
             <div className='flex flex-col justify-center gap-6 mx-auto w-[90%]'>
-                <div className='w-full border-b rounded-lg border-gray-300 mx-auto my-6'>
+                <div className='w-full border-b border-gray-300 mx-auto my-6'>
                     <div className='grid grid-cols-3 items-center py-3 px-5 text-center'>
                         <div className='flex gap-4 font-bold text-2xl pl-5'>
                         {isEditing ? (
-                            <input
-                            type="text"
-                            value={nickname}
-                            onChange={nicknameChange}
-                            className="border rounded-xl px-2 py-1 w-32"
-                            />
+                            <div className='flex items-center justify-start gap-3'>
+                                <input
+                                type="text"
+                                value={nickname}
+                                onChange={nicknameChange}
+                                className="border rounded-xl px-2 py-1 w-32"
+                                />
+                                <p className='font-normal text-xs text-red-500'>{errorMessage}</p>
+                            </div>
                         ) : (
                             <>
-                            <p>{nickname}</p>
-                            <p>|</p>
-                            <p>Lv.2</p>
+                                <p>{nickname}</p>
+                                <p>|</p>
+                                <p>Lv.2</p>
                             </>
                         )}
                         </div>
@@ -290,6 +312,7 @@ const MyPage = () => {
                                     duration-300' 
                                     type="button"
                                     onClick={nicknameSave}
+                                    disabled={errorMessage !== ''}
                                     >닉네임 저장</button>
                             ) : (
                                 <button className='
