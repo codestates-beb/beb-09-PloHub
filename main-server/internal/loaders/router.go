@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"main-server/internal/middlewares"
 	"main-server/internal/routers"
 	"net/http"
 
@@ -15,6 +16,7 @@ func NewRouter(routers ...routers.Router) http.Handler {
 	mux.Use(middleware.RealIP)
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
+	mux.Use(middlewares.CORS())
 
 	mux.Get("/api/v1/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
