@@ -57,7 +57,7 @@ export default function Home() {
 
     const loginCheck = (e) => {
         
-        if (!user.account) {
+        if (!user.email) {
             e.preventDefault();
             setIsModalOpen(true);
             setModalTitle('Error');
