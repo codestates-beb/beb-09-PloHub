@@ -29,8 +29,13 @@ const PostDetail = () => {
     return (
         <>
             <div className='w-[90%] min-h-screen mx-auto mt-20 flex flex-col gap-12'>
-                <div className='border-b-2 border-black w-full'>
+                <div className='flex justify-between border-b-2 border-black w-full'>
                     <p className='font-bold text-4xl mb-5'>All</p>
+                    {isAuthor && 
+                        <button className='w-28 h-12 rounded-xl bg-red-400 hover:bg-red-500 text-white text-white transition duration-300'>
+                            Delete
+                        </button>
+                    }
                 </div>
                 <div className='w-full flex justify-between border-b'>
                     <p className='mb-5 font-semibold text-xl'>게시글 제목</p>
