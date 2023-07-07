@@ -7,6 +7,8 @@ const { connectToDatabase } = require("./loaders/connectDB");
 const createWallet = require("./routes/create");
 const reward = require("./routes/reward");
 const createNFT = require("./routes/createNFT");
+const userNFT = require("./routes/userNFT");
+const transferToken = require("./routes/transferToken");
 
 // const mainRouter = require('./router/main');
 
@@ -23,6 +25,8 @@ app.use(express.json()); //json으로 이루어진 Request Body를 받는다.
 app.use("/api/v1/wallets", createWallet);
 app.use("/api/v1/wallets", reward);
 app.use("/api/v1/nft", createNFT);
+app.use("/api/v1/nft", userNFT);
+app.use("/api/v1/wallets",transferToken);
 
 connectToDatabase;
 
