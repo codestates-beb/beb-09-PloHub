@@ -3,9 +3,12 @@ services:
   ganache:
     container_name: ganache
     image: trufflesuite/ganache:latest
+    command: --database.dbPath=/data
     ports:
       - 8545:8545
     restart: always
+    volumes:
+      - ganache-data:/data
 
   main-server:
     container_name: main-server
@@ -49,6 +52,8 @@ services:
       - mysql-data:/var/lib/mysql
 
 volumes:
+  ganache-data:
+    driver: local
   postgres-data:
     driver: local
   mysql-data:
