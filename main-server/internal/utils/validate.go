@@ -2,7 +2,9 @@ package utils
 
 import (
 	"errors"
+	"net/mail"
 	"regexp"
+	"unicode/utf8"
 )
 
 var (
@@ -19,6 +21,11 @@ func ValidateEmail(email string) error {
 	}
 
 	if !valid {
+		return ErrInvalidEmail
+	}
+
+	_, err = mail.ParseAddress(email)
+	if err != nil {
 		return ErrInvalidEmail
 	}
 
@@ -57,5 +64,13 @@ func ValidatePassword(password string) error {
 		return errors.Join(ErrInvalidPassword, errors.New("password must contain at least one special character"))
 	}
 
+	return nil
+}
+
+func ValidateNickname(nickname string) error {
+	length := utf8.RuneCountInString(nickname)
+	if length < 2 || length > 8 {
+		return errors.New("nickname must be between 2 and 8 characters long")
+	}
 	return nil
 }

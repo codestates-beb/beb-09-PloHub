@@ -282,7 +282,12 @@ func (ur *userRouter) changeNickname(w http.ResponseWriter, r *http.Request) {
 	// get nickname from form data
 	nickname := r.FormValue("nickname")
 
-	// TODO: validate nickname
+	// validate nickname
+	if err := utils.ValidateNickname(nickname); err != nil {
+		zap.L().Error("failed to validate nickname", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
 
 	// change nickname
 	err := ur.userSvc.ChangeNickname(r.Context(), userID, nickname)
