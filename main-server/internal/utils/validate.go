@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"net/mail"
 	"regexp"
 	"unicode/utf8"
 )
@@ -20,6 +21,11 @@ func ValidateEmail(email string) error {
 	}
 
 	if !valid {
+		return ErrInvalidEmail
+	}
+
+	_, err = mail.ParseAddress(email)
+	if err != nil {
 		return ErrInvalidEmail
 	}
 
