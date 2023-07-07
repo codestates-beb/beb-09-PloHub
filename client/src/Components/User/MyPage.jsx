@@ -4,6 +4,7 @@ import { SET_NICKNAME } from '../Redux/ActionTypes';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
+import axios from 'axios';
 import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
 import { format } from 'date-fns';
 import { logoBlack, ploHub, ModalLayout } from '../Reference'
@@ -15,7 +16,7 @@ const MyPage = () => {
     const dispatch = useDispatch();
 
     const [isEditing, setIsEditing] = useState(false);
-    const [nickname, setNickname] = useState('Test');
+    const [nickname, setNickname] = useState(user.nickname);
     const [errorMessage, setErrorMessage] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]);
@@ -37,9 +38,23 @@ const MyPage = () => {
         setIsEditing(true);
     };
 
-    const nicknameSave = () => {
-        setIsEditing(false);
-        dispatch({ type: SET_NICKNAME, payload: nickname });
+    const changeNickname = async () => {
+        const formData = new FormData();
+        const accessToken = localStorage.getItem('access_token');
+
+        formData.append('nickname', nickname);
+
+        try {
+            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            });
+            console.log(response);
+            // dispatch({ type: SET_NICKNAME, payload: nickname });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const validateNickname = () => {
@@ -104,13 +119,45 @@ const MyPage = () => {
     const totalPages = Math.ceil(posts.length / postsPerPage);
 
     const myPageInfo = async () => {
+        const accessToken = localStorage.getItem('access_token');
+        console.log(accessToken);
+        
         try {
-            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', );
-            console.log(response);
+            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            });
+            if (response.status === 200) {
+                // 서버로부터 받은 사용자 정보
+                // const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data;
+                console.log(response);
+
+                // console.log('email: ' + email);
+                // console.log('address: ' + address);
+                // console.log('nickname: ' + nickname);
+                // console.log('level: ' + level);
+                // console.log('token: ' + token_amount);
+                // console.log('daily: ' + daily_token);
+                // console.log('eth_amount: ' + eth_amount);
+
+                // dispatch({ type: SET_EMAIL, payload: email });
+                // dispatch({ type: SET_ADDRESS, payload: address });
+                // dispatch({ type: SET_NICKNAME, payload: nickname });
+                // dispatch({ type: SET_LEVEL, payload: level });
+                // dispatch({ type: SET_TOKEN_BALANCE, payload: token_amount });
+                // dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
+                // dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
+            }
         } catch (error) {
-            console.log(error);
+            console.error("Failed to fetch user info: ", error);
         }
     }
+
+
+    useEffect(() => {
+        myPageInfo();
+    }, []);
 
     const tokenSwapLayoutHtml = () => {
         const handleTokenAmountChange = (e) => {
@@ -289,15 +336,15 @@ const MyPage = () => {
                             </div>
                         ) : (
                             <>
-                                <p>{nickname}</p>
+                                <p>{user.nickname.length >= 8 ? user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5) : user.nickname}</p>
                                 <p>|</p>
-                                <p>Lv.2</p>
+                                <p>Lv. {user.level}</p>
                             </>
                         )}
                         </div>
-                        <div className='flex gap-12 justify-center font-bold text-2xl'>
-                            <p>My Token : 15 PH</p>
-                            <p>My ETH : 0.1 ETH</p>
+                        <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
+                            <p>My Token : {user.tokenBalance} PH</p>
+                            <p>My ETH : {Number(user.ethBalance).toLocaleString()} ETH</p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
                             {isEditing ? (
@@ -311,7 +358,7 @@ const MyPage = () => {
                                     transition 
                                     duration-300' 
                                     type="button"
-                                    onClick={nicknameSave}
+                                    onClick={changeNickname}
                                     disabled={errorMessage !== ''}
                                     >닉네임 저장</button>
                             ) : (

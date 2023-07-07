@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 import { FaCircleUser } from 'react-icons/fa6';
 import { BiSolidDownArrow, BiSolidUser } from 'react-icons/bi';
 import { IoMdCreate } from 'react-icons/io';
@@ -9,9 +10,17 @@ import { IoCreateOutline } from 'react-icons/io5';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { AiOutlineUserAdd } from 'react-icons/ai';
 import { logoWhite } from '../Reference';
+import { SET_EMAIL,
+    SET_ADDRESS,
+    SET_NICKNAME, 
+    SET_LEVEL, 
+    SET_TOKEN_BALANCE, 
+    SET_DAILY_TOKEN_BALANCE,
+    SET_ETH_BALANCE } from '../Redux/ActionTypes';
 
 const Header = () => {
     const { user } = useSelector((state) => state);
+    const dispatch = useDispatch();
 
     const [isMenuOpen, setMenuOpen] = useState(false);
     const [arrowRotation, setArrowRotation] = useState(0);
@@ -20,6 +29,48 @@ const Header = () => {
         setMenuOpen(!isMenuOpen);
         setArrowRotation(arrowRotation + 180);
     }
+    
+    const userInfo = async () => {
+        const accessToken = localStorage.getItem('access_token');
+        console.log(accessToken);
+        
+        try {
+            let response = await axios.get('http://localhost:4000/api/v1/users/myinfo', {
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            });
+            if (response.status === 200) {
+                // 서버로부터 받은 사용자 정보
+                const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data.user_info;
+                console.log(response.data);
+
+                console.log('email: ' + email);
+                console.log('address: ' + address);
+                console.log('nickname: ' + nickname);
+                console.log('level: ' + level);
+                console.log('token: ' + token_amount);
+                console.log('daily: ' + daily_token);
+                console.log('eth_amount: ' + eth_amount);
+
+                dispatch({ type: SET_EMAIL, payload: email });
+                dispatch({ type: SET_ADDRESS, payload: address });
+                dispatch({ type: SET_NICKNAME, payload: nickname });
+                dispatch({ type: SET_LEVEL, payload: level });
+                dispatch({ type: SET_TOKEN_BALANCE, payload: token_amount });
+                dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
+                dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
+            }
+        } catch (error) {
+            console.error("Failed to fetch user info: ", error);
+        }
+    }
+
+    useEffect(() => {
+        userInfo();
+    }, [])
+
+    
     return (
         <>
             <div className="h-24 bg-blue-dark text-white py-4 px-6 grid grid-cols-2 content-center overflow-hidden">
@@ -29,7 +80,7 @@ const Header = () => {
 					</Link>
                 </div>
                 <div className='flex items-center gap-5 col-end-5 px-8'>
-                    {user.account ? (
+                    {user.email ? (
                         <div className='flex items-center gap-5 font-semibold'>
                             <div>
                                 <FaCircleUser size={30} />
@@ -38,7 +89,7 @@ const Header = () => {
                                 Lv. {user.level}
                             </div>
                             <div>
-                                {user.nickname}
+                                {user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5)}
                             </div>
                             <div className='relative cursor-pointer' style={{ transform: `rotate(${arrowRotation}deg)`, transition: 'transform 0.4s' }}>
                                 <BiSolidDownArrow onClick={menuToggle} />

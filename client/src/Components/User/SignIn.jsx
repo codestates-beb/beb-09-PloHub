@@ -41,7 +41,8 @@ const SignIn = () => {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json'
-                }
+                },
+                withCredentials: true // Add this line
             });
             console.log(response);
             if (response.status === 200) {
@@ -50,6 +51,7 @@ const SignIn = () => {
                 setModalBody('로그인 되었습니다.');
 
                 const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data.user_info;
+                const { access_token } = response.data;
 
                 console.log('email: ' + email);
                 console.log('address: ' + address);
@@ -58,6 +60,7 @@ const SignIn = () => {
                 console.log('token: ' + token_amount);
                 console.log('daily: ' + daily_token);
                 console.log('eth_amount: ' + eth_amount);
+                console.log('access_token: ' + access_token);
 
                 dispatch({ type: SET_EMAIL, payload: email });
                 dispatch({ type: SET_ADDRESS, payload: address });
@@ -66,11 +69,12 @@ const SignIn = () => {
                 dispatch({ type: SET_TOKEN_BALANCE, payload: token_amount });
                 dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
                 dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
-                
 
+                localStorage.setItem('access_token', access_token);
+                
                 setTimeout(() => {
                     setIsModalOpen(false);
-                    router.push('/users/mypage');
+                    router.push('/');
                 }, 3000);
             }
         } catch (error) {
