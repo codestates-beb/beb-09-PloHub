@@ -8,6 +8,7 @@ import (
 	"main-server/internal/models"
 	"main-server/internal/services/wallet"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -134,11 +135,23 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 				return err
 			}
 
-			// TODO: update user level based on token amount
+			level := user.Level
+
+			// if level is 1, check if token amount is greater than 40 which is the requirement for level 2
+			if level == 1 {
+				tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 64)
+				if err != nil {
+					return err
+				}
+
+				if tokenAmount >= 40 {
+					level = 2
+				}
+			}
 
 			err = q.UpdateUser(ctx, plohub.UpdateUserParams{
 				Nickname:    user.Nickname,
-				Level:       user.Level,
+				Level:       level,
 				Address:     user.Address,
 				EthAmount:   user.EthAmount,
 				TokenAmount: reward.TokenAmount,
