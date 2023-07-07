@@ -56,6 +56,10 @@ func (s *service) CreateWallet(ctx context.Context, userID int32) (*models.Walle
 		_ = resp.Body.Close()
 	}()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error creating wallet: %s", resp.Status)
+	}
+
 	var walletResp models.CreateWalletResponse
 
 	err = json.NewDecoder(resp.Body).Decode(&walletResp)
@@ -115,6 +119,10 @@ func (s *service) IssueReward(ctx context.Context, userID int32, rewardType mode
 	defer func() {
 		_ = resp.Body.Close()
 	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error issuing reward: %s", resp.Status)
+	}
 
 	var rewardResp models.IssueRewardResponse
 
