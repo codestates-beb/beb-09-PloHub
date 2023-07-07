@@ -20,7 +20,7 @@ const MyPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]);
     const [activeTab, setActiveTab] = useState('owned');
-    const [modalOpen, setModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
 
@@ -261,11 +261,11 @@ const MyPage = () => {
     const openTokenSendModal = (e) => {
         const btnType = e.target.innerText;
         if (btnType === '토큰 교환') {
-            setModalOpen(true);
+            setIsModalOpen(true);
             setModalTitle('토큰 교환');
             setModalBody(tokenSwapLayoutHtml);
         } else {
-            setModalOpen(true);
+            setIsModalOpen(true);
             setModalTitle('토큰 전송');
             setModalBody(tokenSendLayoutHtml);
         }
@@ -501,7 +501,7 @@ const MyPage = () => {
                     </div>
                 </div>
             </div>
-            <ModalLayout isOpen={modalOpen} modalTitle={modalTitle} modalBody={modalBody} />
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
 }
