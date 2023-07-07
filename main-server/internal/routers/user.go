@@ -257,10 +257,12 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	err = ur.userSvc.EmailExists(r.Context(), req.Email)
 	if err != nil {
 		zap.L().Error("failed to check if email exists", zap.Error(err))
+		statusCode := http.StatusBadRequest
 		if err != user.ErrEmailAlreadyExists {
 			err = errors.New("unable to check if email exists")
+			statusCode = http.StatusInternalServerError
 		}
-		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		utils.ErrorJSON(w, err, statusCode)
 		return
 	}
 
