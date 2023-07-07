@@ -69,7 +69,7 @@ module.exports = {
       port: 7545, // Standard Ethereum port (default: none)
       network_id: "5777", // Any network (default: none)
     },
-    container: {
+    docker: {
       host: "localhost",
       port: 8545,
       network_id: "*",
