@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Modal from 'react-modal';
 import Image from 'next/image';
 import Link from 'next/link';
-import { format } from 'date-fns'
-import { Header, Footer, logoBlack } from '../Components/Reference'
+import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
+import { format } from 'date-fns';
+import { logoBlack, ploHub, ModalLayout } from '../Reference'
 
-const mypage = () => {
-
+const MyPage = () => {
+    const router = useRouter();
     const currentDate = new Date();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -13,23 +16,30 @@ const mypage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]);
     const [activeTab, setActiveTab] = useState('owned');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
+
+    useEffect(() => {
+        Modal.setAppElement('#__next');  // Next.js의 기본 root id는 #__next 입니다.
+    }, []);
+
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };
 
 
-    const handleNicknameChange = (e) => {
+    const nicknameChange = (e) => {
         setNickname(e.target.value);
     };
 
-    const handleEditButtonClick = () => {
+    const nicknameEdit = () => {
         setIsEditing(true);
     };
 
-    const handleSaveButtonClick = () => {
+    const nicknameSave = () => {
         setIsEditing(false);
-        // Perform save logic here
     };
 
     const formatDate = format(currentDate, 'yyyy-MM-dd');
@@ -73,11 +83,167 @@ const mypage = () => {
     // Calculate total pages
     const totalPages = Math.ceil(posts.length / postsPerPage);
 
+    const tokenSwapLayoutHtml = () => {
+        const handleTokenAmountChange = (e) => {
+            // ERC-20 수량 변경 시 처리 로직
+        };
+    
+        const handleEthAmountChange = (e) => {
+            // ETH 수량 변경 시 처리 로직
+        };
+    
+        return (
+            <>
+                <form className='
+                    flex 
+                    flex-col 
+                    justify-center 
+                    items-center 
+                    gap-6
+                    w-[70%]'>
+                    <div className='w-full flex items-center gap-3'>
+                        <Image src={ploHub} width={40} height={40} alt='PloHub' />
+                        <p className='font-bold text-xl'>PH</p>
+                        <input className='
+                            border 
+                            rounded-lg 
+                            w-full
+                            p-2'
+                            type="number" 
+                            onChange={handleTokenAmountChange} />
+                    </div>
+                    <FaArrowCircleDown size={50}  className="text-gray-500" />
+                    <div className='w-full flex items-center gap-3'>
+                        <FaEthereum size={30} />
+                        <p className='font-bold text-xl'>ETH</p>
+                        <input className='
+                            border 
+                            rounded-lg 
+                            w-full
+                            p-2'
+                            type="number" 
+                            onChange={handleEthAmountChange} />
+                    </div>
+                    <div className='w-[60%] flex justify-center items-center gap-3'>
+                        <button className='
+                            w-[6rem]
+                            border 
+                            rounded-xl 
+                            p-3 
+                            text-white 
+                            bg-gray-600 
+                            hover:bg-gray-700 
+                            transition 
+                            duration-300' 
+                            type='button'
+                            onClick={() => setModalOpen(false)}>
+                            취소
+                        </button>
+                        <button className='
+                            w-[6rem]
+                            border 
+                            rounded-xl 
+                            p-3 
+                            text-white 
+                            bg-blue-main
+                            hover:bg-blue-dark 
+                            transition 
+                            duration-300' 
+                            type='submit'>
+                            전송
+                        </button>
+                    </div>
+                </form>
+    
+            </>
+        );
+    }
 
+    const tokenSendLayoutHtml = () => {
+    
+        return (
+            <>
+                <form className='
+                    flex 
+                    flex-col 
+                    justify-center 
+                    items-center 
+                    gap-6
+                    w-[90%]'>
+                    <div className='w-full flex flex-col justify-center gap-3'>
+                        <div className='flex items-center gap-3'>
+                            <FaAddressCard size={35} className='text-gray-600' />
+                            <p className='font-bold text-xl'>지갑 주소</p>
+                        </div>
+                        <input className='
+                            border 
+                            rounded-lg 
+                            w-full
+                            p-1'
+                            type="text" />
+                    </div>
+                    <div className='w-full flex flex-col justify-center gap-3'>
+                        <div className='flex items-center gap-3'>
+                            <Image src={ploHub} width={35} height={35} alt='PloHub' />
+                            <p className='font-bold text-xl'>PH</p>
+                        </div>
+                        <input className='
+                            border 
+                            rounded-lg 
+                            w-full
+                            p-1'
+                            type="number" />
+                    </div>
+                    <div className='w-[60%] flex justify-center items-center gap-3'>
+                        <button className='
+                            w-[6rem]
+                            border 
+                            rounded-xl 
+                            p-3 
+                            text-white 
+                            bg-gray-600 
+                            hover:bg-gray-700 
+                            transition 
+                            duration-300' 
+                            type='button'
+                            onClick={() => setModalOpen(false)}>
+                            취소
+                        </button>
+                        <button className='
+                            w-[6rem]
+                            border 
+                            rounded-xl 
+                            p-3 
+                            text-white 
+                            bg-blue-main
+                            hover:bg-blue-dark 
+                            transition 
+                            duration-300' 
+                            type='submit'>
+                            전송
+                        </button>
+                    </div>
+                </form>
+    
+            </>
+        );
+    }
+
+    const openTokenSendModal = (e) => {
+        const btnType = e.target.innerText;
+        if (btnType === '토큰 교환') {
+            setModalOpen(true);
+            setModalTitle('토큰 교환');
+            setModalBody(tokenSwapLayoutHtml);
+        } else {
+            setModalOpen(true);
+            setModalTitle('토큰 전송');
+            setModalBody(tokenSendLayoutHtml);
+        }
+    }
 
     return (
         <>
-            <Header />
             <div className='flex flex-col justify-center gap-6 mx-auto w-[90%]'>
                 <div className='w-full border-b rounded-lg border-gray-300 mx-auto my-6'>
                     <div className='grid grid-cols-3 items-center py-3 px-5 text-center'>
@@ -86,7 +252,7 @@ const mypage = () => {
                             <input
                             type="text"
                             value={nickname}
-                            onChange={handleNicknameChange}
+                            onChange={nicknameChange}
                             className="border rounded-xl px-2 py-1 w-32"
                             />
                         ) : (
@@ -101,8 +267,36 @@ const mypage = () => {
                             <p>My Token : 15 PH</p>
                             <p>My ETH : 0.1 ETH</p>
                         </div>
-                        <div className='text-right font-bold text-xl'>
-                        {isEditing ? (
+                        <div className='flex gap-5 justify-end font-bold text-xl'>
+                            {isEditing ? (
+                                <button className='
+                                    border 
+                                    rounded-xl 
+                                    p-3 
+                                    text-white 
+                                    bg-yellow-500 
+                                    hover:bg-yellow-600 
+                                    transition 
+                                    duration-300' 
+                                    type="button"
+                                    onClick={nicknameSave}
+                                    >닉네임 저장</button>
+                            ) : (
+                                <button className='
+                                    border 
+                                    rounded-xl 
+                                    p-3 
+                                    text-white 
+                                    bg-yellow-500 
+                                    hover:bg-yellow-600 
+                                    transition 
+                                    duration-300' 
+                                    type="button"
+                                    onClick={nicknameEdit}
+                                    >
+                                        닉네임 변경
+                                    </button>
+                            )}
                             <button className='
                                 border 
                                 rounded-xl 
@@ -113,9 +307,9 @@ const mypage = () => {
                                 transition 
                                 duration-300' 
                                 type="button"
-                                onClick={handleSaveButtonClick}
-                                >닉네임 저장</button>
-                        ) : (
+                                onClick={openTokenSendModal}>
+                                토큰 교환
+                            </button>
                             <button className='
                                 border 
                                 rounded-xl 
@@ -126,9 +320,9 @@ const mypage = () => {
                                 transition 
                                 duration-300' 
                                 type="button"
-                                onClick={handleEditButtonClick}
-                                >닉네임 변경</button>
-                        )}
+                                onClick={openTokenSendModal}>
+                                토큰 전송
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -150,7 +344,10 @@ const mypage = () => {
                             </thead>
                             <tbody>
                                 {currentItems.map((post) => (
-                                <tr key={post.id} className="hover:bg-gray-200 transition-all duration-300 cursor-pointer">
+                                <tr 
+                                    key={post.id} 
+                                    className="hover:bg-gray-200 transition-all duration-300 cursor-pointer"
+                                    onClick={() => router.push(`/posts/${post.id}`)}>
                                     <td className="border-b p-3">
                                         <p className="text-xl font-semibold">{post.id}</p>
                                     </td>
@@ -179,8 +376,8 @@ const mypage = () => {
                             {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i + 1}
-                                className={`px-4 py-2 mx-1 rounded ${
-                                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                className={`px-2 py-2 mx-1 ${
+                                currentPage === i + 1 ? 'font-bold' : ''
                                 }`}
                                 onClick={() => handlePageChange(i + 1)}
                             >
@@ -263,9 +460,9 @@ const mypage = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
+            <ModalLayout isOpen={modalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
 }
 
-export default mypage;
+export default MyPage;

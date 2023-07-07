@@ -143,8 +143,8 @@ export default function Home() {
                             {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i + 1}
-                                className={`px-4 py-2 mx-1 rounded ${
-                                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                className={`px-2 py-2 mx-1 ${
+                                currentPage === i + 1 ? 'font-bold' : ''
                                 }`}
                                 onClick={() => handlePageChange(i + 1)}
                             >

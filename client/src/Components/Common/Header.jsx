@@ -55,7 +55,7 @@ const Header = () => {
                                     shadow-md"
                                     >
                                     <ul className="text-center">
-                                        <Link href='/mypage'>
+                                        <Link href='/users/mypage'>
                                             <li className="
                                                 flex 
                                                 justify-center 
@@ -137,7 +137,7 @@ const Header = () => {
                                 duration-300
                                 cursor-pointer'>
                                 <FiLogIn size={20} />
-                                <Link href='/signin'>
+                                <Link href='/users/signin'>
                                     <button>Sign In</button>
                                 </Link>
                             </div>
@@ -156,7 +156,7 @@ const Header = () => {
                                 duration-300
                                 cursor-pointer'>
                                 <AiOutlineUserAdd size={20} />
-                                <Link href='/signup'>
+                                <Link href='/users/signup'>
                                     <button>Sign Up</button>
                                 </Link>
                             </div>
