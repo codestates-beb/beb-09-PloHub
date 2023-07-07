@@ -128,8 +128,7 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 		userInfo = models.ToUserInfo(user)
 
 		// if user never logged in before or user logged in before but not today
-		// TODO: improve date comparison logic
-		if !user.LatestLoginDate.Valid || !checkUserLoggedInToday(user.LatestLoginDate.Time) {
+		if !user.LatestLoginDate.Valid || checkIfUserNotLoggedInToday(user.LatestLoginDate.Time) {
 			reward, err := s.walletSvc.IssueReward(ctx, user.ID, models.RewardTypeLogin)
 			if err != nil {
 				return err
@@ -318,6 +317,7 @@ func matchPassword(hashedPassword, password string) (bool, error) {
 	return true, nil
 }
 
-func checkUserLoggedInToday(t time.Time) bool {
-	return time.Now().Day()-t.Day() == 0
+func checkIfUserNotLoggedInToday(t time.Time) bool {
+	now := time.Now()
+	return t.Year() != now.Year() || t.Month() != now.Month() || t.Day() != now.Day()
 }
