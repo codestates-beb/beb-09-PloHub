@@ -125,6 +125,14 @@ const SignUp = () => {
         passwordConfirm();
     }, [pwConfirm]);
 
+    /**
+     * 회원 가입을 처리하는 함수.
+     *
+     * @async
+     * @function signUp
+     * @returns {Promise<void>} Promise 객체
+     * @throws {Error} 회원 가입 중 발생한 오류
+     */
     const signUp = async () => {
         const formData = new FormData();
 
