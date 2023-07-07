@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
 import Modal from 'react-modal';
 import { BsFillImageFill } from 'react-icons/bs';
 import { ModalLayout } from '../../Components/Reference';
@@ -16,14 +18,26 @@ const NftCreate = () => {
     const [fileType, setFileType] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
     const [uploadFile, setUploadFile] = useState(null);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
     const [elements, setElements] = useState();
 
+    const user = useSelector((state) => state.user);
+    const router = useRouter();
+
     useEffect(() => {
-        Modal.setAppElement('#__next');  // Next.js의 기본 root id는 #__next 입니다.
-    }, []);
+        if (!user.account) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.push('/users/signin');
+            }, 3000);
+        }
+    }, [user]);
 
     const { register, formState: { errors }, handleSubmit } = useForm();
 
@@ -51,12 +65,12 @@ const NftCreate = () => {
                 }
             });
         } else {
-            setModalIsOpen(true);
+            setIsModalOpen(true);
             setModalTitle("Error");
             setModalBody(`파일 사이즈가 MAX SIZE ${SIZE}보다 큽니다.`);
 
             setTimeout(() => {
-                setModalIsOpen(false);
+                setIsModalOpen(false);
             }, 3000);
         }
     }
@@ -169,7 +183,7 @@ const NftCreate = () => {
                     </form>
                 </div>
             </div>
-            <ModalLayout isOpen={modalIsOpen} modalTitle={modalTitle} modalBody={modalBody} />
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
 }

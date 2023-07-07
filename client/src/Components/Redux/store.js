@@ -21,7 +21,7 @@ const initialState = {
 const demoUser = {
     account: 'test@test.com',
     nickname: 'Test User',
-    level: '2',
+    level: '1',
     tokenBalance: '15',
     ethBalance: '1.5',
 }

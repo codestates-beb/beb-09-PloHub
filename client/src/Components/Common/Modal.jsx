@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Modal from 'react-modal';
 
 const ModalLayout = ({ isOpen,  modalTitle, modalBody }) => {
+
+    useEffect(() => {
+        Modal.setAppElement('#__next');  // Next.js의 기본 root id는 #__next 입니다.
+    }, []);
+
     return (
         <Modal
         isOpen={isOpen}

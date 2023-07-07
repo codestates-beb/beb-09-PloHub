@@ -20,11 +20,6 @@ const MyPage = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
 
-    useEffect(() => {
-        Modal.setAppElement('#__next');  // Next.js의 기본 root id는 #__next 입니다.
-    }, []);
-
-
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };
@@ -88,6 +83,15 @@ const MyPage = () => {
 
     // Calculate total pages
     const totalPages = Math.ceil(posts.length / postsPerPage);
+
+    const myPageInfo = async () => {
+        try {
+            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', );
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     const tokenSwapLayoutHtml = () => {
         const handleTokenAmountChange = (e) => {

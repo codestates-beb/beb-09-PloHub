@@ -1,10 +1,51 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router';
 import 'react-quill/dist/quill.snow.css';
+import { ModalLayout } from '../Reference';
 
 const PostCreate = () => {
     const router = useRouter();
+    const user = useSelector((state) => state.user);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
+    const [selectCategory, setSelectCategory] = useState('');
+
+    useEffect(() => {
+        if (!user.account) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.push('/users/signin');
+            }, 3000);
+        }
+    }, [user]);
+
+    const categoryChange = (e) => {
+        setSelectCategory(e.target.value);
+    }
+
+    const userLevelCheck = () => {
+        if(user.level !== '2' && selectCategory === 'courseinfo') {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('해당 카테고리는 2레벨만 작성 가능합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
+
+    useEffect(() => {
+        userLevelCheck()
+    }, [selectCategory]);
 
     const QuillWrapper = dynamic(() => import('react-quill'), {
         ssr: false,
@@ -58,8 +99,19 @@ const PostCreate = () => {
                     <p className='font-bold text-4xl'>게시글 작성</p>
                 </div>
                 <div className='w-1/5'>
-                    <select className="border-b outline-none focus:border-black transition duration-300 py-2 px-4 w-full" required>
-                        <option className="text-sm" value="" selected disabled>카테고리를 선택해 주세요.</option>
+                    <select className="
+                        border-b 
+                        outline-none 
+                        focus:border-black 
+                        transition 
+                        duration-300 
+                        py-2 
+                        px-4 
+                        w-full" 
+                        value={selectCategory}
+                        onChange={categoryChange}
+                        required>
+                        <option className="text-sm" value="" disabled>카테고리를 선택해 주세요.</option>
                         <option className="text-sm" value="all">All</option>
                         <option className="text-sm" value="eventinfo">행사 정보</option>
                         <option className="text-sm" value="courseinfo">코스 정보</option>
@@ -100,6 +152,7 @@ const PostCreate = () => {
                     </button>
                 </div>
             </div>
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     );
 };
