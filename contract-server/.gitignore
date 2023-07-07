@@ -3,4 +3,3 @@ node_modules
 package-lock.json
 config.json
 .DS_Store
-./CONTRACT/build

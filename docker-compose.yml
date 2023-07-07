@@ -24,6 +24,17 @@ services:
       - source: main-server-config
         target: /app/config/config.json
 
+  contract-server:
+    container_name: contract-server
+    build:
+      context: ./contract-server
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - mysql
+
   postgres:
     container_name: postgres
     image: postgres:15.3
