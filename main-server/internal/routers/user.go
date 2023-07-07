@@ -57,16 +57,18 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 
 	// validate email and password
 	if err := utils.ValidateEmail(email); err != nil {
-		if err != nil {
-			zap.L().Error("failed to validate email", zap.Error(err))
+		zap.L().Error("failed to validate email", zap.Error(err))
+		if !errors.Is(err, utils.ErrInvalidEmail) {
+			err = errors.New("unable to validate email")
 		}
 		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
 	if err := utils.ValidatePassword(password); err != nil {
-		if err != nil {
-			zap.L().Error("failed to validate password", zap.Error(err))
+		zap.L().Error("failed to validate password", zap.Error(err))
+		if !errors.Is(err, utils.ErrInvalidPassword) {
+			err = errors.New("unable to validate password")
 		}
 		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
@@ -238,6 +240,16 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		zap.L().Error("failed to read request body", zap.Error(err))
 		utils.ErrorJSON(w, errors.New("unable to read request body"), http.StatusBadRequest)
+		return
+	}
+
+	// validate email
+	if err := utils.ValidateEmail(req.Email); err != nil {
+		zap.L().Error("failed to validate email", zap.Error(err))
+		if !errors.Is(err, utils.ErrInvalidEmail) {
+			err = errors.New("unable to validate email")
+		}
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
