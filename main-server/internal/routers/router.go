@@ -9,7 +9,7 @@ import (
 )
 
 type Router interface {
-	Register(h http.Handler)
+	Register(h http.Handler) Router
 	Handler() http.Handler
 }
 
@@ -36,8 +36,9 @@ func (r *router) setup() Router {
 	return r
 }
 
-func (r *router) Register(h http.Handler) {
+func (r *router) Register(h http.Handler) Router {
 	r.mux.Mount(r.pattern, h)
+	return r
 }
 
 func (r *router) Handler() http.Handler {

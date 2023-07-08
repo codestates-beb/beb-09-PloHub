@@ -53,11 +53,7 @@ func newApp(cfg *configs.Config) *app.App {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	repo := newRepo(ctx, cfg.GetPostgresDSN())
-	users := newUserController(repo, cfg)
-	router := routers.NewRouter("/api/v1")
-
-	router.Register(users.Route())
+	router := newRouter(ctx, cfg)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Server.Port),
@@ -65,6 +61,19 @@ func newApp(cfg *configs.Config) *app.App {
 	}
 
 	return app.New().SetServer(srv)
+}
+
+func newRouter(ctx context.Context, cfg *configs.Config) routers.Router {
+	repo := newRepo(ctx, cfg.GetPostgresDSN())
+
+	hc := controllers.NewHealthcheckController()
+	uc := newUserController(repo, cfg)
+
+	router := routers.NewRouter("/api/v1").
+		Register(hc.Route()).
+		Register(uc.Route())
+
+	return router
 }
 
 func newRepo(ctx context.Context, dsn string) plohub.Repository {
