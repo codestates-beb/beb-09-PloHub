@@ -3,7 +3,7 @@ services:
   ganache:
     container_name: ganache
     image: trufflesuite/ganache:latest
-    command: --database.dbPath=/data
+    command: --database.dbPath=/data --wallet.accounts 0xf3aff74e76ab06ba866303284853ab6eef61028409b85d918dbd65ddbb6cf879,10000000000000000000000 --wallet.accounts 0x81adba35ea1df077bcd938abc83ee1fa3635da98f9c075892f16a458c071fbd3,10000000000000000000000
     ports:
       - 8545:8545
     restart: always
