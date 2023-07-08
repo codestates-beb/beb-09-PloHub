@@ -1,4 +1,4 @@
-package routers
+package controllers
 
 import (
 	"errors"
@@ -14,14 +14,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type userRouter struct {
+type userController struct {
 	domain  string
 	userSvc user.Service
 	authSvc auth.Service
 }
 
-func NewUserRouter(domain string, userSvc user.Service, authSvc auth.Service) Router {
-	return &userRouter{
+func NewUserController(domain string, userSvc user.Service, authSvc auth.Service) Controller {
+	return &userController{
 		domain:  domain,
 		userSvc: userSvc,
 		authSvc: authSvc,
@@ -29,21 +29,21 @@ func NewUserRouter(domain string, userSvc user.Service, authSvc auth.Service) Ro
 }
 
 // Route returns a http.Handler that handles user related requests
-func (ur *userRouter) Route() http.Handler {
+func (uc *userController) Route() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Route("/users", func(r chi.Router) {
-		r.Post("/signup", ur.signUp)
-		r.Post("/login", ur.login)
-		r.Post("/refresh", ur.refresh)
-		r.Post("/logout", ur.logout)
-		r.Post("/check-email", ur.checkEmail)
+		r.Post("/signup", uc.signUp)
+		r.Post("/login", uc.login)
+		r.Post("/refresh", uc.refresh)
+		r.Post("/logout", uc.logout)
+		r.Post("/check-email", uc.checkEmail)
 
 		r.Group(func(sr chi.Router) {
-			sr.Use(middlewares.AccessTokenRequired(ur.authSvc))
-			sr.Get("/myinfo", ur.myInfo)
-			sr.Get("/mypage", ur.myPage) // TODO: implement this
-			sr.Post("/change-nickname", ur.changeNickname)
+			sr.Use(middlewares.AccessTokenRequired(uc.authSvc))
+			sr.Get("/myinfo", uc.myInfo)
+			sr.Get("/mypage", uc.myPage) // TODO: implement this
+			sr.Post("/change-nickname", uc.changeNickname)
 		})
 	})
 
@@ -51,7 +51,7 @@ func (ur *userRouter) Route() http.Handler {
 }
 
 // signUp handles POST /users/signup
-func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) signUp(w http.ResponseWriter, r *http.Request) {
 	// get email and password from form data
 	email, password := r.FormValue("email"), r.FormValue("password")
 
@@ -75,7 +75,7 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create user
-	err := ur.userSvc.SignUp(r.Context(), email, password)
+	err := uc.userSvc.SignUp(r.Context(), email, password)
 	if err != nil {
 		zap.L().Error("failed to sign up", zap.Error(err))
 		if err != user.ErrEmailAlreadyExists {
@@ -94,15 +94,15 @@ func (ur *userRouter) signUp(w http.ResponseWriter, r *http.Request) {
 }
 
 // login handles POST /users/login
-func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) login(w http.ResponseWriter, r *http.Request) {
 	// get email and password from form data
 	email, password := r.FormValue("email"), r.FormValue("password")
 
 	// try to login
-	userInfo, err := ur.userSvc.Login(r.Context(), email, password)
+	userInfo, err := uc.userSvc.Login(r.Context(), email, password)
 	if err != nil {
 		zap.L().Error("failed to login", zap.Error(err), zap.String("email", email))
-		utils.ErrorJSON(w, errors.New("unable to login, please check your email and password"), http.StatusBadRequest)
+		utils.ErrorJSON(w, errors.New("unable to login, please check youc email and password"), http.StatusBadRequest)
 		return
 	}
 
@@ -113,14 +113,14 @@ func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// generate token pair
-	tokenPair, err := ur.authSvc.GenerateTokenPair(jwtUser)
+	tokenPair, err := uc.authSvc.GenerateTokenPair(jwtUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// set refresh token to cookie
-	refreshCookie := ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
+	refreshCookie := uc.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
@@ -131,7 +131,7 @@ func (ur *userRouter) login(w http.ResponseWriter, r *http.Request) {
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
-func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) refresh(w http.ResponseWriter, r *http.Request) {
 	// get refresh token from cookie
 	var refreshCookie *http.Cookie
 
@@ -152,7 +152,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	// verify refresh token
 	refreshToken := refreshCookie.Value
 
-	jwtUser, err := ur.authSvc.VerifyToken(refreshToken, models.TokenRoleRefresh)
+	jwtUser, err := uc.authSvc.VerifyToken(refreshToken, models.TokenRoleRefresh)
 	if err != nil {
 		zap.L().Error("failed to verify refresh token", zap.Error(err), zap.String("refresh_token", refreshToken))
 		utils.ErrorJSON(w, errors.New("invalid refresh token"), http.StatusUnauthorized)
@@ -160,7 +160,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user info
-	userInfo, err := ur.userSvc.UserInfo(r.Context(), jwtUser.ID)
+	userInfo, err := uc.userSvc.UserInfo(r.Context(), jwtUser.ID)
 	if err != nil {
 		zap.L().Error("failed to get user info", zap.Error(err), zap.Int32("user_id", jwtUser.ID))
 		utils.ErrorJSON(w, errors.New("unable to get user info"), http.StatusInternalServerError)
@@ -174,7 +174,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// generate new token pair
-	tokenPair, err := ur.authSvc.GenerateTokenPair(newJwtUser)
+	tokenPair, err := uc.authSvc.GenerateTokenPair(newJwtUser)
 	if err != nil {
 		zap.L().Error("failed to generate token pair", zap.Error(err), zap.Int32("user_id", jwtUser.ID))
 		utils.ErrorJSON(w, errors.New("unable to generate token pair"), http.StatusInternalServerError)
@@ -182,7 +182,7 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// set refresh token to cookie
-	refreshCookie = ur.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
+	refreshCookie = uc.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
@@ -193,9 +193,9 @@ func (ur *userRouter) refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 // logout handles POST /users/logout
-func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) logout(w http.ResponseWriter, r *http.Request) {
 	// delete refresh token from cookie
-	http.SetCookie(w, ur.newExpiredRefreshCookie())
+	http.SetCookie(w, uc.newExpiredRefreshCookie())
 
 	// send response
 	var resp models.CommonResponse
@@ -206,12 +206,12 @@ func (ur *userRouter) logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // myInfo handles GET /users/myinfo
-func (ur *userRouter) myInfo(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) myInfo(w http.ResponseWriter, r *http.Request) {
 	// get user id from context (set by AccessTokenRequired middleware)
 	userID := r.Context().Value(middlewares.UserIDKey).(int32)
 
 	// get user info
-	userInfo, err := ur.userSvc.UserInfo(r.Context(), userID)
+	userInfo, err := uc.userSvc.UserInfo(r.Context(), userID)
 	if err != nil {
 		zap.L().Error("failed to get user info", zap.Error(err), zap.Int32("user_id", userID))
 		utils.ErrorJSON(w, errors.New("unable to get user info"), http.StatusInternalServerError)
@@ -226,13 +226,13 @@ func (ur *userRouter) myInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 // myPage handles GET /users/mypage
-func (ur *userRouter) myPage(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) myPage(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement this
 	w.WriteHeader(http.StatusOK)
 }
 
 // checkEmail handles POST /users/check-email
-func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) checkEmail(w http.ResponseWriter, r *http.Request) {
 	var req models.CheckEmailRequest
 
 	// read request body
@@ -254,7 +254,7 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if email exists
-	err = ur.userSvc.EmailExists(r.Context(), req.Email)
+	err = uc.userSvc.EmailExists(r.Context(), req.Email)
 	if err != nil {
 		zap.L().Error("failed to check if email exists", zap.Error(err))
 		statusCode := http.StatusBadRequest
@@ -275,7 +275,7 @@ func (ur *userRouter) checkEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 // changeNickname handles POST /users/change-nickname
-func (ur *userRouter) changeNickname(w http.ResponseWriter, r *http.Request) {
+func (uc *userController) changeNickname(w http.ResponseWriter, r *http.Request) {
 	// get user id from context (set by AccessTokenRequired middleware)
 	userID := r.Context().Value(middlewares.UserIDKey).(int32)
 
@@ -290,7 +290,7 @@ func (ur *userRouter) changeNickname(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// change nickname
-	err := ur.userSvc.ChangeNickname(r.Context(), userID, nickname)
+	err := uc.userSvc.ChangeNickname(r.Context(), userID, nickname)
 	if err != nil {
 		zap.L().Error("failed to change nickname", zap.Error(err), zap.Int32("user_id", userID))
 		if err != user.ErrSameNickname {
@@ -310,11 +310,11 @@ func (ur *userRouter) changeNickname(w http.ResponseWriter, r *http.Request) {
 }
 
 // newRefreshCookie returns a new refresh token cookie
-func (ur *userRouter) newRefreshCookie(token string, expiry time.Duration) *http.Cookie {
+func (uc *userController) newRefreshCookie(token string, expiry time.Duration) *http.Cookie {
 	return &http.Cookie{
 		Name:     "refresh_token",
 		Value:    token,
-		Domain:   ur.domain,
+		Domain:   uc.domain,
 		Path:     "/",
 		Expires:  time.Now().Add(expiry),
 		MaxAge:   int(expiry.Seconds()),
@@ -325,7 +325,7 @@ func (ur *userRouter) newRefreshCookie(token string, expiry time.Duration) *http
 }
 
 // newExpiredRefreshCookie returns an expired refresh token cookie
-func (ur *userRouter) newExpiredRefreshCookie() *http.Cookie {
+func (uc *userController) newExpiredRefreshCookie() *http.Cookie {
 	return &http.Cookie{
 		Name:     "refresh_token",
 		Value:    "",

@@ -7,6 +7,7 @@ import (
 	"main-server/db/plohub"
 	"main-server/internal/app"
 	"main-server/internal/configs"
+	"main-server/internal/controllers"
 	"main-server/internal/routers"
 	"main-server/internal/services/auth"
 	"main-server/internal/services/user"
@@ -53,7 +54,7 @@ func newApp(cfg *configs.Config) *app.App {
 	defer cancel()
 
 	repo := newRepo(ctx, cfg.GetPostgresDSN())
-	users := newUserRouter(repo, cfg)
+	users := newUserController(repo, cfg)
 	router := NewRouter(users)
 
 	srv := &http.Server{
@@ -72,7 +73,7 @@ func newRepo(ctx context.Context, dsn string) plohub.Repository {
 	return plohub.NewRepository(db)
 }
 
-func newUserRouter(repo plohub.Repository, cfg *configs.Config) routers.Router {
+func newUserController(repo plohub.Repository, cfg *configs.Config) routers.Router {
 	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
 	userSvc := user.NewService(walletSvc, repo)
 	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
@@ -80,5 +81,5 @@ func newUserRouter(repo plohub.Repository, cfg *configs.Config) routers.Router {
 		zap.L().Panic("Failed to create auth service", zap.Error(err))
 	}
 
-	return routers.NewUserRouter(cfg.Server.Domain, userSvc, authSvc)
+	return controllers.NewUserController(cfg.Server.Domain, userSvc, authSvc)
 }
