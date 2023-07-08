@@ -55,11 +55,13 @@ func newApp(cfg *configs.Config) *app.App {
 
 	repo := newRepo(ctx, cfg.GetPostgresDSN())
 	users := newUserController(repo, cfg)
-	router := NewRouter(users)
+	router := routers.NewRouter("/api/v1")
+
+	router.Register(users.Route())
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Server.Port),
-		Handler: router,
+		Handler: router.Handler(),
 	}
 
 	return app.New().SetServer(srv)
@@ -73,7 +75,7 @@ func newRepo(ctx context.Context, dsn string) plohub.Repository {
 	return plohub.NewRepository(db)
 }
 
-func newUserController(repo plohub.Repository, cfg *configs.Config) routers.Router {
+func newUserController(repo plohub.Repository, cfg *configs.Config) controllers.Controller {
 	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
 	userSvc := user.NewService(walletSvc, repo)
 	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
