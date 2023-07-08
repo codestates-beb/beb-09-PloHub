@@ -12,11 +12,15 @@ func NewHealthcheckController() Controller {
 	return &healthcheckController{}
 }
 
+func (hc *healthcheckController) Pattern() string {
+	return "/healthcheck"
+}
+
 // Route returns a http.Handler that handles healthcheck related requests
-func (hc *healthcheckController) Route() http.Handler {
+func (hc *healthcheckController) Handler() http.Handler {
 	mux := chi.NewRouter()
 
-	mux.Get("/healthcheck", hc.healthcheck)
+	mux.Get("/", hc.healthcheck)
 
 	return mux
 }

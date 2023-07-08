@@ -3,5 +3,6 @@ package controllers
 import "net/http"
 
 type Controller interface {
-	Route() http.Handler
+	Pattern() string
+	Handler() http.Handler
 }

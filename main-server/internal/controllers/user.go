@@ -28,23 +28,25 @@ func NewUserController(domain string, userSvc user.Service, authSvc auth.Service
 	}
 }
 
+func (uc *userController) Pattern() string {
+	return "/users"
+}
+
 // Route returns a http.Handler that handles user related requests
-func (uc *userController) Route() http.Handler {
+func (uc *userController) Handler() http.Handler {
 	mux := chi.NewRouter()
 
-	mux.Route("/users", func(r chi.Router) {
-		r.Post("/signup", uc.signUp)
-		r.Post("/login", uc.login)
-		r.Post("/refresh", uc.refresh)
-		r.Post("/logout", uc.logout)
-		r.Post("/check-email", uc.checkEmail)
+	mux.Post("/signup", uc.signUp)
+	mux.Post("/login", uc.login)
+	mux.Post("/refresh", uc.refresh)
+	mux.Post("/logout", uc.logout)
+	mux.Post("/check-email", uc.checkEmail)
 
-		r.Group(func(sr chi.Router) {
-			sr.Use(middlewares.AccessTokenRequired(uc.authSvc))
-			sr.Get("/myinfo", uc.myInfo)
-			sr.Get("/mypage", uc.myPage) // TODO: implement this
-			sr.Post("/change-nickname", uc.changeNickname)
-		})
+	mux.Group(func(r chi.Router) {
+		r.Use(middlewares.AccessTokenRequired(uc.authSvc))
+		r.Get("/myinfo", uc.myInfo)
+		r.Get("/mypage", uc.myPage) // TODO: implement this
+		r.Post("/change-nickname", uc.changeNickname)
 	})
 
 	return mux

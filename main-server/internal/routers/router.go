@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"fmt"
+	"main-server/internal/controllers"
 	"main-server/internal/middlewares"
 	"net/http"
 
@@ -9,19 +11,19 @@ import (
 )
 
 type Router interface {
-	Register(h http.Handler) Router
-	Handler() http.Handler
+	Register(c controllers.Controller) Router
+	Route() http.Handler
 }
 
 type router struct {
 	mux     *chi.Mux
-	pattern string
+	version string
 }
 
-func NewRouter(pattern string) Router {
+func NewRouter(version string) Router {
 	r := &router{
 		mux:     nil,
-		pattern: pattern,
+		version: version,
 	}
 	return r.setup()
 }
@@ -33,14 +35,15 @@ func (r *router) setup() Router {
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Use(middlewares.CORS())
+	r.mux = mux
 	return r
 }
 
-func (r *router) Register(h http.Handler) Router {
-	r.mux.Mount(r.pattern, h)
+func (r *router) Register(c controllers.Controller) Router {
+	r.mux.Mount(fmt.Sprintf("/api/%s%s", r.version, c.Pattern()), c.Handler())
 	return r
 }
 
-func (r *router) Handler() http.Handler {
+func (r *router) Route() http.Handler {
 	return r.mux
 }

@@ -57,7 +57,7 @@ func newApp(cfg *configs.Config) *app.App {
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Server.Port),
-		Handler: router.Handler(),
+		Handler: router.Route(),
 	}
 
 	return app.New().SetServer(srv)
@@ -69,9 +69,9 @@ func newRouter(ctx context.Context, cfg *configs.Config) routers.Router {
 	hc := controllers.NewHealthcheckController()
 	uc := newUserController(repo, cfg)
 
-	router := routers.NewRouter("/api/v1").
-		Register(hc.Route()).
-		Register(uc.Route())
+	router := routers.NewRouter("v1").
+		Register(hc).
+		Register(uc)
 
 	return router
 }
