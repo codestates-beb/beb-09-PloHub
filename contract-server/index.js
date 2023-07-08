@@ -27,8 +27,8 @@ app.use("/api/v1/wallets", createWallet);
 app.use("/api/v1/wallets", reward);
 app.use("/api/v1/nft", createNFT);
 app.use("/api/v1/nft", userNFT);
-app.use("/api/v1/wallets",transferToken);
-app.use("/api/v1/wallets",tokenSwap);
+app.use("/api/v1/wallets", transferToken);
+app.use("/api/v1/wallets", tokenSwap);
 
 connectToDatabase;
 
@@ -45,5 +45,5 @@ app.use((req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`OpenSee Server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });

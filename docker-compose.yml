@@ -32,6 +32,16 @@ services:
     ports:
       - 8080:8080
     restart: always
+    volumes:
+      - /tmp/contract-server/npm_cache:/root/.npm:z
+      - ./contract-server/abi:/usr/src/app/abi:z
+      - ./contract-server/config:/usr/src/app/config:z
+      - ./contract-server/controllers:/usr/src/app/controllers:z
+      - ./contract-server/loaders:/usr/src/app/loaders:z
+      - ./contract-server/models:/usr/src/app/models:z
+      - ./contract-server/routes:/usr/src/app/routes:z
+      - ./contract-server/.env:/usr/src/app/.env:z
+      - ./contract-server/index.js:/usr/src/app/index.js:z
     depends_on:
       - mysql
 

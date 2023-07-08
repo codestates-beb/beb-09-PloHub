@@ -1,13 +1,15 @@
-FROM node:16-alpine
+FROM node:16.14.2-alpine3.15
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY . .
+RUN apk update && apk add python3 make g++
+
+COPY package*.json ./
+
+RUN npm config set cache-min 9999999
 
 RUN npm install
 
 ENV NODE_ENV=docker
 
-EXPOSE 8080
-
-CMD ["node", "index.js"]
+CMD [ "npm", "run", "dev" ]
