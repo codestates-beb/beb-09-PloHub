@@ -19,5 +19,11 @@
     "port": "",
     "domain": "",
     "contract_server_base_url": ""
+  },
+  "s3": {
+    "region": "",
+    "access_key": "",
+    "secret_key": "",
+    "bucket": ""
   }
 }
