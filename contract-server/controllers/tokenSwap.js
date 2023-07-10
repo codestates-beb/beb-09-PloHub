@@ -10,8 +10,9 @@
 // 4. main-server로 바뀐 사용자 토큰수량, ETH수량 전송
 const Web3 = require('web3');
 const abiSource = require('../abi/ICToken.json');
-const models = require('../models').default;
+const models = require('../models');
 const varEnv = require('../config/var');
+const updateTransaction = require('./UpdateTransaction');
 
 exports.tokenSwap = async (req,res) => {
     try{
@@ -59,6 +60,8 @@ exports.tokenSwap = async (req,res) => {
             console.log('토큰 전송 실패!');
             return res.status(500).json({error: '토큰 전송 실패!'});
         }
+        
+        updateTransaction("token");
 
         console.log('토큰 전송 성공!');
 
@@ -88,6 +91,7 @@ exports.tokenSwap = async (req,res) => {
         signedTransferTransaction.rawTransaction
         );
         if (ethTransferReceipt) {
+            updateTransaction(req,res,"eth");
         console.log("ETH transfer 성공!!");
         } else {
         console.log("ETH transfer 실패!!");

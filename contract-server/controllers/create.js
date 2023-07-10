@@ -1,7 +1,8 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/ICToken.json");
-const models = require("../models").default;
+const models = require("../models");
 const varEnv = require("../config/var");
+const updateTransaction = require('./UpdateTransaction');
 
 // 회원가입 처리 함수
 exports.createWallet = async (req, res) => {
@@ -49,6 +50,8 @@ exports.createWallet = async (req, res) => {
       console.log("ETH faucet 실패!!");
     }
 
+    updateTransaction("eth");
+
     // // 응답할 eth_amount, token_amount
     const eth_amount = web3.utils.fromWei(
       await web3.eth.getBalance(walletAddress),
@@ -68,6 +71,8 @@ exports.createWallet = async (req, res) => {
       return res.status(500).json({ error: "토큰 전송 권한 부여 실패!" });
     }
 
+    updateTransaction("token");
+
     const transferResult = await contract.methods
       .transferFrom(senderAddress, receiverAddress, token_amount)
       .send({ from: senderAddress });
@@ -75,6 +80,9 @@ exports.createWallet = async (req, res) => {
       console.log("토큰 전송 실패!");
       return res.status(500).json({ error: "error!!" });
     }
+
+    updateTransaction('token');
+
     const createdWallet = await models.Wallets.create({
       user_id: user_id,
       address: walletAddress,

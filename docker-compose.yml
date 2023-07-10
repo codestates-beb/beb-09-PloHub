@@ -76,8 +76,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=plohub
-    ports:
-      - 5000:3306
+    # ports:
+    #   - 5000:3306
     restart: always
     volumes:
       - mysql-data:/var/lib/mysql

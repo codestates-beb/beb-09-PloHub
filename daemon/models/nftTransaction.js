@@ -72,6 +72,6 @@ module.exports = (sequelize,DataTypes) => {
 });
 
 nftTransaction.associate = (models) => {
-    nftTransaction.belongTo(models.nftTransaction, {foreignKey: 'hash'})
+    nftTransaction.belongsTo(models.nftTransaction, {foreignKey: 'blockNumber'})
     }
 };

@@ -72,6 +72,6 @@ module.exports = (sequelize,DataTypes) => {
 });
 
 tokenTransaction.associate = (models) => {
-    tokenTransaction.belongTo(models.tokenTransaction, {foreignKey: 'hash'})
+    tokenTransaction.belongTo(models.tokenTransaction, {foreignKey: 'blockNumber'})
     }
 };

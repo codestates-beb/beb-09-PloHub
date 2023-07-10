@@ -1,6 +1,6 @@
 module.exports = (sequelize,DataTypes) => {
-    const transactions = sequelize.define(
-        'transactions',
+    const ethTransaction = sequelize.define(
+        'ethTransaction',
         {
     hash: {
         type: DataTypes.STRING,
@@ -68,10 +68,10 @@ module.exports = (sequelize,DataTypes) => {
     }
 },{
     timestamps: false,
-    tableName: 'transactions'
+    tableName: 'nftTransaction'
 });
 
-    transactions.associate = (models) => {
-        transactions.belongsTo(models.transactions, {foreignKey: 'blockNumber'})
+ethTransaction.associate = (models) => {
+    ethTransaction.belongsTo(models.ethTransaction, {foreignKey: 'blockNumber'})
     }
 };

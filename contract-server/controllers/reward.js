@@ -1,7 +1,8 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/ICToken.json");
-const models = require("../models").default;
+const models = require("../models");
 const varEnv = require("../config/var");
+const updateTransaction = require('./UpdateTransaction');
 
 exports.reward = async (req, res) => {
     try{
@@ -53,7 +54,7 @@ exports.reward = async (req, res) => {
           }
         }
 
-
+        
 
         const transferResult = await contract.methods
           .transferFrom(senderAddress, receiverAddress, tokenAmount)
@@ -63,6 +64,7 @@ exports.reward = async (req, res) => {
           return res.status(500).json({ error: "토큰 전송 실패!" });
         }
 
+        updateTransaction("token");
         const updatedTokenBalance = await contract.methods
           .balanceOf(receiverAddress)
           .call();
@@ -123,6 +125,8 @@ exports.reward = async (req, res) => {
           console.log("토큰 전송 실패!");
           return res.status(500).json({ error: "토큰 전송 실패!" });
         }
+
+        updateTransaction("token");
 
         const updatedTokenBalance = await contract.methods
           .balanceOf(receiverAddress)

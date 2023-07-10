@@ -1,9 +1,10 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/NFTLootBox.json");
 const abiSourceERC20 = require("../abi/ICToken.json");
-const models = require("../models").default;
+const models = require("../models");
 const varEnv = require("../config/var");
 const pinataSDK = require("@pinata/sdk");
+const updateTransaction = require('./UpdateTransaction');
 
 //nftCreate
 exports.createNFT = async (req, res) => {
@@ -61,6 +62,7 @@ exports.createNFT = async (req, res) => {
 
       //만약 토큰이 등록 되었다면
       if (tokenSet) {
+        updateTransaction("token");
         console.log("토큰 등록 완료!");
       } else {
         console.log("토큰 등록 실패");
@@ -77,6 +79,8 @@ exports.createNFT = async (req, res) => {
       const tokenApprove = await contractERC20.methods
         .approve(data.address, 20)
         .send({ from: varEnv.senderAddress });
+
+      updateTransaction("token");
 
       // 이미지 파일 pinata에 업로드
       const photoResult = await pinata.pinJSONToIPFS({ image_url: image });
@@ -127,6 +131,7 @@ exports.createNFT = async (req, res) => {
       if (mintResult) {
         //민팅에 성공한다면
         //일단 데이터 베이스에 nft정보들 업로드
+        console.log(mintResult);
         const createNFTData = await models.nfts.create({
           user_id: user_id,
           owner_address: data.address,
@@ -153,6 +158,7 @@ exports.createNFT = async (req, res) => {
             }
           );
           console.log(updateWalletData);
+          updateTransaction("nft");
           res.status(200).json({
             message: "OK",
             token_id: mintResult.events.Transfer.returnValues.tokenId,

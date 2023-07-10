@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const abiSource = require('../abi/NFTLootBox.json');
 const abiSourceERC20 = require('../abi/ICToken.json');
-const models = require('../models').default;
+const models = require('../models');
 const varEnv = require('../config/var');
 
 
