@@ -15,7 +15,7 @@ const NftDetail = () => {
     const router = useRouter();
 
     useEffect(() => {
-        if (!user.account) {
+        if (!user.email) {
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody('로그인이 필요합니다.');
