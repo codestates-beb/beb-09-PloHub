@@ -32,7 +32,7 @@ SELECT * FROM posts WHERE user_id = $1;
 SELECT * FROM posts WHERE category = $1 limit $2 offset $3;
 
 -- name: UpdatePost :exec
-UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, updated_at = now() WHERE id = $5;
+UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, reward_amount = $5, updated_at = now() WHERE id = $6;
 
 -- name: DeletePost :exec
 DELETE FROM posts WHERE id = $1;

@@ -460,15 +460,16 @@ func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) er
 }
 
 const updatePost = `-- name: UpdatePost :exec
-UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, updated_at = now() WHERE id = $5
+UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, reward_amount = $5, updated_at = now() WHERE id = $6
 `
 
 type UpdatePostParams struct {
-	Title    string
-	Content  string
-	Category int16
-	Nftnized bool
-	ID       int32
+	Title        string
+	Content      string
+	Category     int16
+	Nftnized     bool
+	RewardAmount int32
+	ID           int32
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
@@ -477,6 +478,7 @@ func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
 		arg.Content,
 		arg.Category,
 		arg.Nftnized,
+		arg.RewardAmount,
 		arg.ID,
 	)
 	return err
