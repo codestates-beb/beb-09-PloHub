@@ -5,6 +5,62 @@ import (
 	"time"
 )
 
+type MediumType int16
+
+const (
+	MediumTypeImage MediumType = iota + 1
+	MediumTypeVideo
+)
+
+func (m MediumType) Valid() bool {
+	return m == MediumTypeImage || m == MediumTypeVideo
+}
+
+type PostCategory int16
+
+const (
+	_ PostCategory = iota
+	PostCategoryEvent
+	PostCategoryCourseInfo
+	PostCategoryReview
+)
+
+func (c PostCategory) Valid() bool {
+	return c == PostCategoryEvent || c == PostCategoryCourseInfo || c == PostCategoryReview
+}
+
+type CreatePostParams struct {
+	UserID   int32
+	Title    string
+	Content  string
+	Category PostCategory
+	Media    []struct {
+		Type MediumType
+		Url  string
+	}
+}
+
+type EditPostParams struct {
+	PostID   int32
+	UserID   int32
+	Title    string
+	Content  string
+	Category PostCategory
+	NFTnized bool
+}
+
+type AddCommentParams struct {
+	PostID  int32
+	UserID  int32
+	Content string
+}
+
+type PostDetail struct {
+	PostInfo PostInfo      `json:"post_info"`
+	Comments []CommentInfo `json:"comments"`
+	Media    []MediumInfo  `json:"media"`
+}
+
 type PostInfo struct {
 	ID           int32     `json:"id"`
 	UserID       int32     `json:"user_id"`
@@ -33,8 +89,8 @@ type MediumInfo struct {
 	Url    string `json:"url"`
 }
 
-func ToPostInfo(post plohub.Post) *PostInfo {
-	postInfo := &PostInfo{}
+func ToPostInfo(post plohub.Post) PostInfo {
+	postInfo := PostInfo{}
 	postInfo.ID = post.ID
 	postInfo.UserID = post.UserID
 	postInfo.Title = post.Title
@@ -50,7 +106,51 @@ func ToPostInfo(post plohub.Post) *PostInfo {
 func ToPostInfos(posts []plohub.Post) []PostInfo {
 	postInfos := make([]PostInfo, len(posts))
 	for i, post := range posts {
-		postInfos[i] = *ToPostInfo(post)
+		postInfos[i] = ToPostInfo(post)
 	}
 	return postInfos
+}
+
+func ToCommentInfo(comment plohub.Comment) CommentInfo {
+	commentInfo := CommentInfo{}
+	commentInfo.ID = comment.ID
+	commentInfo.PostID = comment.PostID
+	commentInfo.UserID = comment.UserID
+	commentInfo.Content = comment.Content
+	commentInfo.RewardAmount = comment.RewardAmount
+	commentInfo.CreatedAt = comment.CreatedAt
+	return commentInfo
+}
+
+func ToCommentInfos(comments []plohub.Comment) []CommentInfo {
+	commentInfos := make([]CommentInfo, len(comments))
+	for i, comment := range comments {
+		commentInfos[i] = ToCommentInfo(comment)
+	}
+	return commentInfos
+}
+
+func ToMediumInfo(medium plohub.Medium) MediumInfo {
+	mediumInfo := MediumInfo{}
+	mediumInfo.ID = medium.ID
+	mediumInfo.PostID = medium.PostID
+	mediumInfo.Type = medium.Type
+	mediumInfo.Url = medium.Url
+	return mediumInfo
+}
+
+func ToMediumInfos(media []plohub.Medium) []MediumInfo {
+	mediumInfos := make([]MediumInfo, len(media))
+	for i, medium := range media {
+		mediumInfos[i] = ToMediumInfo(medium)
+	}
+	return mediumInfos
+}
+
+func ToPostDetail(post plohub.Post, comments []plohub.Comment, media []plohub.Medium) PostDetail {
+	postDetail := PostDetail{}
+	postDetail.PostInfo = ToPostInfo(post)
+	postDetail.Comments = ToCommentInfos(comments)
+	postDetail.Media = ToMediumInfos(media)
+	return postDetail
 }
