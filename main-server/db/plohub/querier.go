@@ -5,7 +5,7 @@ import "context"
 type Querier interface {
 	CreateComment(ctx context.Context, arg CreateCommentParams) error
 	CreateMedia(ctx context.Context, arg CreateMediaParams) error
-	CreatePost(ctx context.Context, arg CreatePostParams) error
+	CreatePost(ctx context.Context, arg CreatePostParams) (int32, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int32, error)
 	DeleteComment(ctx context.Context, id int32) error
 	DeleteMedia(ctx context.Context, id int32) error
