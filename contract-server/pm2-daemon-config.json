@@ -1,0 +1,11 @@
+{
+    "apps" : [
+        {
+            "name" : "contract-server",
+            "cwd" : "daemon",
+            "script" : "node index.js",
+            "watch" : false,
+            "autorestart" : false
+        }
+    ]
+}
