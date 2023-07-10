@@ -70,7 +70,7 @@ const SignIn = () => {
                 dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
                 dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
 
-                localStorage.setItem('access_token', access_token);
+                localStorage.setItem('accessToken', access_token);
                 
                 setTimeout(() => {
                     setIsModalOpen(false);

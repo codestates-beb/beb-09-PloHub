@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'
+import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { FaCircleUser } from 'react-icons/fa6';
@@ -17,13 +18,18 @@ import { SET_EMAIL,
     SET_TOKEN_BALANCE, 
     SET_DAILY_TOKEN_BALANCE,
     SET_ETH_BALANCE } from '../Redux/ActionTypes';
+import { ModalLayout } from '../Reference';
 
 const Header = () => {
     const { user } = useSelector((state) => state);
     const dispatch = useDispatch();
+    const router = useRouter();
 
     const [isMenuOpen, setMenuOpen] = useState(false);
     const [arrowRotation, setArrowRotation] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
 
     const menuToggle = () => {
         setMenuOpen(!isMenuOpen);
@@ -31,8 +37,7 @@ const Header = () => {
     }
     
     const userInfo = async () => {
-        const accessToken = localStorage.getItem('access_token');
-        console.log(accessToken);
+        const accessToken = localStorage.getItem('accessToken');
         
         try {
             let response = await axios.get('http://localhost:4000/api/v1/users/myinfo', {
@@ -68,7 +73,40 @@ const Header = () => {
 
     useEffect(() => {
         userInfo();
-    }, [])
+    }, []);
+
+    const logOut = async () => {
+        try {
+            let response = await axios.post('http://localhost:4000/api/v1/users/logout', {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                withCredentials: true
+            });
+            if (response.data.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('로그아웃 되었습니다.');
+
+                localStorage.removeItem('accessToken');
+
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.push('/');
+                    router.reload();
+                }, 3000);
+            }
+        } catch (error) {
+            console.log(error);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
 
     
     return (
@@ -89,7 +127,7 @@ const Header = () => {
                                 Lv. {user.level}
                             </div>
                             <div>
-                                {user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5)}
+                                {user.nickname.length >= 8 ? user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5) : user.nickname}
                             </div>
                             <div className='relative cursor-pointer' style={{ transform: `rotate(${arrowRotation}deg)`, transition: 'transform 0.4s' }}>
                                 <BiSolidDownArrow onClick={menuToggle} />
@@ -163,7 +201,8 @@ const Header = () => {
                                             hover:bg-gray-300 
                                             transition 
                                             duration-300 
-                                            cursor-pointer">
+                                            cursor-pointer"
+                                            onClick={logOut}>
                                             <FiLogOut size={20} />
                                             LogOut
                                         </li>
@@ -215,6 +254,7 @@ const Header = () => {
                     )}
                 </div>
             </div>
+            <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     );
 }

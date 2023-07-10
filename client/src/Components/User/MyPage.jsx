@@ -25,10 +25,22 @@ const MyPage = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
 
+    useEffect(() => {
+        if (!user.email) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('로그인이 필요합니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.push('/users/signin');
+            }, 3000);
+        }
+    }, [user]);
+
     const handleTabChange = (tab) => {
         setActiveTab(tab);
     };
-
 
     const nicknameChange = (e) => {
         setNickname(e.target.value);
@@ -40,18 +52,20 @@ const MyPage = () => {
 
     const changeNickname = async () => {
         const formData = new FormData();
-        const accessToken = localStorage.getItem('access_token');
 
         formData.append('nickname', nickname);
+        console.log(nickname);
 
         try {
-            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
+            let response = await axios.post('http://localhost:4000/api/v1/users/change-nickname', formData, {
                 headers: {
-                    "Authorization": `Bearer ${accessToken}`
+                    "Authorization": `Bearer ${localStorage.getItem('accessToken')}`
                 }
             });
             console.log(response);
-            // dispatch({ type: SET_NICKNAME, payload: nickname });
+            dispatch({ type: SET_NICKNAME, payload: nickname });
+            router.reload();
+
         } catch (error) {
             console.log(error);
         }
@@ -119,13 +133,11 @@ const MyPage = () => {
     const totalPages = Math.ceil(posts.length / postsPerPage);
 
     const myPageInfo = async () => {
-        const accessToken = localStorage.getItem('access_token');
-        console.log(accessToken);
         
         try {
             let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
                 headers: {
-                    "Authorization": `Bearer ${accessToken}`
+                    "Authorization": `Bearer ${localStorage.getItem('accessToken')}`
                 }
             });
             if (response.status === 200) {
@@ -344,7 +356,10 @@ const MyPage = () => {
                         </div>
                         <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
                             <p>My Token : {user.tokenBalance} PH</p>
-                            <p>My ETH : {Number(user.ethBalance).toLocaleString()} ETH</p>
+                            <p>
+                                My ETH :  
+                                {Number(user.ethBalance).toLocaleString()} ETH
+                            </p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
                             {isEditing ? (
