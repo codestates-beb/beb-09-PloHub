@@ -1,8 +1,17 @@
 const cron = require("node-cron");
-const models = require("../models");
+const models = require("../contract-server/models");
 const Web3 = require("web3");
-const varEnv = require('../config/var');
+const varEnv = require('../contract-server/config/var');
 const web3 = new Web3(varEnv.rpcURL);
+
+
+// 데몬 구현 위해서 walletsDaemon, nftsDaemon 스키마 생성 후 테이블 생성 -> daemon.js 작성
+
+// 트랜잭션이 일어날 때 마다 controller에서 transaction 테이블에 트랜잭션 저장(type = wallets, nfts로 나눠서 데몬 실행 후 tpye을 확인 후 tpye에 맞는 데이터 베이스에 저장)
+
+// 사용자의 지갑 주소나 ERC20 or ERC721 컨트랙트 주소를 포함한 트랜잭션만 골라서 저장, ERC20 거래는 walletsDaemon에 ERC721거래는 nftsDaemon에 저장
+
+// 그리고 데몬을 실행하면 1초마다 데이터 베이스를 탐색(status: pending인 것만 다 찾아와서 하나하나 type 비교 후 맞는 데이터 베이스에 저장)
 
 
 // 최신블록넘버 조회
