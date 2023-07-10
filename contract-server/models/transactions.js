@@ -72,6 +72,8 @@ module.exports = (sequelize,DataTypes) => {
 });
 
     transactions.associate = (models) => {
-        transactions.belongTo(models.transactions, {foreignKey: 'hash'})
+        transactions.belongsTo(models.transactions, {foreignKey: 'hash'})
     }
+
+    return transactions
 };

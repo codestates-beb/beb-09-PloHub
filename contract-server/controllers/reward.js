@@ -1,6 +1,6 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/ICToken.json");
-const models = require("../models");
+const models = require("../models").default;
 const varEnv = require("../config/var");
 
 exports.reward = async (req, res) => {
@@ -52,6 +52,8 @@ exports.reward = async (req, res) => {
             return res.status(500).json({ error: "토큰 전송 권한 부여 실패!" });
           }
         }
+
+
 
         const transferResult = await contract.methods
           .transferFrom(senderAddress, receiverAddress, tokenAmount)

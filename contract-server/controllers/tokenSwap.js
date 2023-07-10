@@ -10,7 +10,7 @@
 // 4. main-server로 바뀐 사용자 토큰수량, ETH수량 전송
 const Web3 = require('web3');
 const abiSource = require('../abi/ICToken.json');
-const models = require('../models');
+const models = require('../models').default;
 const varEnv = require('../config/var');
 
 exports.tokenSwap = async (req,res) => {

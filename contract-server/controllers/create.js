@@ -1,6 +1,6 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/ICToken.json");
-const models = require("../models");
+const models = require("../models").default;
 const varEnv = require("../config/var");
 
 // 회원가입 처리 함수

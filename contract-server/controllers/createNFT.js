@@ -1,7 +1,7 @@
 const Web3 = require("web3");
 const abiSource = require("../abi/NFTLootBox.json");
 const abiSourceERC20 = require("../abi/ICToken.json");
-const models = require("../models");
+const models = require("../models").default;
 const varEnv = require("../config/var");
 const pinataSDK = require("@pinata/sdk");
 
@@ -118,6 +118,8 @@ exports.createNFT = async (req, res) => {
       const mintResult = await contract.methods
         .mintNFT(data.address, tokenURI, varEnv.senderAddress)
         .send({ from: userWallet.address, gas: 3000000 }); //유저가 가스비 부담 및  트랜잭션 서명
+
+      //status: pending
 
       //지갑 연결 해제
       web3.eth.accounts.wallet.remove(userWallet);
