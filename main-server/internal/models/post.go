@@ -20,13 +20,13 @@ type PostCategory int16
 
 const (
 	_ PostCategory = iota
-	PostCategoryEvent
+	PostCategoryEventInfo
 	PostCategoryCourseInfo
 	PostCategoryReview
 )
 
 func (c PostCategory) Valid() bool {
-	return c == PostCategoryEvent || c == PostCategoryCourseInfo || c == PostCategoryReview
+	return c == PostCategoryEventInfo || c == PostCategoryCourseInfo || c == PostCategoryReview
 }
 
 type CreatePostParams struct {
@@ -34,10 +34,12 @@ type CreatePostParams struct {
 	Title    string
 	Content  string
 	Category PostCategory
-	Media    []struct {
-		Type MediumType
-		Url  string
-	}
+	Media    []CreateMediumParams
+}
+
+type CreateMediumParams struct {
+	Type MediumType
+	Url  string
 }
 
 type EditPostParams struct {
@@ -87,6 +89,10 @@ type MediumInfo struct {
 	PostID int32  `json:"post_id"`
 	Type   int16  `json:"type"`
 	Url    string `json:"url"`
+}
+
+type GetPostsResponse struct {
+	Posts []PostInfo `json:"posts"`
 }
 
 func ToPostInfo(post plohub.Post) PostInfo {
