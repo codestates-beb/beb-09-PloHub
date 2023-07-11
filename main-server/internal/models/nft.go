@@ -26,6 +26,11 @@ type NFTMinted struct {
 	TokenAmount string `json:"token_amount"`
 }
 
+type MintNFTResponse struct {
+	CommonResponse
+	TokenID int32 `json:"token_id"`
+}
+
 type GetNFTDetailsRequest struct {
 	TokenID int32 `json:"token_id"`
 }
