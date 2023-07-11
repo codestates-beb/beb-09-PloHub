@@ -16,6 +16,9 @@ CREATE TABLE nfts (
   token_id int NOT NULL,
   token_uri varchar(255) NOT NULL,
   price decimal(20,0) DEFAULT 0,
+  name varchar(255) NOT NULL,
+  description varchar(255) NOT NULL,
+  image varchar(255) NOT NULL,
   created_at timestamp DEFAULT now()
 );
 
