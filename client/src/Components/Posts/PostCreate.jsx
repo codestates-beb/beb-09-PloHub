@@ -102,7 +102,7 @@ const PostCreate = () => {
                 }, 3000);
             }
         } catch (e) {
-            console.log('Error', e.message);
+            console.log('Error: ', e.message);
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody(e.message);
