@@ -19,7 +19,7 @@ const PostCreate = () => {
     const [selectedFile, setSelectedFile] = useState([]);
 
     useEffect(() => {
-        if (!user.email) {
+        if (!user) {
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody('로그인이 필요합니다.');
@@ -96,14 +96,6 @@ const PostCreate = () => {
             formData.append('videos', video);
         });
         
-        console.log('formData', formData.get('category'));
-
-        console.log('title', title);
-        console.log('content', content);
-        console.log('category', selectCategory);
-        console.log('images', images);
-        console.log('videos', videos);
-
         try {
             let response = await axios.post('http://localhost:4000/api/v1/posts/create', formData, {
                 headers: {
@@ -112,9 +104,25 @@ const PostCreate = () => {
                 withCredentials: true
             });
 
-            console.log(response);
+            if (response.data.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('게시글이 등록되었습니다.');
+
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.push('/users/mypage');
+                }, 3000);
+            }
         } catch (e) {
-            console.log(e);
+            console.log('Error', e.message);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(e.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
         }
     }
     
