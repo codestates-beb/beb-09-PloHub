@@ -9,26 +9,13 @@ const updateTransaction = require('./UpdateTransaction');
 //nftCreate
 exports.createNFT = async (req, res) => {
   try {
-    // 1. main server로 부터 nft를 민팅하려는 유저 정보(user_id)와 client에 입력된
-    //    nft 정보(image, name, description)를 받는다
-    // 2. 데이터 베이스에서 해당 유저의 지갑 정보(address, privateKey)를 가져온다
-    //      setToken함수로 사용할 토큰 타입 지정
-    // 3. 정보를 pinata에 업로드 후 tokenURI 반환 받는다.
-    //    (1. 사진 먼저 업로드, 사진 CID 반환 2. metadata객체에 사진 CID와 나머지 정보를 담아 업로드,
-    //     최종 tokenURI 반환)
-    // 4. 컨트랙트 객체와 지갑비밀키 연결(트랜잭션 서명자 지정) XXXX(send: from만 지정해주면 됨)
-    // 5. contract.methods.mintNFT(발행자, tokenURI).send() 실행(구매하는게 아니기 때문에 아직 setToken필요 X)
-    // 6. 트랜잭션이 성공적으로 실행되면 데이터 베이스에 nft 정보들 저장
-    // 7. 서명자는 가스비를 썼기 때문에 eth_amount도 최신화
-    // 8. NFT price는 일단 고정 (100e18)
-    // 9. client에 바로 성공 메세지 전송??? 아니면 main 서버 거쳐서(굳이??)
-
     //pinata 객체 생성
     const pinata = new pinataSDK(varEnv.pinataAPI, varEnv.pinataSecret);
     const { name, description, image, user_id } = req.body;
 
-    if (!name || !description || !image || !user_id){
-      res.status(400).json({message: 'NFT data error'});
+    //name image user_id는 필수!
+    if (!name || !image || !user_id){
+      res.status(400).json({message: 'Invalid request'});
     }
 
     const abi = abiSource.abi;
@@ -56,8 +43,7 @@ exports.createNFT = async (req, res) => {
     if (data.token_amount < 20) {
       res.status(400).json({ message: "Insufficient token balance" });
     } else {
-      //만약 많다면 NFT 발행 가능!
-      //일단 토큰 URI를 얻어야함
+      //만약 많다면 NFT 발행 가능
 
       //createButton을 누르면 메타 마스크처럼 뭔가 창이 하나 떠서 확인버튼을 누를 수 있게끔하면 좋을거 같음
       const tokenSet = await contract.methods
@@ -108,8 +94,6 @@ exports.createNFT = async (req, res) => {
       );
 
       const tokenURI = `ifps://${metadataResult.IpfsHash}`;
-
-      //여기까지 완료
 
       // 사용자 지갑과 컨트랙트 객체 연결
       const userWallet = web3.eth.accounts.privateKeyToAccount(
@@ -176,8 +160,6 @@ exports.createNFT = async (req, res) => {
           console.log("data upload is failed..");
           res.status(400).json({ message: "data upload is failed.." });
         }
-        //TODO : 토큰을 썻기 떄문에 사용자의 토큰 수량 wallet에 업데이트, main-server 데이터 베이스에도 업로드
-        //해줘야 하기 때문에 response에 업데이트 후 사용자 토큰 수량 전송!! 이 부분 만들어야함
       }
     }
   } catch (error) {

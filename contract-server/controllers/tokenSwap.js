@@ -1,13 +1,3 @@
-//토큰 스왑 방식
-//토큰을 이더로 교환할 지갑에서 토큰을 꺼내서 서버 계좌로 보내줌
-//서버 계좌에서는 토크을 보낸 지갑으로 해당하는 비율 만큼 이더를 보내준다
-//이더를 전송하고 토큰으로 받는 것은 X, 토큰은 오직 활동을 통해서만 받을 수 있다!
-
-// 1. 사용자 지갑 -> 서버 지갑 토큰 전송
-// if 토큰 전송이 완료된다면 
-// 2. 서버 지갑 -> 사용자 지갑 ETH전송
-// 3. ETH 전송 완료되면 데이터베이스 최신화
-// 4. main-server로 바뀐 사용자 토큰수량, ETH수량 전송
 const Web3 = require('web3');
 const abiSource = require('../abi/ICToken.json');
 const models = require('../models');
@@ -29,6 +19,10 @@ exports.tokenSwap = async (req,res) => {
                 user_id: user_id
             }
         });
+
+        if (!sender) {
+            res.status(400).json({message: 'Invalid userId'});
+        }
 
         const senderAddress = sender.address;
 
@@ -95,6 +89,7 @@ exports.tokenSwap = async (req,res) => {
         console.log("ETH transfer 성공!!");
         } else {
         console.log("ETH transfer 실패!!");
+        res.status(400).json({message: 'failed ETH transfer'});
         }
 
         //데이터 베이스 최신화
