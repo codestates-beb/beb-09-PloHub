@@ -9,7 +9,7 @@ import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
 import { format } from 'date-fns';
 import { logoBlack, ploHub, ModalLayout } from '../Reference'
 
-const MyPage = ({ userInfo }) => {
+const MyPage = () => {
     const router = useRouter();
     const currentDate = new Date();
     const user = useSelector((state) => state.user);
@@ -24,21 +24,6 @@ const MyPage = ({ userInfo }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
-
-    console.log(userInfo);
-
-    useEffect(() => {
-        if (!user.email) {
-            setIsModalOpen(true);
-            setModalTitle('Error');
-            setModalBody('로그인이 필요합니다.');
-
-            setTimeout(() => {
-                setIsModalOpen(false);
-                router.push('/users/signin');
-            }, 3000);
-        }
-    }, [user]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);

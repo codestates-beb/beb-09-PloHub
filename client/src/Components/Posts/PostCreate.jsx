@@ -18,19 +18,6 @@ const PostCreate = () => {
     const [images, setImages] = useState([]);
     const [videos, setVideos] = useState([]);
 
-    useEffect(() => {
-        if (!user.email) {
-            setIsModalOpen(true);
-            setModalTitle('Error');
-            setModalBody('로그인이 필요합니다.');
-
-            setTimeout(() => {
-                setIsModalOpen(false);
-                router.push('/users/signin');
-            }, 3000);
-        }
-    }, [user]);
-
     const categoryChange = (e) => {
         setSelectCategory(e.target.value);
     }
