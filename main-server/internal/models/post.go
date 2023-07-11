@@ -63,10 +63,17 @@ type PostDetail struct {
 	Media    []MediumInfo  `json:"media"`
 }
 
+type Author struct {
+	ID       int32  `json:"id"`
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Level    int16  `json:"level"`
+	Address  string `json:"address"`
+}
+
 type PostInfo struct {
 	ID           int32     `json:"id"`
-	Author       string    `json:"author"`
-	AuthorEmail  string    `json:"author_email"`
+	Author       Author    `json:"author"`
 	Title        string    `json:"title"`
 	Content      string    `json:"content"`
 	Category     int16     `json:"category"`
@@ -100,8 +107,11 @@ type GetPostsResponse struct {
 func ToPostInfo(post plohub.GetPostByIDRow) PostInfo {
 	postInfo := PostInfo{}
 	postInfo.ID = post.ID
-	postInfo.Author = post.Author.String
-	postInfo.AuthorEmail = post.AuthorEmail.String
+	postInfo.Author.ID = post.UserID
+	postInfo.Author.Nickname = post.Author.String
+	postInfo.Author.Email = post.AuthorEmail.String
+	postInfo.Author.Level = post.AuthorLevel.Int16
+	postInfo.Author.Address = post.AuthorAddress.String
 	postInfo.Title = post.Title
 	postInfo.Content = post.Content
 	postInfo.Category = post.Category
@@ -125,7 +135,6 @@ func ToCommentInfo(comment plohub.Comment) CommentInfo {
 	commentInfo.ID = comment.ID
 	commentInfo.PostID = comment.PostID
 	commentInfo.UserID = comment.UserID
-	commentInfo.Nickname = comment.Nickname
 	commentInfo.Content = comment.Content
 	commentInfo.RewardAmount = comment.RewardAmount
 	commentInfo.CreatedAt = comment.CreatedAt
