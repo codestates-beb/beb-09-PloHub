@@ -68,7 +68,7 @@ exports.createWallet = async (req, res) => {
       .send({ from: senderAddress });
     if (!approveResult.status) {
       console.log("토큰 전송 권한 부여 실패!");
-      return res.status(500).json({ error: "토큰 전송 권한 부여 실패!" });
+      return res.status(400).json({ error: "토큰 전송 권한 부여 실패!" });
     }
 
     updateTransaction("token");
@@ -78,7 +78,7 @@ exports.createWallet = async (req, res) => {
       .send({ from: senderAddress });
     if (!transferResult.status) {
       console.log("토큰 전송 실패!");
-      return res.status(500).json({ error: "error!!" });
+      return res.status(400).json({ error: "error!!" });
     }
 
     updateTransaction('token');
