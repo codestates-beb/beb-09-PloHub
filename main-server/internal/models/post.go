@@ -65,7 +65,8 @@ type PostDetail struct {
 
 type PostInfo struct {
 	ID           int32     `json:"id"`
-	UserID       int32     `json:"user_id"`
+	Author       string    `json:"author"`
+	AuthorEmail  string    `json:"author_email"`
 	Title        string    `json:"title"`
 	Content      string    `json:"content"`
 	Category     int16     `json:"category"`
@@ -96,10 +97,11 @@ type GetPostsResponse struct {
 	Posts []PostInfo `json:"posts"`
 }
 
-func ToPostInfo(post plohub.Post) PostInfo {
+func ToPostInfo(post plohub.GetPostByIDRow) PostInfo {
 	postInfo := PostInfo{}
 	postInfo.ID = post.ID
-	postInfo.UserID = post.UserID
+	postInfo.Author = post.Author.String
+	postInfo.AuthorEmail = post.AuthorEmail.String
 	postInfo.Title = post.Title
 	postInfo.Content = post.Content
 	postInfo.Category = post.Category
@@ -110,7 +112,7 @@ func ToPostInfo(post plohub.Post) PostInfo {
 	return postInfo
 }
 
-func ToPostInfos(posts []plohub.Post) []PostInfo {
+func ToPostInfos(posts []plohub.GetPostByIDRow) []PostInfo {
 	postInfos := make([]PostInfo, len(posts))
 	for i, post := range posts {
 		postInfos[i] = ToPostInfo(post)
@@ -155,7 +157,7 @@ func ToMediumInfos(media []plohub.Medium) []MediumInfo {
 	return mediumInfos
 }
 
-func ToPostDetail(post plohub.Post, comments []plohub.Comment, media []plohub.Medium) PostDetail {
+func ToPostDetail(post plohub.GetPostByIDRow, comments []plohub.Comment, media []plohub.Medium) PostDetail {
 	postDetail := PostDetail{}
 	postDetail.PostInfo = ToPostInfo(post)
 	postDetail.Comments = ToCommentInfos(comments)

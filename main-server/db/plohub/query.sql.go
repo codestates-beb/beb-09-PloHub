@@ -8,6 +8,7 @@ package plohub
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createComment = `-- name: CreateComment :exec
@@ -276,20 +277,38 @@ func (q *Queries) GetMediaByPostID(ctx context.Context, postID int32) ([]Medium,
 }
 
 const getPostByID = `-- name: GetPostByID :one
-SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE id = $1
+select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+from posts as p
+left join users as u on p.user_id = u.id where p.id = $1
 `
 
-func (q *Queries) GetPostByID(ctx context.Context, id int32) (Post, error) {
+type GetPostByIDRow struct {
+	ID           int32
+	UserID       int32
+	Author       sql.NullString
+	AuthorEmail  sql.NullString
+	Title        string
+	Content      string
+	Category     int16
+	Nftnized     bool
+	RewardAmount int32
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+func (q *Queries) GetPostByID(ctx context.Context, id int32) (GetPostByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getPostByID, id)
-	var i Post
+	var i GetPostByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.Author,
+		&i.AuthorEmail,
 		&i.Title,
 		&i.Content,
 		&i.Category,
-		&i.RewardAmount,
 		&i.Nftnized,
+		&i.RewardAmount,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -297,7 +316,10 @@ func (q *Queries) GetPostByID(ctx context.Context, id int32) (Post, error) {
 }
 
 const getPosts = `-- name: GetPosts :many
-SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts limit $1 offset $2
+select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+from posts as p
+left join users as u on p.user_id = u.id
+limit $1 offset $2
 `
 
 type GetPostsParams struct {
@@ -305,23 +327,39 @@ type GetPostsParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, error) {
+type GetPostsRow struct {
+	ID           int32
+	UserID       int32
+	Author       sql.NullString
+	AuthorEmail  sql.NullString
+	Title        string
+	Content      string
+	Category     int16
+	Nftnized     bool
+	RewardAmount int32
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]GetPostsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPosts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetPostsRow
 	for rows.Next() {
-		var i Post
+		var i GetPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.Author,
+			&i.AuthorEmail,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardAmount,
 			&i.Nftnized,
+			&i.RewardAmount,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -339,7 +377,10 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]Post, err
 }
 
 const getPostsByCategory = `-- name: GetPostsByCategory :many
-SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE category = $1 limit $2 offset $3
+select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+from posts as p
+left join users as u on p.user_id = u.id
+WHERE category = $1 limit $2 offset $3
 `
 
 type GetPostsByCategoryParams struct {
@@ -348,23 +389,39 @@ type GetPostsByCategoryParams struct {
 	Offset   int32
 }
 
-func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]Post, error) {
+type GetPostsByCategoryRow struct {
+	ID           int32
+	UserID       int32
+	Author       sql.NullString
+	AuthorEmail  sql.NullString
+	Title        string
+	Content      string
+	Category     int16
+	Nftnized     bool
+	RewardAmount int32
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]GetPostsByCategoryRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsByCategory, arg.Category, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetPostsByCategoryRow
 	for rows.Next() {
-		var i Post
+		var i GetPostsByCategoryRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.Author,
+			&i.AuthorEmail,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardAmount,
 			&i.Nftnized,
+			&i.RewardAmount,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -382,26 +439,45 @@ func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategory
 }
 
 const getPostsByUserID = `-- name: GetPostsByUserID :many
-SELECT id, user_id, title, content, category, reward_amount, nftnized, created_at, updated_at FROM posts WHERE user_id = $1
+select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+from posts as p
+left join users as u on p.user_id = u.id
+WHERE user_id = $1
 `
 
-func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]Post, error) {
+type GetPostsByUserIDRow struct {
+	ID           int32
+	UserID       int32
+	Author       sql.NullString
+	AuthorEmail  sql.NullString
+	Title        string
+	Content      string
+	Category     int16
+	Nftnized     bool
+	RewardAmount int32
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]GetPostsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetPostsByUserIDRow
 	for rows.Next() {
-		var i Post
+		var i GetPostsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.Author,
+			&i.AuthorEmail,
 			&i.Title,
 			&i.Content,
 			&i.Category,
-			&i.RewardAmount,
 			&i.Nftnized,
+			&i.RewardAmount,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

@@ -58,8 +58,25 @@ func (s *service) GetPosts(ctx context.Context, limit, page int32) ([]models.Pos
 			return err
 		}
 
+		postInfos = make([]models.PostInfo, 0, len(posts))
+
 		// convert posts to postInfos
-		postInfos = models.ToPostInfos(posts)
+		for _, post := range posts {
+			postInfo := models.PostInfo{
+				ID:           post.ID,
+				Author:       post.Author.String,
+				AuthorEmail:  post.AuthorEmail.String,
+				Title:        post.Title,
+				Content:      post.Content,
+				Category:     post.Category,
+				RewardAmount: post.RewardAmount,
+				Nftnized:     post.Nftnized,
+				CreatedAt:    post.CreatedAt,
+				UpdatedAt:    post.UpdatedAt,
+			}
+
+			postInfos = append(postInfos, postInfo)
+		}
 
 		return nil
 	}
@@ -95,7 +112,24 @@ func (s *service) GetPostsByCategory(ctx context.Context, category int16, limit,
 		}
 
 		// convert posts to postInfos
-		postInfos = models.ToPostInfos(posts)
+		postInfos = make([]models.PostInfo, 0, len(posts))
+
+		for _, post := range posts {
+			postInfo := models.PostInfo{
+				ID:           post.ID,
+				Author:       post.Author.String,
+				AuthorEmail:  post.AuthorEmail.String,
+				Title:        post.Title,
+				Content:      post.Content,
+				Category:     post.Category,
+				RewardAmount: post.RewardAmount,
+				Nftnized:     post.Nftnized,
+				CreatedAt:    post.CreatedAt,
+				UpdatedAt:    post.UpdatedAt,
+			}
+
+			postInfos = append(postInfos, postInfo)
+		}
 
 		return nil
 	}
