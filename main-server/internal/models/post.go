@@ -84,10 +84,13 @@ type PostInfo struct {
 }
 
 type CommentInfo struct {
-	ID           int32     `json:"id"`
-	PostID       int32     `json:"post_id"`
-	UserID       int32     `json:"user_id"`
-	Nickname     string    `json:"nickname"`
+	ID     int32 `json:"id"`
+	PostID int32 `json:"post_id"`
+	Author struct {
+		ID       int32  `json:"id"`
+		Nickname string `json:"nickname"`
+		Level    int16  `json:"level"`
+	} `json:"author"`
 	Content      string    `json:"content"`
 	RewardAmount int32     `json:"reward_amount"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -130,18 +133,20 @@ func ToPostInfos(posts []plohub.GetPostByIDRow) []PostInfo {
 	return postInfos
 }
 
-func ToCommentInfo(comment plohub.Comment) CommentInfo {
+func ToCommentInfo(comment plohub.GetCommentsByPostIDRow) CommentInfo {
 	commentInfo := CommentInfo{}
 	commentInfo.ID = comment.ID
 	commentInfo.PostID = comment.PostID
-	commentInfo.UserID = comment.UserID
+	commentInfo.Author.ID = comment.UserID
+	commentInfo.Author.Nickname = comment.Nickname.String
+	commentInfo.Author.Level = comment.Level.Int16
 	commentInfo.Content = comment.Content
 	commentInfo.RewardAmount = comment.RewardAmount
 	commentInfo.CreatedAt = comment.CreatedAt
 	return commentInfo
 }
 
-func ToCommentInfos(comments []plohub.Comment) []CommentInfo {
+func ToCommentInfos(comments []plohub.GetCommentsByPostIDRow) []CommentInfo {
 	commentInfos := make([]CommentInfo, len(comments))
 	for i, comment := range comments {
 		commentInfos[i] = ToCommentInfo(comment)
@@ -166,7 +171,7 @@ func ToMediumInfos(media []plohub.Medium) []MediumInfo {
 	return mediumInfos
 }
 
-func ToPostDetail(post plohub.GetPostByIDRow, comments []plohub.Comment, media []plohub.Medium) PostDetail {
+func ToPostDetail(post plohub.GetPostByIDRow, comments []plohub.GetCommentsByPostIDRow, media []plohub.Medium) PostDetail {
 	postDetail := PostDetail{}
 	postDetail.PostInfo = ToPostInfo(post)
 	postDetail.Comments = ToCommentInfos(comments)

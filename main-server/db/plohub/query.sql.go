@@ -172,22 +172,38 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 }
 
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
-SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE post_id = $1
+select c.id, c.post_id, c.user_id, u.nickname, u.level, c.content, c.reward_amount, c.created_at
+from comments as c
+left join users as u on c.user_id = u.id
+where post_id = $1
 `
 
-func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comment, error) {
+type GetCommentsByPostIDRow struct {
+	ID           int32
+	PostID       int32
+	UserID       int32
+	Nickname     sql.NullString
+	Level        sql.NullInt16
+	Content      string
+	RewardAmount int32
+	CreatedAt    time.Time
+}
+
+func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]GetCommentsByPostIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCommentsByPostID, postID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Comment
+	var items []GetCommentsByPostIDRow
 	for rows.Next() {
-		var i Comment
+		var i GetCommentsByPostIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
+			&i.Nickname,
+			&i.Level,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,
@@ -206,22 +222,38 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 }
 
 const getCommentsByUserID = `-- name: GetCommentsByUserID :many
-SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE user_id = $1
+select c.id, c.post_id, c.user_id, u.nickname, u.level, c.content, c.reward_amount, c.created_at
+from comments as c
+left join users as u on c.user_id = u.id
+where user_id = $1
 `
 
-func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comment, error) {
+type GetCommentsByUserIDRow struct {
+	ID           int32
+	PostID       int32
+	UserID       int32
+	Nickname     sql.NullString
+	Level        sql.NullInt16
+	Content      string
+	RewardAmount int32
+	CreatedAt    time.Time
+}
+
+func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]GetCommentsByUserIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getCommentsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Comment
+	var items []GetCommentsByUserIDRow
 	for rows.Next() {
-		var i Comment
+		var i GetCommentsByUserIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
+			&i.Nickname,
+			&i.Level,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,
