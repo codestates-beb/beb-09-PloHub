@@ -29,10 +29,11 @@ type Config struct {
 		ContractServerBaseURL string `mapstructure:"contract_server_base_url"`
 	} `mapstructure:"server"`
 	S3 struct {
-		Region    string `mapstructure:"region"`
-		AccessKey string `mapstructure:"access_key"`
-		SecretKey string `mapstructure:"secret_key"`
-		Bucket    string `mapstructure:"bucket"`
+		Region     string `mapstructure:"region"`
+		AccessKey  string `mapstructure:"access_key"`
+		SecretKey  string `mapstructure:"secret_key"`
+		MainBucket string `mapstructure:"main_bucket"`
+		NFTBucket  string `mapstructure:"nft_bucket"`
 	} `mapstructure:"s3"`
 }
 

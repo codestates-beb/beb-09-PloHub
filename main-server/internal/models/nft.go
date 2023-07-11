@@ -13,17 +13,22 @@ type NFT struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-type CreateNFTRequest struct {
+type MintNFTRequest struct {
 	UserID      int32  `json:"user_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Image       string `json:"image"`
 }
 
-type NFTCreated struct {
+type NFTMinted struct {
 	TokenID     int32  `json:"token_id"`
 	EthAmount   string `json:"eth_amount"`
 	TokenAmount string `json:"token_amount"`
+}
+
+type MintNFTResponse struct {
+	CommonResponse
+	TokenID int32 `json:"token_id"`
 }
 
 type GetNFTDetailsRequest struct {
