@@ -229,7 +229,24 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 		// TODO: request NFTs by user id
 
 		myPageInfo.UserInfo = *models.ToUserInfo(user)
-		myPageInfo.Posts = models.ToPostInfos(posts)
+
+		myPageInfo.Posts = make([]models.PostInfo, len(posts))
+
+		for i, post := range posts {
+			myPageInfo.Posts[i] = models.PostInfo{
+				ID:           post.ID,
+				Author:       post.Author.String,
+				AuthorEmail:  post.AuthorEmail.String,
+				Title:        post.Title,
+				Content:      post.Content,
+				Category:     post.Category,
+				RewardAmount: post.RewardAmount,
+				Nftnized:     post.Nftnized,
+				CreatedAt:    post.CreatedAt,
+				UpdatedAt:    post.UpdatedAt,
+			}
+		}
+
 		myPageInfo.NFTs = nil
 
 		return nil
