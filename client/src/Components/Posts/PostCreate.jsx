@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router';
-import 'react-quill/dist/quill.snow.css';
+import axios from 'axios';
+import Editor from './Editor';
 import { ModalLayout } from '../Reference';
 
 const PostCreate = () => {
@@ -13,6 +13,10 @@ const PostCreate = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
     const [selectCategory, setSelectCategory] = useState('');
+    const [title, setTitle] = useState('');
+    const [content, setContent ] = useState('');
+    const [images, setImages] = useState([]);
+    const [videos, setVideos] = useState([]);
 
     useEffect(() => {
         if (!user.email) {
@@ -47,50 +51,39 @@ const PostCreate = () => {
         userLevelCheck()
     }, [selectCategory]);
 
-    const QuillWrapper = dynamic(() => import('react-quill'), {
-        ssr: false,
-        loading: () => <p>Loading ...</p>,
-    });
+    const createPost = async () => {
 
-    const modules = {
-        toolbar: [
-            [{ header: '1' }, { header: '2' }, { font: [] }],
-            [{ size: [] }],
-            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [
-                { list: 'ordered' },
-                { list: 'bullet' },
-                { indent: '-1' },
-                { indent: '+1' },
-            ],
-            ['link', 'image', 'video'],
-            ['clean'],
-        ],
-        clipboard: {
-          // toggle to add extra line breaks when pasting HTML:
-            matchVisual: false,
-        },
+        const formData = new FormData();
+
+        formData.append('title', title);
+        formData.append('content', content);
+        if(selectCategory === 'eventinfo') {
+            formData.append('category', 1);
+        } else if (selectCategory === 'courseinfo') {
+            formData.append('category', 2);
+        } else if (selectCategory === 'review') {
+            formData.append('category', 3);
+        }
+        formData.append('images', images);
+        formData.append('videos', videos);
+
+        console.log('title', title);
+        console.log('content', content);
+        console.log('category', selectCategory);
+        console.log('images', images);
+        console.log('videos', videos);
+
+        try {
+            let response = await axios.post('http://localhost:4000/api/v1/posts/create', formData, {
+                withCredentials: true
+            });
+
+            console.log(response);
+        } catch (e) {
+            console.log(e);
+        }
     }
-    /*
-    * Quill editor formats
-    * See https://quilljs.com/docs/formats/
-    */
-    const formats = [
-        'header',
-        'font',
-        'size',
-        'bold',
-        'italic',
-        'underline',
-        'strike',
-        'blockquote',
-        'list',
-        'bullet',
-        'indent',
-        'link',
-        'image',
-        'video',
-    ]
+    
 
     return (
         <>
@@ -119,10 +112,15 @@ const PostCreate = () => {
                     </select>
                 </div>
                 <div className='w-2/5'>
-                    <input className='w-full border-b focus:border-black transition duration-300 py-2 px-3' type="text" name="" placeholder='제목을 입력해 주세요'/>
+                    <input 
+                        className='w-full border-b focus:border-black transition duration-300 py-2 px-3' 
+                        type="text" 
+                        name="" 
+                        placeholder='제목을 입력해 주세요'
+                        onChange={(e) => setTitle(e.target.value)}/>
                 </div>
                 <div className='w-full h-[45rem]'>
-                    <QuillWrapper modules={modules} formats={formats} theme="snow" placeholder={'내용을 입력해주세요.'} style={{ height: '100%'}}/>
+                    <Editor content={content} setContent={setContent}/>
                 </div>
                 <div className='w-full flex gap-3 justify-end mt-16'>
                     <button className='
@@ -147,7 +145,8 @@ const PostCreate = () => {
                         text-white 
                         hover:bg-blue-main 
                         transition 
-                        duration-300'>
+                        duration-300'
+                        onClick={createPost}>
                         Create
                     </button>
                 </div>
