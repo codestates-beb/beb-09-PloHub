@@ -74,4 +74,5 @@ module.exports = (sequelize,DataTypes) => {
 ethTransaction.associate = (models) => {
     ethTransaction.belongsTo(models.ethTransaction, {foreignKey: 'blockNumber'})
     }
+    return ethTransaction;
 };

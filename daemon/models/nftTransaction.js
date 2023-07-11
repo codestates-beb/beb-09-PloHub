@@ -74,4 +74,5 @@ module.exports = (sequelize,DataTypes) => {
 nftTransaction.associate = (models) => {
     nftTransaction.belongsTo(models.nftTransaction, {foreignKey: 'blockNumber'})
     }
+    return nftTransaction;
 };

@@ -1,6 +1,6 @@
 const { Sequelize } = require("sequelize");
 const env = process.env.NODE_ENV || "development";
-const config = require("../config/config")[env]; //설정한 config 에서 'development' config 가져오자.
+const config = require("../config/config.json")[env]; //설정한 config 에서 'development' config 가져오자.
 const db = {};
 
 const sequelize = new Sequelize(

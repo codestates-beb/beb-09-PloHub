@@ -46,7 +46,7 @@ ALTER TABLE nfts ADD FOREIGN KEY (user_id) REFERENCES wallets (user_id);
     type VARCHAR(255)
 );
 
- CREATE TABLE ethTransactions (
+ CREATE TABLE ethTransaction (
     hash VARCHAR(255) NOT NULL,
     nonce VARCHAR(255) NOT NULL,
     blockHash VARCHAR(255) DEFAULT "",
@@ -66,7 +66,7 @@ ALTER TABLE nfts ADD FOREIGN KEY (user_id) REFERENCES wallets (user_id);
 );
 
 
- CREATE TABLE tokenTransactions (
+ CREATE TABLE tokenTransaction (
     hash VARCHAR(255) NOT NULL,
     nonce VARCHAR(255) NOT NULL,
     blockHash VARCHAR(255) DEFAULT "",
@@ -85,7 +85,7 @@ ALTER TABLE nfts ADD FOREIGN KEY (user_id) REFERENCES wallets (user_id);
     type VARCHAR(255)
 );
 
- CREATE TABLE nftTransactions (
+ CREATE TABLE nftTransaction (
     hash VARCHAR(255) NOT NULL,
     nonce VARCHAR(255) NOT NULL,
     blockHash VARCHAR(255) DEFAULT "",

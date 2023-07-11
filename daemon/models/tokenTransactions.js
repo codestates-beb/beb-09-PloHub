@@ -72,6 +72,7 @@ module.exports = (sequelize,DataTypes) => {
 });
 
 tokenTransaction.associate = (models) => {
-    tokenTransaction.belongTo(models.tokenTransaction, {foreignKey: 'blockNumber'})
+    tokenTransaction.belongsTo(models.tokenTransaction, {foreignKey: 'blockNumber'})
     }
+    return tokenTransaction;
 };
