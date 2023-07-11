@@ -18,8 +18,9 @@ exports.nftDetail = async (req,res) => {
     const nftData = nftInfo.dataValues;
     console.log(nftData);
 
-    res.status(200).json({message: 'OK', owner_address: nftData.owner_address, token_uri: nftData.token_uri, price: nftData.price});
-    
+    res.status(200).json({message: 'OK', owner_address: nftData.owner_address, price: nftData.price, name:nftData.name, description: nftData.description, image: nftData.image});
+    //  
+
     }catch(error){
         console.log(error);
         res.status(500).json({error: error});

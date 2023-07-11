@@ -138,6 +138,9 @@ exports.createNFT = async (req, res) => {
           token_id: mintResult.events.Transfer.returnValues.tokenId,
           token_uri: tokenURI,
           price: 20,
+          name: name,
+          description: description,
+          image: image
         });
         //가스비 및 토큰 사용했기 때문에 데이터 베이스에 업로드 후 메인 서버로 변동 사항 반환
         if (createNFTData) {

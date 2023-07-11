@@ -27,6 +27,18 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.DECIMAL(20, 0),
           defaultValue: 0
         },
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        description: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        image: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
         created_at: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW
