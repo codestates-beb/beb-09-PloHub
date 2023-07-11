@@ -38,7 +38,7 @@ connectToDatabase;
 app.use((err, req, res, next) => {
   //에러발생시 처리 next(err)
   console.error(err.stack);
-  return res.status(400).send({ message: "something broke" });
+  return res.status(500).send({ message: "something broke" });
 });
 
 app.use((req, res, next) => {
