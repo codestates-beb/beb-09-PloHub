@@ -46,6 +46,9 @@ SELECT * FROM media WHERE post_id = $1;
 -- name: DeleteMedia :exec
 DELETE FROM media WHERE id = $1;
 
+-- name: DeleteMediaByPostID :exec
+DELETE FROM media WHERE post_id = $1;
+
 -- name: CreateComment :exec
 INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4);
 
@@ -63,3 +66,6 @@ UPDATE comments SET content = $1 WHERE id = $2;
 
 -- name: DeleteComment :exec
 DELETE FROM comments WHERE id = $1;
+
+-- name: DeleteCommentsByPostID :exec
+DELETE FROM comments WHERE post_id = $1;

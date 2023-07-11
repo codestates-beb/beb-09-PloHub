@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -31,6 +32,7 @@ var (
 type Service interface {
 	UploadFile(ctx context.Context, filename string, file io.Reader) (string, error)
 	DeleteFile(ctx context.Context, filename string) error
+	ToFilename(url string) string
 }
 
 type service struct {
@@ -98,4 +100,9 @@ func (s *service) DeleteFile(ctx context.Context, filename string) error {
 	}
 
 	return nil
+}
+
+// ToFilename converts URL to filename
+func (s *service) ToFilename(url string) string {
+	return strings.TrimPrefix(url, fmt.Sprintf("https://%s.s3.%s.amazonaws.com/", s.bucket, s.region))
 }
