@@ -118,7 +118,7 @@ export default function Home({ postList }) {
                                         <p className="text-gray-600"> {post.content}</p>
                                     </td>
                                     <td className="border-b p-6">
-                                        <p className="text-gray-600"> {post.writer}</p>
+                                        <p className="text-gray-600"> {post.author.nickname}</p>
                                     </td>
                                     <td className="border-b p-6">
                                         <p className="text-gray-600"> 
