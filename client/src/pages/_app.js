@@ -14,13 +14,12 @@ function App({ Component, pageProps }) {
         const refresh = async () => {
             try {
                 const response = await axios.post('http://localhost:4000/api/v1/users/refresh', {}, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                    },
                     withCredentials: true
                 });
             
                 const { access_token } = response.data;
+
+                console.log('refresh access_token', access_token);
             
             } catch (error) {
                 console.log(error);

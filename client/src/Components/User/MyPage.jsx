@@ -9,7 +9,7 @@ import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
 import { format } from 'date-fns';
 import { logoBlack, ploHub, ModalLayout } from '../Reference'
 
-const MyPage = () => {
+const MyPage = ({ userInfo }) => {
     const router = useRouter();
     const currentDate = new Date();
     const user = useSelector((state) => state.user);
@@ -24,6 +24,8 @@ const MyPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
+
+    console.log(userInfo);
 
     useEffect(() => {
         if (!user.email) {
@@ -58,9 +60,7 @@ const MyPage = () => {
 
         try {
             let response = await axios.post('http://localhost:4000/api/v1/users/change-nickname', formData, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('accessToken')}`
-                }
+                withCredentials: true
             });
             console.log(response);
             dispatch({ type: SET_NICKNAME, payload: nickname });
@@ -136,30 +136,11 @@ const MyPage = () => {
         
         try {
             let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('accessToken')}`
-                }
+                withCredentials: true
             });
             if (response.status === 200) {
                 // 서버로부터 받은 사용자 정보
-                // const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data;
                 console.log(response);
-
-                // console.log('email: ' + email);
-                // console.log('address: ' + address);
-                // console.log('nickname: ' + nickname);
-                // console.log('level: ' + level);
-                // console.log('token: ' + token_amount);
-                // console.log('daily: ' + daily_token);
-                // console.log('eth_amount: ' + eth_amount);
-
-                // dispatch({ type: SET_EMAIL, payload: email });
-                // dispatch({ type: SET_ADDRESS, payload: address });
-                // dispatch({ type: SET_NICKNAME, payload: nickname });
-                // dispatch({ type: SET_LEVEL, payload: level });
-                // dispatch({ type: SET_TOKEN_BALANCE, payload: token_amount });
-                // dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
-                // dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
             }
         } catch (error) {
             console.error("Failed to fetch user info: ", error);
