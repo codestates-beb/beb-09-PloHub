@@ -68,6 +68,10 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		page = int32(pageInt)
+		if page < 1 {
+			utils.ErrorJSON(w, errors.New("invalid page"), http.StatusBadRequest)
+			return
+		}
 	} else {
 		page = 1
 	}
@@ -80,6 +84,10 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		limit = int32(limitInt)
+		if limit < 1 {
+			utils.ErrorJSON(w, errors.New("invalid limit"), http.StatusBadRequest)
+			return
+		}
 	} else {
 		limit = 10
 	}
@@ -92,6 +100,10 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		category = int16(categoryInt)
+		if !models.PostCategory(category).Valid() {
+			utils.ErrorJSON(w, errors.New("invalid category"), http.StatusBadRequest)
+			return
+		}
 	} else {
 		category = 0
 	}
@@ -150,6 +162,11 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !models.PostCategory(categoryInt).Valid() {
+		utils.ErrorJSON(w, errors.New("invalid category"), http.StatusBadRequest)
+		return
+	}
+
 	var media []models.CreateMediumParams
 
 	uuid := uuid.New().String()
@@ -165,7 +182,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 			}
 			defer file.Close()
 
-			filename := fmt.Sprintf("%s_%d_%s", uuid, i, image.Filename)
+			filename := fmt.Sprintf("%s_image_%d_%s", uuid, i, image.Filename)
 
 			url, err := pc.storeSvc.UploadFile(r.Context(), filename, file)
 			if err != nil {
@@ -192,7 +209,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 			}
 			defer file.Close()
 
-			filename := fmt.Sprintf("%s_%d_%s", uuid, i, video.Filename)
+			filename := fmt.Sprintf("%s_video_%d_%s", uuid, i, video.Filename)
 
 			url, err := pc.storeSvc.UploadFile(r.Context(), filename, file)
 			if err != nil {
