@@ -20,7 +20,3 @@ type JWTUser struct {
 	ID    int32  `json:"id"`
 	Email string `json:"email"`
 }
-
-type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-}
