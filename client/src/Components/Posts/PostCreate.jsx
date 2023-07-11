@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import Editor from './Editor';
 import { ModalLayout } from '../Reference';
 
 const PostCreate = () => {
@@ -17,9 +16,10 @@ const PostCreate = () => {
     const [content, setContent ] = useState('');
     const [images, setImages] = useState([]);
     const [videos, setVideos] = useState([]);
+    const [selectedFile, setSelectedFile] = useState([]);
 
     useEffect(() => {
-        if (!user.email) {
+        if (!user) {
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody('로그인이 필요합니다.');
@@ -51,36 +51,78 @@ const PostCreate = () => {
         userLevelCheck()
     }, [selectCategory]);
 
+    const fileInputRef = useRef(null);
+
+    const handleFileSelect = () => {
+        fileInputRef.current.click();
+    };
+    
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files)
+
+        files.forEach((file) => {
+            const extension = file.name.split('.').pop().toLowerCase();
+        
+            if (extension === 'jpg' || extension === 'jpeg' || extension === 'png') {
+                setImages((prevImages) => [...prevImages, file]);
+            } else if (extension === 'mp4' || extension === 'avi' || extension === 'mov') {
+                setVideos((prevVideos) => [...prevVideos, file]);
+            }
+        });
+        setSelectedFile(files)
+    };
+
     const createPost = async () => {
 
         const formData = new FormData();
 
         formData.append('title', title);
         formData.append('content', content);
-        if(selectCategory === 'eventinfo') {
+        if (selectCategory === 'all') {
+            formData.append('category', 0);
+        } else if(selectCategory === 'eventinfo') {
             formData.append('category', 1);
         } else if (selectCategory === 'courseinfo') {
             formData.append('category', 2);
         } else if (selectCategory === 'review') {
             formData.append('category', 3);
         }
-        formData.append('images', images);
-        formData.append('videos', videos);
 
-        console.log('title', title);
-        console.log('content', content);
-        console.log('category', selectCategory);
-        console.log('images', images);
-        console.log('videos', videos);
+        images.forEach((image) => {
+            formData.append('images', image);
+        });
 
+        videos.forEach((video) => {
+            formData.append('videos', video);
+        });
+        
         try {
             let response = await axios.post('http://localhost:4000/api/v1/posts/create', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data', // 파일 업로드 시 Content-Type 설정
+                },
                 withCredentials: true
             });
 
-            console.log(response);
+            if (response.data.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('게시글이 등록되었습니다.');
+
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.push('/users/mypage');
+                }, 3000);
+            }
         } catch (e) {
-            console.log(e);
+            console.log('Error', e.message);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(e.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
         }
     }
     
@@ -120,7 +162,29 @@ const PostCreate = () => {
                         onChange={(e) => setTitle(e.target.value)}/>
                 </div>
                 <div className='w-full h-[45rem]'>
-                    <Editor content={content} setContent={setContent}/>
+                    <input
+                        type='file'
+                        ref={fileInputRef}
+                        className='w-full hidden'
+                        onChange={handleFileChange}
+                        multiple
+                    />
+                    <div className='flex w-[30%] justify-between mb-5'>
+                        <p className='border-b w-[80%] m-0'>
+                            {selectedFile.length > 0 ? (
+                                selectedFile.map((file) => file.name + ', ')
+                            ) : (
+                                '파일을 선택해 주세요.'
+                            )
+                            }
+                        </p>
+                        <button 
+                        className='border rounded-lg p-2 bg-blue-main text-white hover:bg-blue-dark transition duration-300'
+                        onClick={handleFileSelect}>
+                            파일 선택
+                        </button>
+                    </div>
+                    <textarea className="border border-gray-300 rounded-lg w-full h-full p-3 outline-none" onChange={(e) => setContent(e.target.value)} />
                 </div>
                 <div className='w-full flex gap-3 justify-end mt-16'>
                     <button className='
