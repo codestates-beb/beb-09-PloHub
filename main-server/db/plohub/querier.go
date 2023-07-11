@@ -8,7 +8,9 @@ type Querier interface {
 	CreatePost(ctx context.Context, arg CreatePostParams) (int32, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int32, error)
 	DeleteComment(ctx context.Context, id int32) error
+	DeleteCommentsByPostID(ctx context.Context, postID int32) error
 	DeleteMedia(ctx context.Context, id int32) error
+	DeleteMediaByPostID(ctx context.Context, postID int32) error
 	DeletePost(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	GetCommentByID(ctx context.Context, id int32) (Comment, error)

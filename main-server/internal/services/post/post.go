@@ -20,7 +20,7 @@ type Service interface {
 	GetPostDetail(ctx context.Context, id int32) (*models.PostDetail, error)
 	CreatePost(ctx context.Context, params models.CreatePostParams) error
 	EditPost(ctx context.Context, params models.EditPostParams) error
-	DeletePost(ctx context.Context, userID, postID int32) error
+	DeletePost(ctx context.Context, userID, postID int32) ([]string, error)
 	LeaveComment(ctx context.Context, params models.AddCommentParams) error
 	DeleteComment(ctx context.Context, userID, commentID int32) error
 }
@@ -270,7 +270,9 @@ func (s *service) EditPost(ctx context.Context, params models.EditPostParams) er
 }
 
 // DeletePost deletes a post by post id
-func (s *service) DeletePost(ctx context.Context, userID, postID int32) error {
+func (s *service) DeletePost(ctx context.Context, userID, postID int32) ([]string, error) {
+	var urls []string
+
 	fn := func(q plohub.Querier) error {
 		// check if post exists
 		post, err := q.GetPostByID(ctx, postID)
@@ -283,15 +285,38 @@ func (s *service) DeletePost(ctx context.Context, userID, postID int32) error {
 			return ErrUnauthorizedAccess
 		}
 
-		// TODO: delete comments
+		// get media
+		media, err := q.GetMediaByPostID(ctx, postID)
+		if err != nil {
+			return err
+		}
 
-		// TODO: delete media
+		for _, m := range media {
+			urls = append(urls, m.Url)
+		}
+
+		// delete comments
+		err = q.DeleteCommentsByPostID(ctx, postID)
+		if err != nil {
+			return err
+		}
+
+		// delete media
+		err = q.DeleteMediaByPostID(ctx, postID)
+		if err != nil {
+			return err
+		}
 
 		// delete post
 		return q.DeletePost(ctx, postID)
 	}
 
-	return s.repo.ExecTx(ctx, fn)
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return urls, nil
 }
 
 // AddComment adds a comment to a post

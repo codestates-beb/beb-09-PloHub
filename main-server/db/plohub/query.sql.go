@@ -96,12 +96,30 @@ func (q *Queries) DeleteComment(ctx context.Context, id int32) error {
 	return err
 }
 
+const deleteCommentsByPostID = `-- name: DeleteCommentsByPostID :exec
+DELETE FROM comments WHERE post_id = $1
+`
+
+func (q *Queries) DeleteCommentsByPostID(ctx context.Context, postID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteCommentsByPostID, postID)
+	return err
+}
+
 const deleteMedia = `-- name: DeleteMedia :exec
 DELETE FROM media WHERE id = $1
 `
 
 func (q *Queries) DeleteMedia(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deleteMedia, id)
+	return err
+}
+
+const deleteMediaByPostID = `-- name: DeleteMediaByPostID :exec
+DELETE FROM media WHERE post_id = $1
+`
+
+func (q *Queries) DeleteMediaByPostID(ctx context.Context, postID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteMediaByPostID, postID)
 	return err
 }
 

@@ -11,6 +11,7 @@ import (
 	"main-server/internal/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -46,7 +47,7 @@ func (pc *postController) Handler() http.Handler {
 		r.Use(middlewares.AccessTokenRequired(pc.authSvc))
 		r.Post("/create", pc.createPost)
 		r.Post("/edit", pc.editPost)
-		r.Post("/delete", pc.deletePost)
+		r.Post("/delete/{id}", pc.deletePost)
 	})
 	return mux
 }
@@ -235,5 +236,42 @@ func (pc *postController) editPost(w http.ResponseWriter, r *http.Request) {
 
 // deletePost handles POST /posts/delete
 func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	id := chi.URLParam(r, "id")
+
+	postID, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		zap.L().Error("failed to parse post id", zap.Error(err))
+		utils.ErrorJSON(w, errors.New("invalid post id"), http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value(middlewares.UserIDKey).(int32)
+
+	urls, err := pc.postSvc.DeletePost(r.Context(), userID, int32(postID))
+	if err != nil {
+		zap.L().Error("failed to delete post", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	for _, url := range urls {
+		urlParts := strings.Split(url, "_")
+		if len(urlParts) != 3 {
+			zap.L().Error("invalid url", zap.String("url", url))
+			continue
+		}
+
+		filename := urlParts[2]
+
+		err = pc.storeSvc.DeleteFile(r.Context(), filename)
+		if err != nil {
+			zap.L().Error("failed to delete file", zap.Error(err))
+		}
+	}
+
+	var resp models.CommonResponse
+	resp.Status = http.StatusOK
+	resp.Message = "successfully deleted post"
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
