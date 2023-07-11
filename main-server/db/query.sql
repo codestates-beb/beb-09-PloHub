@@ -16,8 +16,8 @@ UPDATE users SET nickname = $1, level = $2, address = $3, eth_amount = $4, token
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
 
--- name: CreatePost :exec
-INSERT INTO posts (user_id, title, content, category, reward_amount) VALUES ($1, $2, $3, $4, $5);
+-- name: CreatePost :one
+INSERT INTO posts (user_id, title, content, category, reward_amount) VALUES ($1, $2, $3, $4, $5) RETURNING id;
 
 -- name: GetPostByID :one
 SELECT * FROM posts WHERE id = $1;
@@ -32,7 +32,7 @@ SELECT * FROM posts WHERE user_id = $1;
 SELECT * FROM posts WHERE category = $1 limit $2 offset $3;
 
 -- name: UpdatePost :exec
-UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, updated_at = now() WHERE id = $5;
+UPDATE posts SET title = $1, content = $2, category = $3, nftnized = $4, reward_amount = $5, updated_at = now() WHERE id = $6;
 
 -- name: DeletePost :exec
 DELETE FROM posts WHERE id = $1;

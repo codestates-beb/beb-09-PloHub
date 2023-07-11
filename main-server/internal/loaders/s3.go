@@ -21,7 +21,7 @@ func MustInitS3Client(ctx context.Context, cfg *configs.Config) *s3.Client {
 
 func NewS3Client(ctx context.Context, cfg *configs.Config) (*s3.Client, error) {
 	creds := credentials.NewStaticCredentialsProvider(cfg.S3.AccessKey, cfg.S3.SecretKey, "")
-	s3cfg, err := config.LoadDefaultConfig(ctx, config.WithCredentialsProvider(creds), config.WithRegion(cfg.S3.Region))
+	s3cfg, err := config.LoadDefaultConfig(ctx, config.WithCredentialsProvider(creds), config.WithDefaultRegion(cfg.S3.Region))
 	if err != nil {
 		return nil, err
 	}
