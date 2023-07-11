@@ -14,19 +14,6 @@ const NftDetail = () => {
     const user = useSelector((state) => state.user);
     const router = useRouter();
 
-    useEffect(() => {
-        if (!user.email) {
-            setIsModalOpen(true);
-            setModalTitle('Error');
-            setModalBody('로그인이 필요합니다.');
-
-            setTimeout(() => {
-                setIsModalOpen(false);
-                router.push('/users/signin');
-            }, 3000);
-        }
-    }, [user]);
-
     return (
         <>
             <div className='w-[50%] min-h-screen mx-auto mt-20 flex flex-col gap-20'>
