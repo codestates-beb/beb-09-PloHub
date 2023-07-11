@@ -46,8 +46,8 @@ func (pc *postController) Handler() http.Handler {
 	mux.Group(func(r chi.Router) {
 		r.Use(middlewares.AccessTokenRequired(pc.authSvc))
 		r.Post("/create", pc.createPost)
-		r.Post("/edit", pc.editPost)
-		r.Post("/delete/{id}", pc.deletePost)
+		r.Post("/edit", pc.editPost) // TODO: implement
+		r.Delete("/{id}", pc.deletePost)
 	})
 	return mux
 }
