@@ -12,13 +12,12 @@ import (
 )
 
 const createComment = `-- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, nickname, content, reward_amount) VALUES ($1, $2, $3, $4, $5)
+INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4)
 `
 
 type CreateCommentParams struct {
 	PostID       int32
 	UserID       int32
-	Nickname     string
 	Content      string
 	RewardAmount int32
 }
@@ -27,7 +26,6 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) er
 	_, err := q.db.ExecContext(ctx, createComment,
 		arg.PostID,
 		arg.UserID,
-		arg.Nickname,
 		arg.Content,
 		arg.RewardAmount,
 	)
@@ -156,7 +154,7 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
 }
 
 const getCommentByID = `-- name: GetCommentByID :one
-SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE id = $1
 `
 
 func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error) {
@@ -166,7 +164,6 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 		&i.ID,
 		&i.PostID,
 		&i.UserID,
-		&i.Nickname,
 		&i.Content,
 		&i.RewardAmount,
 		&i.CreatedAt,
@@ -175,7 +172,7 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 }
 
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
-SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE post_id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE post_id = $1
 `
 
 func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comment, error) {
@@ -191,7 +188,6 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
-			&i.Nickname,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,
@@ -210,7 +206,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 }
 
 const getCommentsByUserID = `-- name: GetCommentsByUserID :many
-SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE user_id = $1
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE user_id = $1
 `
 
 func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comment, error) {
@@ -226,7 +222,6 @@ func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comm
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
-			&i.Nickname,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,
@@ -277,23 +272,25 @@ func (q *Queries) GetMediaByPostID(ctx context.Context, postID int32) ([]Medium,
 }
 
 const getPostByID = `-- name: GetPostByID :one
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id where p.id = $1
 `
 
 type GetPostByIDRow struct {
-	ID           int32
-	UserID       int32
-	Author       sql.NullString
-	AuthorEmail  sql.NullString
-	Title        string
-	Content      string
-	Category     int16
-	Nftnized     bool
-	RewardAmount int32
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            int32
+	UserID        int32
+	Author        sql.NullString
+	AuthorEmail   sql.NullString
+	AuthorLevel   sql.NullInt16
+	AuthorAddress sql.NullString
+	Title         string
+	Content       string
+	Category      int16
+	Nftnized      bool
+	RewardAmount  int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (q *Queries) GetPostByID(ctx context.Context, id int32) (GetPostByIDRow, error) {
@@ -304,6 +301,8 @@ func (q *Queries) GetPostByID(ctx context.Context, id int32) (GetPostByIDRow, er
 		&i.UserID,
 		&i.Author,
 		&i.AuthorEmail,
+		&i.AuthorLevel,
+		&i.AuthorAddress,
 		&i.Title,
 		&i.Content,
 		&i.Category,
@@ -316,7 +315,7 @@ func (q *Queries) GetPostByID(ctx context.Context, id int32) (GetPostByIDRow, er
 }
 
 const getPosts = `-- name: GetPosts :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 limit $1 offset $2
@@ -328,17 +327,19 @@ type GetPostsParams struct {
 }
 
 type GetPostsRow struct {
-	ID           int32
-	UserID       int32
-	Author       sql.NullString
-	AuthorEmail  sql.NullString
-	Title        string
-	Content      string
-	Category     int16
-	Nftnized     bool
-	RewardAmount int32
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            int32
+	UserID        int32
+	Author        sql.NullString
+	AuthorEmail   sql.NullString
+	AuthorLevel   sql.NullInt16
+	AuthorAddress sql.NullString
+	Title         string
+	Content       string
+	Category      int16
+	Nftnized      bool
+	RewardAmount  int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]GetPostsRow, error) {
@@ -355,6 +356,8 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]GetPostsR
 			&i.UserID,
 			&i.Author,
 			&i.AuthorEmail,
+			&i.AuthorLevel,
+			&i.AuthorAddress,
 			&i.Title,
 			&i.Content,
 			&i.Category,
@@ -377,7 +380,7 @@ func (q *Queries) GetPosts(ctx context.Context, arg GetPostsParams) ([]GetPostsR
 }
 
 const getPostsByCategory = `-- name: GetPostsByCategory :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 WHERE category = $1 limit $2 offset $3
@@ -390,17 +393,19 @@ type GetPostsByCategoryParams struct {
 }
 
 type GetPostsByCategoryRow struct {
-	ID           int32
-	UserID       int32
-	Author       sql.NullString
-	AuthorEmail  sql.NullString
-	Title        string
-	Content      string
-	Category     int16
-	Nftnized     bool
-	RewardAmount int32
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            int32
+	UserID        int32
+	Author        sql.NullString
+	AuthorEmail   sql.NullString
+	AuthorLevel   sql.NullInt16
+	AuthorAddress sql.NullString
+	Title         string
+	Content       string
+	Category      int16
+	Nftnized      bool
+	RewardAmount  int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]GetPostsByCategoryRow, error) {
@@ -417,6 +422,8 @@ func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategory
 			&i.UserID,
 			&i.Author,
 			&i.AuthorEmail,
+			&i.AuthorLevel,
+			&i.AuthorAddress,
 			&i.Title,
 			&i.Content,
 			&i.Category,
@@ -439,24 +446,26 @@ func (q *Queries) GetPostsByCategory(ctx context.Context, arg GetPostsByCategory
 }
 
 const getPostsByUserID = `-- name: GetPostsByUserID :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 WHERE user_id = $1
 `
 
 type GetPostsByUserIDRow struct {
-	ID           int32
-	UserID       int32
-	Author       sql.NullString
-	AuthorEmail  sql.NullString
-	Title        string
-	Content      string
-	Category     int16
-	Nftnized     bool
-	RewardAmount int32
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            int32
+	UserID        int32
+	Author        sql.NullString
+	AuthorEmail   sql.NullString
+	AuthorLevel   sql.NullInt16
+	AuthorAddress sql.NullString
+	Title         string
+	Content       string
+	Category      int16
+	Nftnized      bool
+	RewardAmount  int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]GetPostsByUserIDRow, error) {
@@ -473,6 +482,8 @@ func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]GetPost
 			&i.UserID,
 			&i.Author,
 			&i.AuthorEmail,
+			&i.AuthorLevel,
+			&i.AuthorAddress,
 			&i.Title,
 			&i.Content,
 			&i.Category,

@@ -234,9 +234,14 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 
 		for i, post := range posts {
 			myPageInfo.Posts[i] = models.PostInfo{
-				ID:           post.ID,
-				Author:       post.Author.String,
-				AuthorEmail:  post.AuthorEmail.String,
+				ID: post.ID,
+				Author: models.Author{
+					ID:       post.UserID,
+					Nickname: post.Author.String,
+					Email:    post.AuthorEmail.String,
+					Level:    post.AuthorLevel.Int16,
+					Address:  post.AuthorAddress.String,
+				},
 				Title:        post.Title,
 				Content:      post.Content,
 				Category:     post.Category,

@@ -20,24 +20,24 @@ DELETE FROM users WHERE id = $1;
 INSERT INTO posts (user_id, title, content, category, reward_amount) VALUES ($1, $2, $3, $4, $5) RETURNING id;
 
 -- name: GetPostByID :one
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id where p.id = $1;
 
 -- name: GetPosts :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 limit $1 offset $2;
 
 -- name: GetPostsByUserID :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 WHERE user_id = $1;
 
 -- name: GetPostsByCategory :many
-select p.id, p.user_id, u.nickname as author, u.email as author_email, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
+select p.id, p.user_id, u.nickname as author, u.email as author_email, u.level as author_level, u.address as author_address, p.title, p.content, p.category, p.nftnized, p.reward_amount, p.created_at, p.updated_at
 from posts as p
 left join users as u on p.user_id = u.id
 WHERE category = $1 limit $2 offset $3;
@@ -61,7 +61,7 @@ DELETE FROM media WHERE id = $1;
 DELETE FROM media WHERE post_id = $1;
 
 -- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, nickname, content, reward_amount) VALUES ($1, $2, $3, $4, $5);
+INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4);
 
 -- name: GetCommentByID :one
 SELECT * FROM comments WHERE id = $1;

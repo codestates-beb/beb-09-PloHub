@@ -63,9 +63,14 @@ func (s *service) GetPosts(ctx context.Context, limit, page int32) ([]models.Pos
 		// convert posts to postInfos
 		for _, post := range posts {
 			postInfo := models.PostInfo{
-				ID:           post.ID,
-				Author:       post.Author.String,
-				AuthorEmail:  post.AuthorEmail.String,
+				ID: post.ID,
+				Author: models.Author{
+					ID:       post.UserID,
+					Nickname: post.Author.String,
+					Email:    post.AuthorEmail.String,
+					Level:    post.AuthorLevel.Int16,
+					Address:  post.AuthorAddress.String,
+				},
 				Title:        post.Title,
 				Content:      post.Content,
 				Category:     post.Category,
@@ -116,9 +121,14 @@ func (s *service) GetPostsByCategory(ctx context.Context, category int16, limit,
 
 		for _, post := range posts {
 			postInfo := models.PostInfo{
-				ID:           post.ID,
-				Author:       post.Author.String,
-				AuthorEmail:  post.AuthorEmail.String,
+				ID: post.ID,
+				Author: models.Author{
+					ID:       post.UserID,
+					Nickname: post.Author.String,
+					Email:    post.AuthorEmail.String,
+					Level:    post.AuthorLevel.Int16,
+					Address:  post.AuthorAddress.String,
+				},
 				Title:        post.Title,
 				Content:      post.Content,
 				Category:     post.Category,
@@ -370,10 +380,9 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 
 		// create comment
 		err = q.CreateComment(ctx, plohub.CreateCommentParams{
-			PostID:   params.PostID,
-			UserID:   params.UserID,
-			Nickname: user.Nickname,
-			Content:  params.Content,
+			PostID:  params.PostID,
+			UserID:  params.UserID,
+			Content: params.Content,
 		})
 		if err != nil {
 			return err
