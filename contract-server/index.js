@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const port = 8080;
 const app = express();
 const { connectToDatabase } = require("./loaders/connectDB");
@@ -10,6 +10,7 @@ const createNFT = require("./routes/createNFT");
 const userNFT = require("./routes/userNFT");
 const transferToken = require("./routes/transferToken");
 const tokenSwap = require("./routes/tokenSwap");
+const nftDetail = require("./routes/nftDetail");
 
 // const mainRouter = require('./router/main');
 
@@ -29,6 +30,7 @@ app.use("/api/v1/nft", createNFT);
 app.use("/api/v1/nft", userNFT);
 app.use("/api/v1/wallets", transferToken);
 app.use("/api/v1/wallets", tokenSwap);
+app.use("/api/v1/nft", nftDetail);
 
 connectToDatabase;
 

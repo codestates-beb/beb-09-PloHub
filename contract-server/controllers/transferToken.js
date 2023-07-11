@@ -2,6 +2,7 @@ const Web3 = require('web3');
 const abiSource = require('../abi/ICToken.json');
 const models = require('../models');
 const varEnv = require('../config/var');
+const updateTransaction = require('./UpdateTransaction');
 
 exports.transferToken = async (req,res) => {
     try{
@@ -51,12 +52,14 @@ exports.transferToken = async (req,res) => {
             }
         }
         console.log('토큰 전송 권한 부여 성공!');
+        console.log(await web3.eth.getBalance(varEnv.senderAddress));
 
         const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, token_amount).send({ from: senderAddress, gas: 3000000 });
         if (!transferResult.status) {
             console.log('토큰 전송 실패!');
             return res.status(500).json({ error: '토큰 전송 실패!' });
         }else{
+            updateTransaction("token");
             console.log("토큰 전송 성공!")
             const senderBalance = await contract.methods.balanceOf(senderAddress).call();
             const senderEthBalance = web3.utils.fromWei(await web3.eth.getBalance(senderAddress), 'wei');

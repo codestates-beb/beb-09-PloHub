@@ -18,6 +18,7 @@ const sequelize = new Sequelize(
 
 db.Wallets = require("./Wallets")(sequelize, Sequelize);
 db.nfts = require("./nfts")(sequelize, Sequelize);
+db.transactions = require("./transactions")(sequelize,Sequelize);
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
