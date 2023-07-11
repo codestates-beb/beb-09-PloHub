@@ -11,12 +11,13 @@ import (
 )
 
 const createComment = `-- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4)
+INSERT INTO comments (post_id, user_id, nickname, content, reward_amount) VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateCommentParams struct {
 	PostID       int32
 	UserID       int32
+	Nickname     string
 	Content      string
 	RewardAmount int32
 }
@@ -25,6 +26,7 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) er
 	_, err := q.db.ExecContext(ctx, createComment,
 		arg.PostID,
 		arg.UserID,
+		arg.Nickname,
 		arg.Content,
 		arg.RewardAmount,
 	)
@@ -153,7 +155,7 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
 }
 
 const getCommentByID = `-- name: GetCommentByID :one
-SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE id = $1
+SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE id = $1
 `
 
 func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error) {
@@ -163,6 +165,7 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 		&i.ID,
 		&i.PostID,
 		&i.UserID,
+		&i.Nickname,
 		&i.Content,
 		&i.RewardAmount,
 		&i.CreatedAt,
@@ -171,7 +174,7 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 }
 
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
-SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE post_id = $1
+SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE post_id = $1
 `
 
 func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comment, error) {
@@ -187,6 +190,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
+			&i.Nickname,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,
@@ -205,7 +209,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]Comm
 }
 
 const getCommentsByUserID = `-- name: GetCommentsByUserID :many
-SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE user_id = $1
+SELECT id, post_id, user_id, nickname, content, reward_amount, created_at FROM comments WHERE user_id = $1
 `
 
 func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comment, error) {
@@ -221,6 +225,7 @@ func (q *Queries) GetCommentsByUserID(ctx context.Context, userID int32) ([]Comm
 			&i.ID,
 			&i.PostID,
 			&i.UserID,
+			&i.Nickname,
 			&i.Content,
 			&i.RewardAmount,
 			&i.CreatedAt,

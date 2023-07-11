@@ -50,7 +50,7 @@ DELETE FROM media WHERE id = $1;
 DELETE FROM media WHERE post_id = $1;
 
 -- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4);
+INSERT INTO comments (post_id, user_id, nickname, content, reward_amount) VALUES ($1, $2, $3, $4, $5);
 
 -- name: GetCommentByID :one
 SELECT * FROM comments WHERE id = $1;

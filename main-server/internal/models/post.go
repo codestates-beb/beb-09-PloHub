@@ -79,6 +79,7 @@ type CommentInfo struct {
 	ID           int32     `json:"id"`
 	PostID       int32     `json:"post_id"`
 	UserID       int32     `json:"user_id"`
+	Nickname     string    `json:"nickname"`
 	Content      string    `json:"content"`
 	RewardAmount int32     `json:"reward_amount"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -122,6 +123,7 @@ func ToCommentInfo(comment plohub.Comment) CommentInfo {
 	commentInfo.ID = comment.ID
 	commentInfo.PostID = comment.PostID
 	commentInfo.UserID = comment.UserID
+	commentInfo.Nickname = comment.Nickname
 	commentInfo.Content = comment.Content
 	commentInfo.RewardAmount = comment.RewardAmount
 	commentInfo.CreatedAt = comment.CreatedAt

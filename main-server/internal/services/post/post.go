@@ -336,9 +336,10 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 
 		// create comment
 		err = q.CreateComment(ctx, plohub.CreateCommentParams{
-			PostID:  params.PostID,
-			UserID:  params.UserID,
-			Content: params.Content,
+			PostID:   params.PostID,
+			UserID:   params.UserID,
+			Nickname: user.Nickname,
+			Content:  params.Content,
 		})
 		if err != nil {
 			return err

@@ -71,11 +71,13 @@ func newRouter(ctx context.Context, cfg *configs.Config) routers.Router {
 	hc := controllers.NewHealthcheckController()
 	uc := newUserController(repo, cfg)
 	pc := newPostController(repo, cfg)
+	cc := newCommentController(repo, cfg)
 
 	router := routers.NewRouter("v1").
 		Register(hc).
 		Register(uc).
-		Register(pc)
+		Register(pc).
+		Register(cc)
 
 	return router
 }
@@ -110,4 +112,17 @@ func newPostController(repo plohub.Repository, cfg *configs.Config) controllers.
 	postSvc := post.NewService(repo, storeSvc, walletSvc)
 
 	return controllers.NewPostController(authSvc, postSvc, storeSvc)
+}
+
+func newCommentController(repo plohub.Repository, cfg *configs.Config) controllers.Controller {
+	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
+	if err != nil {
+		zap.L().Panic("Failed to create auth service", zap.Error(err))
+	}
+	s3Client := MustInitS3Client(context.Background(), cfg)
+	storeSvc := storage.NewService(cfg.S3.Region, cfg.S3.Bucket, s3Client)
+	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
+	postSvc := post.NewService(repo, storeSvc, walletSvc)
+
+	return controllers.NewCommentController(authSvc, postSvc)
 }
