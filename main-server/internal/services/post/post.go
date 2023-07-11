@@ -7,6 +7,7 @@ import (
 	"main-server/internal/models"
 	"main-server/internal/services/storage"
 	"main-server/internal/services/wallet"
+	"strconv"
 )
 
 var (
@@ -19,7 +20,7 @@ type Service interface {
 	GetPostDetail(ctx context.Context, id int32) (*models.PostDetail, error)
 	CreatePost(ctx context.Context, params models.CreatePostParams) error
 	EditPost(ctx context.Context, params models.EditPostParams) error
-	DeletePost(ctx context.Context, id int32) error
+	DeletePost(ctx context.Context, userID, postID int32) error
 	LeaveComment(ctx context.Context, params models.AddCommentParams) error
 	DeleteComment(ctx context.Context, userID, commentID int32) error
 }
@@ -49,7 +50,7 @@ func (s *service) GetPosts(ctx context.Context, limit, page int32) ([]models.Pos
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// get posts from db with limit and offset
-		posts, err := s.repo.GetPosts(ctx, plohub.GetPostsParams{
+		posts, err := q.GetPosts(ctx, plohub.GetPostsParams{
 			Limit:  limit,
 			Offset: (page - 1) * limit,
 		})
@@ -84,7 +85,7 @@ func (s *service) GetPostsByCategory(ctx context.Context, category int16, limit,
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// get posts from db with limit and offset
-		posts, err := s.repo.GetPostsByCategory(ctx, plohub.GetPostsByCategoryParams{
+		posts, err := q.GetPostsByCategory(ctx, plohub.GetPostsByCategoryParams{
 			Category: category,
 			Limit:    limit,
 			Offset:   (page - 1) * limit,
@@ -120,19 +121,19 @@ func (s *service) GetPostDetail(ctx context.Context, id int32) (*models.PostDeta
 	// transaction function
 	fn := func(q plohub.Querier) error {
 		// get post from db
-		post, err := s.repo.GetPostByID(ctx, id)
+		post, err := q.GetPostByID(ctx, id)
 		if err != nil {
 			return err
 		}
 
 		// get comments from db
-		comments, err := s.repo.GetCommentsByPostID(ctx, id)
+		comments, err := q.GetCommentsByPostID(ctx, id)
 		if err != nil {
 			return err
 		}
 
 		// get media from db
-		media, err := s.repo.GetMediaByPostID(ctx, id)
+		media, err := q.GetMediaByPostID(ctx, id)
 		if err != nil {
 			return err
 		}
@@ -157,13 +158,13 @@ func (s *service) GetPostDetail(ctx context.Context, id int32) (*models.PostDeta
 func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams) error {
 	fn := func(q plohub.Querier) error {
 		// check if user exists
-		user, err := s.repo.GetUserByID(ctx, params.UserID)
+		user, err := q.GetUserByID(ctx, params.UserID)
 		if err != nil {
 			return err
 		}
 
 		// create post
-		postID, err := s.repo.CreatePost(ctx, plohub.CreatePostParams{
+		postID, err := q.CreatePost(ctx, plohub.CreatePostParams{
 			UserID:       params.UserID,
 			Title:        params.Title,
 			Content:      params.Content,
@@ -176,7 +177,7 @@ func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams
 
 		// create media
 		for _, m := range params.Media {
-			err = s.repo.CreateMedia(ctx, plohub.CreateMediaParams{
+			err = q.CreateMedia(ctx, plohub.CreateMediaParams{
 				PostID: postID,
 				Type:   int16(m.Type),
 				Url:    m.Url,
@@ -197,8 +198,22 @@ func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams
 			return err
 		}
 
+		// level up user
+		level := user.Level
+
+		if level == 1 {
+			tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 64)
+			if err != nil {
+				return err
+			}
+
+			if tokenAmount >= 40 {
+				level = 2
+			}
+		}
+
 		// update user with reward
-		err = s.repo.UpdateUser(ctx, plohub.UpdateUserParams{
+		err = q.UpdateUser(ctx, plohub.UpdateUserParams{
 			ID:              params.UserID,
 			DailyToken:      user.DailyToken + reward.RewardAmount,
 			Nickname:        user.Nickname,
@@ -213,7 +228,7 @@ func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams
 		}
 
 		// update post with reward amount
-		return s.repo.UpdatePost(ctx, plohub.UpdatePostParams{
+		return q.UpdatePost(ctx, plohub.UpdatePostParams{
 			ID:           postID,
 			Title:        params.Title,
 			Content:      params.Content,
@@ -230,7 +245,7 @@ func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams
 func (s *service) EditPost(ctx context.Context, params models.EditPostParams) error {
 	fn := func(q plohub.Querier) error {
 		// check if post exists
-		post, err := s.repo.GetPostByID(ctx, params.PostID)
+		post, err := q.GetPostByID(ctx, params.PostID)
 		if err != nil {
 			return err
 		}
@@ -241,7 +256,7 @@ func (s *service) EditPost(ctx context.Context, params models.EditPostParams) er
 		}
 
 		// update post
-		return s.repo.UpdatePost(ctx, plohub.UpdatePostParams{
+		return q.UpdatePost(ctx, plohub.UpdatePostParams{
 			ID:           params.PostID,
 			Title:        params.Title,
 			Content:      params.Content,
@@ -255,12 +270,17 @@ func (s *service) EditPost(ctx context.Context, params models.EditPostParams) er
 }
 
 // DeletePost deletes a post by post id
-func (s *service) DeletePost(ctx context.Context, id int32) error {
+func (s *service) DeletePost(ctx context.Context, userID, postID int32) error {
 	fn := func(q plohub.Querier) error {
 		// check if post exists
-		_, err := s.repo.GetPostByID(ctx, id)
+		post, err := q.GetPostByID(ctx, postID)
 		if err != nil {
 			return err
+		}
+
+		// check if user is the owner of the post
+		if userID != post.UserID {
+			return ErrUnauthorizedAccess
 		}
 
 		// TODO: delete comments
@@ -268,7 +288,7 @@ func (s *service) DeletePost(ctx context.Context, id int32) error {
 		// TODO: delete media
 
 		// delete post
-		return s.repo.DeletePost(ctx, id)
+		return q.DeletePost(ctx, postID)
 	}
 
 	return s.repo.ExecTx(ctx, fn)
@@ -278,19 +298,19 @@ func (s *service) DeletePost(ctx context.Context, id int32) error {
 func (s *service) LeaveComment(ctx context.Context, params models.AddCommentParams) error {
 	fn := func(q plohub.Querier) error {
 		// check if post exists
-		_, err := s.repo.GetPostByID(ctx, params.PostID)
+		_, err := q.GetPostByID(ctx, params.PostID)
 		if err != nil {
 			return err
 		}
 
 		// check if user exists
-		user, err := s.repo.GetUserByID(ctx, params.UserID)
+		user, err := q.GetUserByID(ctx, params.UserID)
 		if err != nil {
 			return err
 		}
 
 		// create comment
-		err = s.repo.CreateComment(ctx, plohub.CreateCommentParams{
+		err = q.CreateComment(ctx, plohub.CreateCommentParams{
 			PostID:  params.PostID,
 			UserID:  params.UserID,
 			Content: params.Content,
@@ -310,12 +330,26 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 			return err
 		}
 
+		// level up user
+		level := user.Level
+
+		if level == 1 {
+			tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 64)
+			if err != nil {
+				return err
+			}
+
+			if tokenAmount >= 40 {
+				level = 2
+			}
+		}
+
 		// update user with reward
-		return s.repo.UpdateUser(ctx, plohub.UpdateUserParams{
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
 			ID:              params.UserID,
 			DailyToken:      user.DailyToken + reward.RewardAmount,
 			Nickname:        user.Nickname,
-			Level:           user.Level,
+			Level:           level,
 			Address:         user.Address,
 			EthAmount:       user.EthAmount,
 			TokenAmount:     reward.TokenAmount,
@@ -330,7 +364,7 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 func (s *service) DeleteComment(ctx context.Context, userID, commentID int32) error {
 	fn := func(q plohub.Querier) error {
 		// check if comment exists
-		comment, err := s.repo.GetCommentByID(ctx, commentID)
+		comment, err := q.GetCommentByID(ctx, commentID)
 		if err != nil {
 			return err
 		}
@@ -341,7 +375,7 @@ func (s *service) DeleteComment(ctx context.Context, userID, commentID int32) er
 		}
 
 		// delete comment
-		return s.repo.DeleteComment(ctx, commentID)
+		return q.DeleteComment(ctx, commentID)
 	}
 
 	return s.repo.ExecTx(ctx, fn)
