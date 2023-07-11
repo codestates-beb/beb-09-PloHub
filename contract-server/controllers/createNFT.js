@@ -27,6 +27,10 @@ exports.createNFT = async (req, res) => {
     const pinata = new pinataSDK(varEnv.pinataAPI, varEnv.pinataSecret);
     const { name, description, image, user_id } = req.body;
 
+    if (!name || !description || !image || !user_id){
+      res.status(400).json({message: 'NFT data error'});
+    }
+
     const abi = abiSource.abi;
     const abiERC20 = abiSourceERC20.abi;
 
