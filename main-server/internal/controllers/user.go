@@ -121,18 +121,20 @@ func (uc *userController) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// set refresh token to cookie
+	// set token pair to cookie
+	accessCookie := uc.newAccessCookie(tokenPair.AccessToken, tokenPair.AccessTokenExpiry)
 	refreshCookie := uc.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
+	http.SetCookie(w, accessCookie)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
-	var resp models.LoginResponse
+	var resp models.UserInfoResponse
 	resp.UserInfo = *userInfo
-	resp.AccessToken = tokenPair.AccessToken
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
+// refresh handles POST /users/refresh
 func (uc *userController) refresh(w http.ResponseWriter, r *http.Request) {
 	// get refresh token from cookie
 	var refreshCookie *http.Cookie
@@ -183,20 +185,24 @@ func (uc *userController) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// set refresh token to cookie
+	// set token pair to cookie
+	accessCookie := uc.newAccessCookie(tokenPair.AccessToken, tokenPair.AccessTokenExpiry)
 	refreshCookie = uc.newRefreshCookie(tokenPair.RefreshToken, tokenPair.RefreshTokenExpiry)
+	http.SetCookie(w, accessCookie)
 	http.SetCookie(w, refreshCookie)
 
 	// send response
-	var resp models.AccessTokenResponse
-	resp.AccessToken = tokenPair.AccessToken
+	var resp models.CommonResponse
+	resp.Status = http.StatusOK
+	resp.Message = "Successfully refreshed token"
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 // logout handles POST /users/logout
 func (uc *userController) logout(w http.ResponseWriter, r *http.Request) {
-	// delete refresh token from cookie
+	// delete token pair from cookie
+	http.SetCookie(w, uc.newExpiredAccessCookie())
 	http.SetCookie(w, uc.newExpiredRefreshCookie())
 
 	// send response
@@ -309,6 +315,36 @@ func (uc *userController) changeNickname(w http.ResponseWriter, r *http.Request)
 	resp.Nickname = nickname
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
+}
+
+// newAccessCookie returns a new access token cookie
+func (uc *userController) newAccessCookie(token string, expiry time.Duration) *http.Cookie {
+	return &http.Cookie{
+		Name:     "access_token",
+		Value:    token,
+		Domain:   uc.domain,
+		Path:     "/",
+		Expires:  time.Now().Add(expiry),
+		MaxAge:   int(expiry.Seconds()),
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+		Secure:   true,
+	}
+}
+
+// newExpiredAccessCookie returns an expired access token cookie
+func (uc *userController) newExpiredAccessCookie() *http.Cookie {
+	return &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Domain:   "",
+		Path:     "/",
+		Expires:  time.Now().Add(-1 * time.Hour),
+		MaxAge:   -1,
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+		Secure:   true,
+	}
 }
 
 // newRefreshCookie returns a new refresh token cookie
