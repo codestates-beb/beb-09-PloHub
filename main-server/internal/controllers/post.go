@@ -11,7 +11,6 @@ import (
 	"main-server/internal/utils"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -255,13 +254,7 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, url := range urls {
-		urlParts := strings.Split(url, "_")
-		if len(urlParts) != 3 {
-			zap.L().Error("invalid url", zap.String("url", url))
-			continue
-		}
-
-		filename := urlParts[2]
+		filename := pc.storeSvc.ToFilename(url)
 
 		err = pc.storeSvc.DeleteFile(r.Context(), filename)
 		if err != nil {
