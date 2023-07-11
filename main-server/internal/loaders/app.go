@@ -68,16 +68,29 @@ func newApp(cfg *configs.Config) *app.App {
 func newRouter(ctx context.Context, cfg *configs.Config) routers.Router {
 	repo := newRepo(ctx, cfg.GetPostgresDSN())
 
+	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
+	userSvc := user.NewService(walletSvc, repo)
+	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
+	if err != nil {
+		zap.L().Panic("Failed to create auth service", zap.Error(err))
+	}
+	mainStorage := storage.NewService(cfg.S3.Region, cfg.S3.MainBucket, MustInitS3Client(ctx, cfg))
+	nftStorage := storage.NewService(cfg.S3.Region, cfg.S3.NFTBucket, MustInitS3Client(ctx, cfg))
+
+	postSvc := post.NewService(repo, mainStorage, walletSvc)
+
 	hc := controllers.NewHealthcheckController()
-	uc := newUserController(repo, cfg)
-	pc := newPostController(repo, cfg)
-	cc := newCommentController(repo, cfg)
+	uc := controllers.NewUserController(cfg.Server.Domain, userSvc, authSvc)
+	pc := controllers.NewPostController(authSvc, postSvc, mainStorage)
+	cc := controllers.NewCommentController(authSvc, postSvc)
+	nc := controllers.NewNFTController(authSvc, nftStorage, userSvc)
 
 	router := routers.NewRouter("v1").
 		Register(hc).
 		Register(uc).
 		Register(pc).
-		Register(cc)
+		Register(cc).
+		Register(nc)
 
 	return router
 }
@@ -88,41 +101,4 @@ func newRepo(ctx context.Context, dsn string) plohub.Repository {
 		zap.L().Panic("Failed to connect to postgres")
 	}
 	return plohub.NewRepository(db)
-}
-
-func newUserController(repo plohub.Repository, cfg *configs.Config) controllers.Controller {
-	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
-	userSvc := user.NewService(walletSvc, repo)
-	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
-	if err != nil {
-		zap.L().Panic("Failed to create auth service", zap.Error(err))
-	}
-
-	return controllers.NewUserController(cfg.Server.Domain, userSvc, authSvc)
-}
-
-func newPostController(repo plohub.Repository, cfg *configs.Config) controllers.Controller {
-	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
-	if err != nil {
-		zap.L().Panic("Failed to create auth service", zap.Error(err))
-	}
-	s3Client := MustInitS3Client(context.Background(), cfg)
-	storeSvc := storage.NewService(cfg.S3.Region, cfg.S3.Bucket, s3Client)
-	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
-	postSvc := post.NewService(repo, storeSvc, walletSvc)
-
-	return controllers.NewPostController(authSvc, postSvc, storeSvc)
-}
-
-func newCommentController(repo plohub.Repository, cfg *configs.Config) controllers.Controller {
-	authSvc, err := auth.NewService(cfg.JWT.AccessTokenSecret, cfg.JWT.RefreshTokenSecret)
-	if err != nil {
-		zap.L().Panic("Failed to create auth service", zap.Error(err))
-	}
-	s3Client := MustInitS3Client(context.Background(), cfg)
-	storeSvc := storage.NewService(cfg.S3.Region, cfg.S3.Bucket, s3Client)
-	walletSvc := wallet.NewService(cfg.Server.ContractServerBaseURL)
-	postSvc := post.NewService(repo, storeSvc, walletSvc)
-
-	return controllers.NewCommentController(authSvc, postSvc)
 }
