@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
+import cookie from 'cookie';
 import DefaultLayout from '../Components/Layout/DefaultLayout'
 import Nav from '../Components/Nav/Nav';
 import { ModalLayout } from '../Components/Reference';
@@ -173,4 +174,35 @@ export default function Home() {
             <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </DefaultLayout>
     )
+}
+
+export const getServerSideProps = async (context) => {
+    const cookies = cookie.parse(context.req.headers.cookie || '');
+    console.log(cookies['access_token']);
+    const token = cookies['access_token'];
+    try {
+        const res = await axios.get('http://localhost:4000/api/v1/posts/list', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            withCredentials: true
+        });
+
+        console.log('token, res', token, res);
+        const postList = res.data;
+
+        return {
+            props: {
+                postList
+            }
+        };
+    } catch (error) {
+        console.error('Failed to fetch user info:', error);
+
+        return {
+            props: {
+                postList: null
+            }
+        };
+    }
 }

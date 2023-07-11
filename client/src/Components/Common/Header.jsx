@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { FaCircleUser } from 'react-icons/fa6';
 import { BiSolidDownArrow, BiSolidUser } from 'react-icons/bi';
 import { IoMdCreate } from 'react-icons/io';
@@ -37,26 +38,13 @@ const Header = () => {
     }
     
     const userInfo = async () => {
-        const accessToken = localStorage.getItem('accessToken');
-        
         try {
             let response = await axios.get('http://localhost:4000/api/v1/users/myinfo', {
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`
-                }
+                withCredentials: true
             });
             if (response.status === 200) {
                 // 서버로부터 받은 사용자 정보
                 const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data.user_info;
-                console.log(response.data);
-
-                console.log('email: ' + email);
-                console.log('address: ' + address);
-                console.log('nickname: ' + nickname);
-                console.log('level: ' + level);
-                console.log('token: ' + token_amount);
-                console.log('daily: ' + daily_token);
-                console.log('eth_amount: ' + eth_amount);
 
                 dispatch({ type: SET_EMAIL, payload: email });
                 dispatch({ type: SET_ADDRESS, payload: address });
@@ -78,17 +66,12 @@ const Header = () => {
     const logOut = async () => {
         try {
             let response = await axios.post('http://localhost:4000/api/v1/users/logout', {}, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                },
                 withCredentials: true
             });
             if (response.data.status === 200) {
                 setIsModalOpen(true);
                 setModalTitle('Success');
                 setModalBody('로그아웃 되었습니다.');
-
-                localStorage.removeItem('accessToken');
 
                 setTimeout(() => {
                     setIsModalOpen(false);

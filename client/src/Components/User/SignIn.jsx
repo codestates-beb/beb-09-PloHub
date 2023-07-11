@@ -53,6 +53,8 @@ const SignIn = () => {
                 const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data.user_info;
                 const { access_token } = response.data;
 
+                console.log('response.data', response.data);
+
                 console.log('email: ' + email);
                 console.log('address: ' + address);
                 console.log('nickname: ' + nickname);
@@ -69,8 +71,6 @@ const SignIn = () => {
                 dispatch({ type: SET_TOKEN_BALANCE, payload: token_amount });
                 dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: daily_token });
                 dispatch({ type: SET_ETH_BALANCE, payload: eth_amount });
-
-                localStorage.setItem('accessToken', access_token);
                 
                 setTimeout(() => {
                     setIsModalOpen(false);
