@@ -13,6 +13,7 @@ type Comment struct {
 	ID           int32
 	PostID       int32
 	UserID       int32
+	Nickname     string
 	Content      string
 	RewardAmount int32
 	CreatedAt    time.Time
