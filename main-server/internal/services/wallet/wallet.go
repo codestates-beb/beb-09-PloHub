@@ -11,7 +11,7 @@ import (
 
 type Service interface {
 	CreateWallet(ctx context.Context, userID int32) (*models.Wallet, error)
-	CreateNFT(ctx context.Context, userID int32, name, description, imageUrl string) (*models.NFTCreated, error)
+	MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (*models.NFTMinted, error)
 	GetAllNFTs(ctx context.Context) ([]*models.NFT, error)
 	GetNFTDetails(ctx context.Context, tokenID int32) (*models.NFT, error)
 	GetUserNFTs(ctx context.Context, userID int32) ([]*models.NFT, error)
@@ -78,8 +78,8 @@ func (s *service) CreateWallet(ctx context.Context, userID int32) (*models.Walle
 	return &wallet, nil
 }
 
-func (s *service) CreateNFT(ctx context.Context, userID int32, name, description, imageUrl string) (*models.NFTCreated, error) {
-	body := models.CreateNFTRequest{
+func (s *service) MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (*models.NFTMinted, error) {
+	body := models.MintNFTRequest{
 		UserID:      userID,
 		Name:        name,
 		Description: description,
@@ -112,7 +112,7 @@ func (s *service) CreateNFT(ctx context.Context, userID int32, name, description
 		return nil, fmt.Errorf("error creating nft: %s", resp.Status)
 	}
 
-	var nftResp models.NFTCreated
+	var nftResp models.NFTMinted
 
 	err = json.NewDecoder(resp.Body).Decode(&nftResp)
 	if err != nil {

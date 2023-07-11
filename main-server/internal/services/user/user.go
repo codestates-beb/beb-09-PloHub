@@ -19,6 +19,7 @@ var (
 	ErrMismatchedHashAndPassword = errors.New("mismatched hash and password")
 	ErrEmailAlreadyExists        = errors.New("email already exists")
 	ErrSameNickname              = errors.New("same nickname")
+	ErrInsufficientToken         = errors.New("insufficient token")
 )
 
 type Service interface {
@@ -29,6 +30,7 @@ type Service interface {
 	MyPage(ctx context.Context, userID int32) (*models.MyPageInfo, error)
 	SignUp(ctx context.Context, email, password string) error
 	Withdraw(ctx context.Context, userID int32) error
+	MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (int32, error)
 }
 
 type service struct {
@@ -338,6 +340,61 @@ func (s *service) Withdraw(ctx context.Context, userID int32) error {
 
 	// return result
 	return nil
+}
+
+// MintNFT mints NFT
+func (s *service) MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (int32, error) {
+	var tokenID int32
+
+	fn := func(q plohub.Querier) error {
+		// get user by id
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		// check token amount
+		tokenAmount, err := strconv.ParseInt(user.TokenAmount, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		if tokenAmount < 20 {
+			return ErrInsufficientToken
+		}
+
+		// mint NFT
+		minted, err := s.walletSvc.MintNFT(ctx, userID, name, description, imageUrl)
+		if err != nil {
+			return err
+		}
+
+		// update user
+		err = q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        user.Nickname,
+			Level:           user.Level,
+			Address:         user.Address,
+			EthAmount:       minted.EthAmount,
+			TokenAmount:     minted.TokenAmount,
+			LatestLoginDate: user.LatestLoginDate,
+			DailyToken:      user.DailyToken,
+			ID:              user.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		tokenID = minted.TokenID
+
+		return nil
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return 0, err
+	}
+
+	return tokenID, nil
 }
 
 func matchPassword(hashedPassword, password string) (bool, error) {
