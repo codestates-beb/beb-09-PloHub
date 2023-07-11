@@ -68,7 +68,7 @@ module.exports = (sequelize,DataTypes) => {
     }
 },{
     timestamps: false,
-    tableName: 'nftTransaction'
+    tableName: 'ethTransaction'
 });
 
 ethTransaction.associate = (models) => {

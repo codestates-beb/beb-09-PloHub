@@ -10,7 +10,7 @@ connectDB;
 
 // 매 초마다 실행
 cron.schedule(
-	"* * * * * *",
+	"*/10 * * * * *",
 	async () => {
 		const transactions = await transactionModel.transactions.findAll({
 			where: {
@@ -46,9 +46,9 @@ cron.schedule(
 					s: tx.s,
 					status: "complete",
 					type: tx.type
-				})
+				});
 			}
-			if (tx.type === 'eth'){	
+			else if (tx.type === 'eth'){	
 				await models.ethTransaction.create({
 					hash: tx.hash,
 					nonce: tx.nonce,
@@ -68,7 +68,7 @@ cron.schedule(
 					type: tx.type
 				})
 			}
-			if (tx.type === 'nft'){
+			else if (tx.type === 'nft'){
 				await models.nftTransaction.create({
 					hash: tx.hash,
 					nonce: tx.nonce,
