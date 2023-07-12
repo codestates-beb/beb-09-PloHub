@@ -16,7 +16,7 @@ const mypage = ({ userInfo }) => {
 
 export default mypage;
 
-export const getServerSideProps = async (context) => {
+export const getServerSideProps = async () => {
     try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/mypage`, {
             withCredentials: true

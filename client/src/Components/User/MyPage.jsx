@@ -117,26 +117,6 @@ const MyPage = () => {
     // Calculate total pages
     const totalPages = Math.ceil(posts.length / postsPerPage);
 
-    const myPageInfo = async () => {
-        
-        try {
-            let response = await axios.get('http://localhost:4000/api/v1/users/mypage', {
-                withCredentials: true
-            });
-            if (response.status === 200) {
-                // 서버로부터 받은 사용자 정보
-                console.log(response);
-            }
-        } catch (error) {
-            console.error("Failed to fetch user info: ", error);
-        }
-    }
-
-
-    useEffect(() => {
-        myPageInfo();
-    }, []);
-
     const tokenSwapLayoutHtml = () => {
         const handleTokenAmountChange = (e) => {
             // ERC-20 수량 변경 시 처리 로직

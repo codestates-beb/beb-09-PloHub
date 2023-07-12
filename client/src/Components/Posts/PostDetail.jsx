@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -34,17 +34,6 @@ const PostDetail = ({ postDetail }) => {
         speed: 500,
         slidesToShow: postDetail.media.length > 2 ? 3 : postDetail.media.length,
         slidesToScroll: postDetail.media.length > 2 ? 3 : postDetail.media.length,
-    };
-
-    const handleCommentChange = (e) => {
-        setComment(e.target.value);
-    };
-
-    const handleCommentSubmit = (e) => {
-        e.preventDefault();
-        // 댓글 작성 및 처리 로직 추가
-        console.log('댓글 작성:', comment);
-        setComment('');
     };
 
     const deletePost = async () => {
@@ -156,7 +145,13 @@ const PostDetail = ({ postDetail }) => {
                         <Slider {...settings} className='relative w-full h-full flex justify-center items-center'>
                             {postDetail.media.map((media, index) => (
                                 <div key={index} className="w-full h-full">
-                                    <Image src={media.url} layout="fill" objectFit="contain" key={index}/>
+                                    {media.type === 1 ? (
+                                        <Image src={media.url} layout="fill" objectFit="contain" key={index}/>
+                                    ) : (
+                                        <video className='cursor-pointer' controls>
+                                            <source src={media.url} />
+                                        </video>
+                                    )}
                                 </div>
                             ))}
                         </Slider>
