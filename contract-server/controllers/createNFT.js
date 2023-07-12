@@ -152,7 +152,7 @@ exports.createNFT = async (req, res) => {
           updateTransaction("nft");
           res.status(200).json({
             message: "OK",
-            token_id: mintResult.events.Transfer.returnValues.tokenId,
+            token_id: Number(mintResult.events.Transfer.returnValues.tokenId),
             eth_amount: eth_amount,
             token_amount: token_amount,
           });
