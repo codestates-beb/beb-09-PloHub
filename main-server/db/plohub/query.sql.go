@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-const createComment = `-- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4)
+const createComment = `-- name: CreateComment :one
+INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4) RETURNING id
 `
 
 type CreateCommentParams struct {
@@ -22,14 +22,16 @@ type CreateCommentParams struct {
 	RewardAmount int32
 }
 
-func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) error {
-	_, err := q.db.ExecContext(ctx, createComment,
+func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createComment,
 		arg.PostID,
 		arg.UserID,
 		arg.Content,
 		arg.RewardAmount,
 	)
-	return err
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createMedia = `-- name: CreateMedia :exec
@@ -588,16 +590,17 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 }
 
 const updateComment = `-- name: UpdateComment :exec
-UPDATE comments SET content = $1 WHERE id = $2
+UPDATE comments SET content = $1, reward_amount = $2 WHERE id = $3
 `
 
 type UpdateCommentParams struct {
-	Content string
-	ID      int32
+	Content      string
+	RewardAmount int32
+	ID           int32
 }
 
 func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) error {
-	_, err := q.db.ExecContext(ctx, updateComment, arg.Content, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateComment, arg.Content, arg.RewardAmount, arg.ID)
 	return err
 }
 

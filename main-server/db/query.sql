@@ -60,8 +60,8 @@ DELETE FROM media WHERE id = $1;
 -- name: DeleteMediaByPostID :exec
 DELETE FROM media WHERE post_id = $1;
 
--- name: CreateComment :exec
-INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4);
+-- name: CreateComment :one
+INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4) RETURNING id;
 
 -- name: GetCommentByID :one
 SELECT * FROM comments WHERE id = $1;
@@ -79,7 +79,7 @@ left join users as u on c.user_id = u.id
 where user_id = $1;
 
 -- name: UpdateComment :exec
-UPDATE comments SET content = $1 WHERE id = $2;
+UPDATE comments SET content = $1, reward_amount = $2 WHERE id = $3;
 
 -- name: DeleteComment :exec
 DELETE FROM comments WHERE id = $1;
