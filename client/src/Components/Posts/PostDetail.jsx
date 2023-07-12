@@ -28,7 +28,9 @@ const PostDetail = ({ postDetail, commentList }) => {
         3: { text: '참여 후기' },
     };
 
-    const isAuthor = user && user.email === postDetail.post_info.author.email;
+    console.log(commentList);
+    const isPostAuthor = user && user.email === postDetail.post_info.author.email;
+    // const isCommentAuthor = user && user.email === commentList.author.email;
 
     const settings = {
         dots: true,
@@ -140,7 +142,7 @@ const PostDetail = ({ postDetail, commentList }) => {
             <div className='w-[90%] min-h-screen mx-auto mt-20 flex flex-col gap-12'>
                 <div className='flex justify-between border-b-2 border-black w-full'>
                     <p className='font-bold text-4xl mb-5'>{categoryMappings[postDetail.post_info.category].text}</p>
-                    {isAuthor && 
+                    {isPostAuthor && 
                         <button className='
                             w-28 
                             h-12 
@@ -202,7 +204,7 @@ const PostDetail = ({ postDetail, commentList }) => {
                                             <p className='text-sm'>{comment.created_at.split('T')[0]} {comment.created_at.substring(11,19)}</p>
                                         </div>
                                     </div>
-                                    {isAuthor &&
+                                    {user.email === comment.author.email &&
                                         <div className='flex justify-end items-center' onClick={() => deleteComment(comment.id)}>
                                             <AiOutlineDelete className="text-red-500 cursor-pointer" size={26} />
                                         </div>
@@ -236,7 +238,7 @@ const PostDetail = ({ postDetail, commentList }) => {
                     </div>
                 </div>
                 <div className='w-full flex gap-3 justify-end my-16'>
-                    {isAuthor && 
+                    {isPostAuthor && 
                         <Link 
                             href={`/posts/edit/${postDetail.post_info.id}`}
                             className='
