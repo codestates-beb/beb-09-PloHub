@@ -84,7 +84,7 @@ const PostCreate = () => {
         });
         
         try {
-            let response = await axios.post('http://localhost:4000/api/v1/posts/create', formData, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/create`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data', // 파일 업로드 시 Content-Type 설정
                 },

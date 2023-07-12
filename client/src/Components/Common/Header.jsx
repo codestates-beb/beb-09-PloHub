@@ -39,7 +39,7 @@ const Header = () => {
     
     const userInfo = async () => {
         try {
-            let response = await axios.get('http://localhost:4000/api/v1/users/myinfo', {
+            let response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/myinfo`, {
                 withCredentials: true
             });
             if (response.status === 200) {
@@ -65,7 +65,7 @@ const Header = () => {
 
     const logOut = async () => {
         try {
-            let response = await axios.post('http://localhost:4000/api/v1/users/logout', {}, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/logout`, {}, {
                 withCredentials: true
             });
             if (response.data.status === 200) {

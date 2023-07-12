@@ -13,7 +13,7 @@ function App({ Component, pageProps }) {
     useEffect(() => {
         const refresh = async () => {
             try {
-                const response = await axios.post('http://localhost:4000/api/v1/users/refresh', {}, {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/refresh`, {}, {
                     withCredentials: true
                 });
             

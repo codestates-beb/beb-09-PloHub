@@ -168,7 +168,7 @@ export const getServerSideProps = async ({ query }) => {
     const { page = 1, limit = 10 } = query;
 
     try {
-        const res = await axios.get('http://localhost:4000/api/v1/posts/list', {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/list`, {
             params: {
             page,
             limit,
