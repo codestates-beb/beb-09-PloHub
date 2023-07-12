@@ -21,6 +21,7 @@ type Querier interface {
 	GetPosts(ctx context.Context, arg GetPostsParams) ([]GetPostsRow, error)
 	GetPostsByCategory(ctx context.Context, arg GetPostsByCategoryParams) ([]GetPostsByCategoryRow, error)
 	GetPostsByUserID(ctx context.Context, userID int32) ([]GetPostsByUserIDRow, error)
+	GetUserByAddress(ctx context.Context, address string) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) error
