@@ -44,7 +44,7 @@ const MyPage = () => {
         console.log(nickname);
 
         try {
-            let response = await axios.post('http://localhost:4000/api/v1/users/change-nickname', formData, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/change-nickname`, formData, {
                 withCredentials: true
             });
             console.log(response);

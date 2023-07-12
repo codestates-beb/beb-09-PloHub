@@ -37,7 +37,7 @@ const SignIn = () => {
         formData.append('password', password);
 
         try {
-            let response = await axios.post('http://localhost:4000/api/v1/users/login', formData, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/login`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json'

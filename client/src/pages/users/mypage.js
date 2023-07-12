@@ -18,7 +18,7 @@ export default mypage;
 
 export const getServerSideProps = async (context) => {
     try {
-        const res = await axios.get('http://localhost:4000/api/v1/users/mypage', {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/mypage`, {
             withCredentials: true
         });
 

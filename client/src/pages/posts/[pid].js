@@ -23,7 +23,7 @@ export const getServerSideProps = async ({ query }) => {
     console.log('pid', pid);
 
     try {
-        const res = await axios.get(`http://localhost:4000/api/v1/posts/detail/${pid}`, {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/detail/${pid}`, {
             withCredentials: true
         });
     

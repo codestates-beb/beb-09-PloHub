@@ -44,8 +44,7 @@ const SignUp = () => {
     
             try {
                 const response = await axios.post(
-                    // `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/check-email`,
-                    `http://localhost:4000/api/v1/users/check-email`,
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/check-email`,
                     { email }, // 요청 데이터를 JSON 객체로 전달
                     {
                     headers: {
@@ -140,7 +139,7 @@ const SignUp = () => {
         formData.append('password', password);
 
         try {
-            let response = await axios.post(`http://localhost:4000/api/v1/users/signup`, formData, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/signup`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Accept": "application/json",
