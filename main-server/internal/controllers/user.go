@@ -45,7 +45,7 @@ func (uc *userController) Handler() http.Handler {
 	mux.Group(func(r chi.Router) {
 		r.Use(middlewares.AccessTokenRequired(uc.authSvc))
 		r.Get("/myinfo", uc.myInfo)
-		r.Get("/mypage", uc.myPage) // TODO: implement this
+		r.Get("/mypage", uc.myPage)
 		r.Post("/change-nickname", uc.changeNickname)
 	})
 
@@ -235,8 +235,18 @@ func (uc *userController) myInfo(w http.ResponseWriter, r *http.Request) {
 
 // myPage handles GET /users/mypage
 func (uc *userController) myPage(w http.ResponseWriter, r *http.Request) {
-	// TODO: implement this
-	w.WriteHeader(http.StatusOK)
+	userID := r.Context().Value(middlewares.UserIDKey).(int32)
+
+	// get user's page info
+	myPageInfo, err := uc.userSvc.MyPage(r.Context(), userID)
+	if err != nil {
+		zap.L().Error("failed to get user's page info", zap.Error(err), zap.Int32("user_id", userID))
+		utils.ErrorJSON(w, errors.New("unable to get user's page info"), http.StatusInternalServerError)
+		return
+	}
+
+	// send response
+	_ = utils.WriteJSON(w, http.StatusOK, myPageInfo)
 }
 
 // checkEmail handles POST /users/check-email
