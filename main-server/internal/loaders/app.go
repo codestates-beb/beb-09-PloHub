@@ -84,13 +84,15 @@ func newRouter(ctx context.Context, cfg *configs.Config) routers.Router {
 	pc := controllers.NewPostController(authSvc, postSvc, mainStorage)
 	cc := controllers.NewCommentController(authSvc, postSvc)
 	nc := controllers.NewNFTController(authSvc, nftStorage, userSvc, walletSvc)
+	tc := controllers.NewTokenController(authSvc, userSvc)
 
 	router := routers.NewRouter("v1").
 		Register(hc).
 		Register(uc).
 		Register(pc).
 		Register(cc).
-		Register(nc)
+		Register(nc).
+		Register(tc)
 
 	return router
 }

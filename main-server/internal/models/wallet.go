@@ -10,8 +10,12 @@ const (
 )
 
 type Wallet struct {
-	UserID      int32  `json:"user_id"`
-	Address     string `json:"address"`
+	UserID  int32  `json:"user_id"`
+	Address string `json:"address"`
+	Balance
+}
+
+type Balance struct {
 	TokenAmount string `json:"token_amount"`
 	EthAmount   string `json:"eth_amount"`
 }
@@ -42,4 +46,15 @@ type IssueRewardRequest struct {
 type IssueRewardResponse struct {
 	RewardAmount int32  `json:"reward_amount"`
 	TokenAmount  string `json:"token_amount"`
+}
+
+type SwapTokensRequest struct {
+	UserID      int32 `json:"user_id"`
+	TokenAmount int32 `json:"token_amount"`
+}
+
+type SwapTokensResponse struct {
+	Message     string `json:"message"`
+	TokenAmount string `json:"token_amount"`
+	EthAmount   string `json:"eth_amount"`
 }
