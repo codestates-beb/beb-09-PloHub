@@ -17,8 +17,7 @@ exports.userNFT = async(req,res) => {
                 user_id: user_id
             }
          })
-        const dataValuesArray = userNFTs.map(item => item.dataValues);
-        console.log(dataValuesArray);   
+        const dataValuesArray = userNFTs.map(item => item.dataValues); 
         
         res.status(200).json({message: 'OK', data: dataValuesArray});
 

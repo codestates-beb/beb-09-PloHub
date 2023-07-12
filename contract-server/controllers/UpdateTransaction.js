@@ -20,8 +20,6 @@ const updateTransaction = async (type) => {
 
     const latestTransaction = await web3.eth.getTransaction(latestTransactionHash);
 
-    console.log(latestTransaction);
-
     const createTransaction = await models.transactions.create({
       hash: latestTransaction.hash,
       nonce: latestTransaction.nonce,
