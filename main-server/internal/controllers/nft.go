@@ -6,24 +6,28 @@ import (
 	"main-server/internal/services/auth"
 	"main-server/internal/services/storage"
 	"main-server/internal/services/user"
+	"main-server/internal/services/wallet"
 	"main-server/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
 type nftController struct {
-	authSvc  auth.Service
-	storeSvc storage.Service
-	userSvc  user.Service
+	authSvc   auth.Service
+	storeSvc  storage.Service
+	userSvc   user.Service
+	walletSvc wallet.Service
 }
 
-func NewNFTController(authSvc auth.Service, storeSvc storage.Service, userSvc user.Service) Controller {
+func NewNFTController(authSvc auth.Service, storeSvc storage.Service, userSvc user.Service, walletSvc wallet.Service) Controller {
 	return &nftController{
-		authSvc:  authSvc,
-		storeSvc: storeSvc,
-		userSvc:  userSvc,
+		authSvc:   authSvc,
+		storeSvc:  storeSvc,
+		userSvc:   userSvc,
+		walletSvc: walletSvc,
 	}
 }
 
@@ -34,12 +38,40 @@ func (c *nftController) Pattern() string {
 func (c *nftController) Handler() http.Handler {
 	mux := chi.NewRouter()
 
+	mux.Get("/detail/{id}", c.getNFTDetail)
+
 	mux.Group(func(r chi.Router) {
 		r.Use(middlewares.AccessTokenRequired(c.authSvc))
 		r.Post("/mint", c.mintNFT)
 	})
 
 	return mux
+}
+
+// getNFTDetail handles GET /nft/detail/{id}
+func (c *nftController) getNFTDetail(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	nftID, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		zap.L().Error("failed to parse nft id", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	nft, err := c.walletSvc.GetNFTDetails(r.Context(), int32(nftID))
+	if err != nil {
+		zap.L().Error("failed to get nft detail", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		NFT models.NFT `json:"nft"`
+	}
+	resp.NFT = *nft
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 // mintNFT handles POST /nft/mint
