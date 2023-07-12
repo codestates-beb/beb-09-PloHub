@@ -31,6 +31,7 @@ type Service interface {
 	SignUp(ctx context.Context, email, password string) error
 	Withdraw(ctx context.Context, userID int32) error
 	MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (int32, error)
+	SwapTokens(ctx context.Context, userID, tokenAmount int32) (*models.Balance, error)
 }
 
 type service struct {
@@ -407,6 +408,53 @@ func (s *service) MintNFT(ctx context.Context, userID int32, name, description, 
 	}
 
 	return tokenID, nil
+}
+
+// SwapTokens swaps tokens
+func (s *service) SwapTokens(ctx context.Context, userID, tokenAmount int32) (*models.Balance, error) {
+	var balance *models.Balance
+
+	fn := func(q plohub.Querier) error {
+		// check user's token amount
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		tokenAmountInt32, err := strconv.ParseInt(user.TokenAmount, 10, 32)
+		if err != nil {
+			return err
+		}
+
+		if int32(tokenAmountInt32) < tokenAmount {
+			return ErrInsufficientToken
+		}
+
+		// swap tokens
+		balance, err = s.walletSvc.SwapTokens(ctx, userID, tokenAmount)
+		if err != nil {
+			return err
+		}
+
+		// update user
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        user.Nickname,
+			Level:           user.Level,
+			Address:         user.Address,
+			EthAmount:       balance.EthAmount,
+			TokenAmount:     balance.TokenAmount,
+			LatestLoginDate: user.LatestLoginDate,
+			DailyToken:      user.DailyToken,
+			ID:              user.ID,
+		})
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return balance, nil
 }
 
 func matchPassword(hashedPassword, password string) (bool, error) {
