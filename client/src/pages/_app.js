@@ -11,15 +11,18 @@ function App({ Component, pageProps }) {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        /**
+         * 토큰을 갱신하는 함수
+         * 백엔드 서버에 POST 요청을 보내어 토큰을 갱신하고,
+         * 응답 메시지를 콘솔에 출력.
+         */
         const refresh = async () => {
             try {
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/refresh`, {}, {
                     withCredentials: true
                 });
-            
-                const { access_token } = response.data;
-
-                console.log('refresh access_token', access_token);
+                
+                console.log('refresh message: ', response.data.message);
             
             } catch (error) {
                 console.log(error);
@@ -28,10 +31,11 @@ function App({ Component, pageProps }) {
         };
         refresh();
         
-        // And every 10 minutes.
+        // 10분마다 실행
         const intervalId = setInterval(refresh, 10 * 60 * 1000);
+        // const intervalId = setInterval(refresh, 10 * 1000);
         
-        // Clear interval on component unmount.
+        // 컴포넌트가 언마운트될 때 인터벌을 해제
         return () => {
             clearInterval(intervalId);
         };

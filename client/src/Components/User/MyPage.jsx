@@ -5,15 +5,29 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import axios from 'axios';
-import { FaArrowCircleDown, FaEthereum, FaAddressCard } from 'react-icons/fa'
-import { format } from 'date-fns';
-import { logoBlack, ploHub, ModalLayout } from '../Reference'
+import cookie from 'cookie';
+import Web3 from 'web3';
+import { logoBlack, ModalLayout } from '../Reference'
+import TokenSwapModal from './TokenSwapModal';
+import TokenSendModal from './TokenSendModal';
 
 const MyPage = () => {
     const router = useRouter();
-    const currentDate = new Date();
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
+
+    let provider;
+    let web3Provider;
+    
+    try {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        provider = window.ethereum;
+        web3Provider = new Web3(provider);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    
 
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState(user.nickname);
@@ -22,40 +36,46 @@ const MyPage = () => {
     const [currentItems, setCurrentItems] = useState([]);
     const [activeTab, setActiveTab] = useState('owned');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalType, setModalType] = useState(null);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
+    const [userInfo, setUserInfo] = useState();
+    const [postInfo, setPostInfo] = useState([]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
-    };
-
-    const nicknameChange = (e) => {
-        setNickname(e.target.value);
     };
 
     const nicknameEdit = () => {
         setIsEditing(true);
     };
 
+    /**
+     * 닉네임을 변경하는 함수
+     * 입력한 닉네임을 백엔드 서버로 전송하여 변경
+     * 변경된 닉네임을 리덕스 스토어와 상태(State)에 업데이트하고 페이지를 새로고침
+     */
     const changeNickname = async () => {
         const formData = new FormData();
 
         formData.append('nickname', nickname);
-        console.log(nickname);
 
         try {
             let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/change-nickname`, formData, {
                 withCredentials: true
             });
-            console.log(response);
             dispatch({ type: SET_NICKNAME, payload: nickname });
             router.reload();
 
         } catch (error) {
-            console.log(error);
+            console.log('Error: ' + error.message);
         }
     };
 
+    /**
+     * 닉네임을 유효성 검사하는 함수
+     * 입력한 닉네임이 유효한지 확인하고, 유효하지 않은 경우 에러 메시지를 설정 
+     */
     const validateNickname = () => {
         if (nickname.length < 2) {
             setErrorMessage('닉네임은 최소 2자 이상이어야 합니다.');
@@ -70,30 +90,7 @@ const MyPage = () => {
         validateNickname();
     }, [nickname])
 
-    const formatDate = format(currentDate, 'yyyy-MM-dd');
-
     const postsPerPage = 5;
-    const posts = [
-        { id: 1, category: 'all', title: 'Post 1', content: 'Author 1', writer: 'test', date: formatDate },
-        { id: 2, category: 'all', title: 'Post 2', content: 'Author 2', writer: 'test', date: formatDate },
-        { id: 3, category: 'all', title: 'Post 3', content: 'Author 3', writer: 'test', date: formatDate },
-        { id: 4, category: 'all', title: 'Post 4', content: 'Author 4', writer: 'test', date: formatDate },
-        { id: 5, category: 'all', title: 'Post 5', content: 'Author 5', writer: 'test', date: formatDate },
-        { id: 6, category: 'all', title: 'Post 6', content: 'Author 6', writer: 'test', date: formatDate },
-        { id: 7, category: 'all', title: 'Post 7', content: 'Author 7', writer: 'test', date: formatDate },
-        { id: 8, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 9, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
-        { id: 10, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
-        { id: 11, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 12, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
-        { id: 13, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
-        { id: 14, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 15, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
-        { id: 16, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
-        { id: 17, category: 'all', title: 'Post 8', content: 'Author 8', writer: 'test', date: formatDate },
-        { id: 18, category: 'all', title: 'Post 9', content: 'Author 9', writer: 'test', date: formatDate },
-        { id: 19, category: 'all', title: 'Post 10', content: 'Author 10', writer: 'test', date: formatDate },
-    ];
 
     const nfts = [
         { id: 1, file: logoBlack, title: 'Card Title1', content: '', price: '1'},
@@ -101,210 +98,110 @@ const MyPage = () => {
         { id: 3, file: logoBlack, title: 'Card Title3', content: '', price: '3'},
     ]
 
-    
+    /**
+     * 페이지 변경 핸들러 함수
+     * 선택한 페이지 번호를 받아와서 현재 페이지 상태(State)를 업데이트함
+     * @param {number} pageNumber 선택한 페이지 번호
+     */
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
-    
+
+    /**
+     * 전체 페이지 수를 계산하는 함수
+     */
     useEffect(() => {
         // currentPage가 바뀔 때마다 실행되도록 설정
         const indexOfLastPost = currentPage * postsPerPage;
         const indexOfFirstPost = indexOfLastPost - postsPerPage;
-        setCurrentItems(posts.slice(indexOfFirstPost, indexOfLastPost));
     }, [currentPage]); // currentPage를 dependency로 추가해주세요.
 
 
     // Calculate total pages
-    const totalPages = Math.ceil(posts.length / postsPerPage);
+    const totalPages = Math.ceil(postInfo.length / postsPerPage);
 
-    const tokenSwapLayoutHtml = () => {
-        const handleTokenAmountChange = (e) => {
-            // ERC-20 수량 변경 시 처리 로직
-        };
-    
-        const handleEthAmountChange = (e) => {
-            // ETH 수량 변경 시 처리 로직
-        };
-    
-        return (
-            <>
-                <form className='
-                    flex 
-                    flex-col 
-                    justify-center 
-                    items-center 
-                    gap-6
-                    w-[70%]'>
-                    <div className='w-full flex items-center gap-3'>
-                        <Image src={ploHub} width={40} height={40} alt='PloHub' />
-                        <p className='font-bold text-xl'>PH</p>
-                        <input className='
-                            border 
-                            rounded-lg 
-                            w-full
-                            p-2'
-                            type="number" 
-                            onChange={handleTokenAmountChange} />
-                    </div>
-                    <FaArrowCircleDown size={50}  className="text-gray-500" />
-                    <div className='w-full flex items-center gap-3'>
-                        <FaEthereum size={30} />
-                        <p className='font-bold text-xl'>ETH</p>
-                        <input className='
-                            border 
-                            rounded-lg 
-                            w-full
-                            p-2'
-                            type="number" 
-                            onChange={handleEthAmountChange} />
-                    </div>
-                    <div className='w-[60%] flex justify-center items-center gap-3'>
-                        <button className='
-                            w-[6rem]
-                            border 
-                            rounded-xl 
-                            p-3 
-                            text-white 
-                            bg-gray-600 
-                            hover:bg-gray-700 
-                            transition 
-                            duration-300' 
-                            type='button'
-                            onClick={() => setModalOpen(false)}>
-                            취소
-                        </button>
-                        <button className='
-                            w-[6rem]
-                            border 
-                            rounded-xl 
-                            p-3 
-                            text-white 
-                            bg-blue-main
-                            hover:bg-blue-dark 
-                            transition 
-                            duration-300' 
-                            type='submit'>
-                            전송
-                        </button>
-                    </div>
-                </form>
-    
-            </>
-        );
-    }
+    /**
+     * 사용자 정보를 가져오는 함수
+     * 백엔드 서버에 GET 요청을 보내어 사용자 정보와 게시물 정보를 가져옴
+     * 가져온 정보를 적절한 상태(State)로 업데이트하고, 리덕스 스토어에도 해당 정보를 저장
+     */
+    const myPageInfo = async () => {
+        const token = cookie.parse(document.cookie || '');
 
-    const tokenSendLayoutHtml = () => {
-    
-        return (
-            <>
-                <form className='
-                    flex 
-                    flex-col 
-                    justify-center 
-                    items-center 
-                    gap-6
-                    w-[90%]'>
-                    <div className='w-full flex flex-col justify-center gap-3'>
-                        <div className='flex items-center gap-3'>
-                            <FaAddressCard size={35} className='text-gray-600' />
-                            <p className='font-bold text-xl'>지갑 주소</p>
-                        </div>
-                        <input className='
-                            border 
-                            rounded-lg 
-                            w-full
-                            p-1'
-                            type="text" />
-                    </div>
-                    <div className='w-full flex flex-col justify-center gap-3'>
-                        <div className='flex items-center gap-3'>
-                            <Image src={ploHub} width={35} height={35} alt='PloHub' />
-                            <p className='font-bold text-xl'>PH</p>
-                        </div>
-                        <input className='
-                            border 
-                            rounded-lg 
-                            w-full
-                            p-1'
-                            type="number" />
-                    </div>
-                    <div className='w-[60%] flex justify-center items-center gap-3'>
-                        <button className='
-                            w-[6rem]
-                            border 
-                            rounded-xl 
-                            p-3 
-                            text-white 
-                            bg-gray-600 
-                            hover:bg-gray-700 
-                            transition 
-                            duration-300' 
-                            type='button'
-                            onClick={() => setModalOpen(false)}>
-                            취소
-                        </button>
-                        <button className='
-                            w-[6rem]
-                            border 
-                            rounded-xl 
-                            p-3 
-                            text-white 
-                            bg-blue-main
-                            hover:bg-blue-dark 
-                            transition 
-                            duration-300' 
-                            type='submit'>
-                            전송
-                        </button>
-                    </div>
-                </form>
-    
-            </>
-        );
-    }
+        try {
+            let response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/mypage`, {
+                headers: {
+                    'Authorization': `Bearer ${token.access_token}`
+                },
+                withCredentials: true
+            });
 
-    const openTokenSendModal = (e) => {
-        const btnType = e.target.innerText;
-        if (btnType === '토큰 교환') {
-            setIsModalOpen(true);
-            setModalTitle('토큰 교환');
-            setModalBody(tokenSwapLayoutHtml);
-        } else {
-            setIsModalOpen(true);
-            setModalTitle('토큰 전송');
-            setModalBody(tokenSendLayoutHtml);
+            const { user_info, posts } = response.data;
+            console.log(response);
+            setUserInfo(user_info);
+            setPostInfo(posts);
+
+            dispatch({ type: SET_EMAIL, payload: userInfo.email });
+            dispatch({ type: SET_ADDRESS, payload: userInfo.address });
+            dispatch({ type: SET_NICKNAME, payload: userInfo.nickname });
+            dispatch({ type: SET_LEVEL, payload: userInfo.level });
+            dispatch({ type: SET_TOKEN_BALANCE, payload: userInfo.token_amount });
+            dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: userInfo.daily_token });
+            dispatch({ type: SET_ETH_BALANCE, payload: userInfo.eth_amount });
+            
+        } catch (error) {
+            console.log('Error: ' + error.message);
         }
     }
 
+    useEffect(() => {
+        myPageInfo();
+    }, [])
+
+    const openTokenSendModal = (modalType) => {
+        if (modalType === 'tokenSwap') {
+            setIsModalOpen(true);
+            setModalTitle('토큰 교환');
+            setModalBody(<TokenSwapModal setIsModalOpen={setIsModalOpen} />);
+        } else if (modalType === 'tokenSend') {
+            setIsModalOpen(true);
+            setModalTitle('토큰 전송');
+            setModalBody(<TokenSendModal setIsModalOpen={setIsModalOpen} />);
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
     return (
         <>
-            <div className='flex flex-col justify-center gap-6 mx-auto w-[90%]'>
+            <div className='flex flex-col gap-6 mx-auto w-[90%] min-h-screen p-4'>
                 <div className='w-full border-b border-gray-300 mx-auto my-6'>
                     <div className='grid grid-cols-3 items-center py-3 px-5 text-center'>
-                        <div className='flex gap-4 font-bold text-2xl pl-5'>
+                        <div className='flex gap-4 font-bold text-2xl pl-3'>
                         {isEditing ? (
                             <div className='flex items-center justify-start gap-3'>
                                 <input
                                 type="text"
                                 value={nickname}
-                                onChange={nicknameChange}
+                                onChange={(e) => setNickname(e.target.value)}
                                 className="border rounded-xl px-2 py-1 w-32"
                                 />
                                 <p className='font-normal text-xs text-red-500'>{errorMessage}</p>
                             </div>
                         ) : (
                             <>
-                                <p>{user.nickname.length >= 8 ? user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5) : user.nickname}</p>
+                                <p>{userInfo?.nickname?.length >= 8 ? userInfo?.nickname.slice(0, 8) + '...' + userInfo.nickname.slice(-5) : userInfo?.nickname}</p>
                                 <p>|</p>
-                                <p>Lv. {user.level}</p>
+                                <p>Lv. {userInfo?.level}</p>
                             </>
                         )}
                         </div>
                         <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
-                            <p>My Token : {user.tokenBalance} PH</p>
+                            <p>My Token : {userInfo?.token_amount} PH</p>
                             <p>
-                                My ETH :  
-                                {Number(user.ethBalance).toLocaleString()} ETH
+                                My ETH : {userInfo?.eth_amount ? web3Provider.utils?.fromWei(userInfo.eth_amount, 'ether') : 0} ETH
                             </p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
@@ -348,7 +245,7 @@ const MyPage = () => {
                                 transition 
                                 duration-300' 
                                 type="button"
-                                onClick={openTokenSendModal}>
+                                onClick={() => openTokenSendModal('tokenSwap')}>
                                 토큰 교환
                             </button>
                             <button className='
@@ -361,13 +258,13 @@ const MyPage = () => {
                                 transition 
                                 duration-300' 
                                 type="button"
-                                onClick={openTokenSendModal}>
+                                onClick={() => openTokenSendModal('tokenSend')}>
                                 토큰 전송
                             </button>
                         </div>
                     </div>
                 </div>
-                <div className=''>
+                <div className='mb-12'>
                     <div className='mb-4'>
                         <p className='font-bold text-2xl'>작성한 게시글</p> 
                     </div>
@@ -384,7 +281,7 @@ const MyPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentItems.map((post) => (
+                                {postInfo.map((post) => (
                                 <tr 
                                     key={post.id} 
                                     className="hover:bg-gray-200 transition-all duration-300 cursor-pointer"
@@ -402,10 +299,10 @@ const MyPage = () => {
                                         <p className="text-gray-600"> {post.content}</p>
                                     </td>
                                     <td className="border-b p-3">
-                                        <p className="text-gray-600"> {post.writer}</p>
+                                        <p className="text-gray-600"> {post.author.nickname}</p>
                                     </td>
                                     <td className="border-b p-3">
-                                        <p className="text-gray-600"> {post.date}</p>
+                                        <p className="text-gray-600"> {post.created_at.split('T')[0]}<br />{post.created_at.substring(11,19)}</p>
                                     </td>
                                 </tr>
                                 ))}
@@ -509,6 +406,12 @@ const MyPage = () => {
                     </div>
                 </div>
             </div>
+            {isModalOpen && modalType === 'tokenSwap' && (
+                <TokenSwapModal closeModal={closeModal} />
+            )}
+            {isModalOpen && modalType === 'tokenSend' && (
+                <TokenSendModal closeModal={closeModal} />
+            )}
             <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
