@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import jwtDecode from 'jwt-decode';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
+import axios from 'axios';
 import '@/styles/globals.css'
 import { store } from '../Components/Redux/store'
 import HeadMeta from '../Components/Common/HeadMeta'
@@ -25,15 +25,15 @@ function App({ Component, pageProps }) {
                 console.log(error);
             }
 
-            refresh();
-
-            // And every 10 minutes.
-            const intervalId = setInterval(refresh, 10 * 60 * 1000);
-    
-            // Clear interval on component unmount.
-            return () => {
-                clearInterval(intervalId);
-            };
+        };
+        refresh();
+        
+        // And every 10 minutes.
+        const intervalId = setInterval(refresh, 10 * 60 * 1000);
+        
+        // Clear interval on component unmount.
+        return () => {
+            clearInterval(intervalId);
         };
     }, []);
 

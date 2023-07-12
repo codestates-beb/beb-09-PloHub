@@ -26,8 +26,6 @@ const PostDetail = ({ postDetail }) => {
         3: { text: '참여 후기' },
     };
 
-
-    console.log(user);
     const isAuthor = user && user.email === postDetail.post_info.author.email;
 
     const settings = {
@@ -51,7 +49,7 @@ const PostDetail = ({ postDetail }) => {
 
     const deletePost = async () => {
         try {
-            let response = await axios.delete(`http://localhost:4000/api/v1/posts/${postDetail.post_info.id}`, {
+            let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/${postDetail.post_info.id}`, {
                 withCredentials: true
             });
             
@@ -74,7 +72,6 @@ const PostDetail = ({ postDetail }) => {
             setTimeout(() => {
                 setIsModalOpen(false);
             }, 3000);
-
         }
     }
 
@@ -82,10 +79,10 @@ const PostDetail = ({ postDetail }) => {
         const formData = new FormData();
 
         formData.append('post_id', postDetail.post_info.id);
-        formData.append('comment', comment);
+        formData.append('content', comment);
 
         try {
-            let response = await axios.post('http://localhost:4000/api/v1/comments/create', formData, {
+            let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/comments/create`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data', // 파일 업로드 시 Content-Type 설정
                 },
@@ -93,11 +90,34 @@ const PostDetail = ({ postDetail }) => {
             });
 
             console.log(response);
-        } catch (error) {
-            console.log(error);
-        }
+            if (response.data.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('댓글이 등록되었습니다.');
 
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                }, 3000);
+            }
+        } catch (error) {
+            console.log('Error: ', error.message);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
     }
+
+    // const deleteComment = async () => {
+    //     try {
+    //         let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}`)
+    //     } catch (error) {
+            
+    //     }
+    // }
 
     return (
         <>
@@ -123,7 +143,11 @@ const PostDetail = ({ postDetail }) => {
                 <div className='w-full flex justify-between border-b'>
                     <p className='mb-5 font-semibold text-xl'>{postDetail.post_info.title}</p>
                     <div className='flex gap-20 font-semibold text-xl'>
-                        <p>{postDetail.post_info.author.nickname}</p>
+                        <p>
+                            {postDetail.post_info.author.nickname.length >= 8 
+                                ? postDetail.post_info.author.nickname.slice(0, 8) + '...' + postDetail.post_info.author.nickname.slice(-5) 
+                                : postDetail.post_info.author.nickname}
+                        </p>
                         <p>{postDetail.post_info.created_at.split('T')[0]} {postDetail.post_info.created_at.substring(11,19)}</p>
                     </div>
                 </div>
