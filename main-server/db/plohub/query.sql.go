@@ -174,7 +174,7 @@ func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error)
 }
 
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
-select c.id, c.post_id, c.user_id, u.nickname, u.level, c.content, c.reward_amount, c.created_at
+select c.id, c.post_id, c.user_id, u.nickname, u.email, u.level, c.content, c.reward_amount, c.created_at
 from comments as c
 left join users as u on c.user_id = u.id
 where post_id = $1
@@ -185,6 +185,7 @@ type GetCommentsByPostIDRow struct {
 	PostID       int32
 	UserID       int32
 	Nickname     sql.NullString
+	Email        sql.NullString
 	Level        sql.NullInt16
 	Content      string
 	RewardAmount int32
@@ -205,6 +206,7 @@ func (q *Queries) GetCommentsByPostID(ctx context.Context, postID int32) ([]GetC
 			&i.PostID,
 			&i.UserID,
 			&i.Nickname,
+			&i.Email,
 			&i.Level,
 			&i.Content,
 			&i.RewardAmount,

@@ -89,6 +89,7 @@ type CommentInfo struct {
 	Author struct {
 		ID       int32  `json:"id"`
 		Nickname string `json:"nickname"`
+		Email    string `json:"email"`
 		Level    int16  `json:"level"`
 	} `json:"author"`
 	Content      string    `json:"content"`
@@ -139,6 +140,7 @@ func ToCommentInfo(comment plohub.GetCommentsByPostIDRow) CommentInfo {
 	commentInfo.PostID = comment.PostID
 	commentInfo.Author.ID = comment.UserID
 	commentInfo.Author.Nickname = comment.Nickname.String
+	commentInfo.Author.Email = comment.Email.String
 	commentInfo.Author.Level = comment.Level.Int16
 	commentInfo.Content = comment.Content
 	commentInfo.RewardAmount = comment.RewardAmount
