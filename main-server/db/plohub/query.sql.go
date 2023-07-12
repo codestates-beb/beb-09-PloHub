@@ -155,6 +155,24 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
 	return exists, err
 }
 
+const getCommentByID = `-- name: GetCommentByID :one
+SELECT id, post_id, user_id, content, reward_amount, created_at FROM comments WHERE id = $1
+`
+
+func (q *Queries) GetCommentByID(ctx context.Context, id int32) (Comment, error) {
+	row := q.db.QueryRowContext(ctx, getCommentByID, id)
+	var i Comment
+	err := row.Scan(
+		&i.ID,
+		&i.PostID,
+		&i.UserID,
+		&i.Content,
+		&i.RewardAmount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getCommentsByPostID = `-- name: GetCommentsByPostID :many
 select c.id, c.post_id, c.user_id, u.nickname, u.email, u.level, c.content, c.reward_amount, c.created_at
 from comments as c

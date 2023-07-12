@@ -219,6 +219,7 @@ func (s *service) GetComments(ctx context.Context, postID int32) ([]models.Comme
 			commentInfo.PostID = comment.PostID
 			commentInfo.Author.ID = comment.UserID
 			commentInfo.Author.Nickname = comment.Nickname.String
+			commentInfo.Author.Email = comment.Email.String
 			commentInfo.Author.Level = comment.Level.Int16
 			commentInfo.Content = comment.Content
 			commentInfo.RewardAmount = comment.RewardAmount

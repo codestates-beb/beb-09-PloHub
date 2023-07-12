@@ -13,6 +13,7 @@ type Querier interface {
 	DeleteMediaByPostID(ctx context.Context, postID int32) error
 	DeletePost(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
+	GetCommentByID(ctx context.Context, id int32) (Comment, error)
 	GetCommentsByPostID(ctx context.Context, postID int32) ([]GetCommentsByPostIDRow, error)
 	GetCommentsByUserID(ctx context.Context, userID int32) ([]GetCommentsByUserIDRow, error)
 	GetMediaByPostID(ctx context.Context, postID int32) ([]Medium, error)
