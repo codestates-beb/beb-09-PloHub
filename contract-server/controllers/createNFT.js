@@ -119,7 +119,7 @@ exports.createNFT = async (req, res) => {
       if (mintResult) {
         //민팅에 성공한다면
         //일단 데이터 베이스에 nft정보들 업로드
-        console.log(mintResult);
+        console.log('NFT minting success!');
         const createNFTData = await models.nfts.create({
           user_id: user_id,
           owner_address: data.address,
@@ -132,7 +132,6 @@ exports.createNFT = async (req, res) => {
         });
         //가스비 및 토큰 사용했기 때문에 데이터 베이스에 업로드 후 메인 서버로 변동 사항 반환
         if (createNFTData) {
-          console.log(createNFTData);
           const token_amount = await contractERC20.methods
             .balanceOf(data.address)
             .call();
@@ -148,7 +147,7 @@ exports.createNFT = async (req, res) => {
               },
             }
           );
-          console.log(updateWalletData);
+          console.log('Data update success!');
           updateTransaction("nft");
           res.status(200).json({
             message: "OK",
@@ -160,11 +159,13 @@ exports.createNFT = async (req, res) => {
           console.log("data upload is failed..");
           res.status(400).json({ message: "data upload is failed.." });
         }
+      }else{
+        res.status(400).json({message: 'NFT minting is failed..'})
       }
     }
   } catch (error) {
     // NFT mint 실패
     console.log(error);
-    res.status(500).json({ error: "NFT 민팅에 실패했습니다." });
+    res.status(500).json({ error: error });
   }
 };

@@ -73,7 +73,7 @@ exports.reward = async (req, res) => {
           .send({ from: senderAddress });
         if (!transferResult.status) {
           console.log("토큰 전송 실패!");
-          return res.status(500).json({ error: "토큰 전송 실패!" });
+          return res.status(400).json({ error: "토큰 전송 실패!" });
         }
 
         updateTransaction("token");
