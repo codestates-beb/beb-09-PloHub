@@ -10,6 +10,8 @@ exports.userNFT = async(req,res) => {
     try{
         const {user_id} = req.body;
 
+        if (!user_id) res.status(400).json({message: 'UserID is required'});
+
         const userNFTs = await models.nfts.findAll({
             where:{
                 user_id: user_id
@@ -23,6 +25,6 @@ exports.userNFT = async(req,res) => {
 
     }catch(error){
         console.log(error);
-        res.status(500).json({ error : 'NFT 정보를 가져오지 못했습니다.'});
+        res.status(500).json({ error : error});
     }
 }
