@@ -3,12 +3,12 @@ import axios from 'axios';
 import { Header, Footer } from '../../Components/Reference';
 import PostDetail from '../../Components/Posts/PostDetail';
 
-const PostDetailPage = ({ postDetail }) => {
+const PostDetailPage = ({ postDetail, commentList }) => {
 
     return (
         <>
             <Header />
-            <PostDetail postDetail={postDetail} />
+            <PostDetail postDetail={postDetail} commentList={commentList} />
             <Footer />
         </>
     )
@@ -30,10 +30,19 @@ export const getServerSideProps = async ({ query }) => {
         const postDetail = res.data;
 
         console.log(res.data);
+
+        const res2 = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/comments/list/${postDetail.post_info.id}`, {
+            withCredentials: true
+        });
+
+        const commentList = res2.data.comments;
+
+        console.log('commentList', commentList)
     
         return {
             props: {
                 postDetail,
+                commentList
             }
         };
         } catch (error) {
@@ -42,6 +51,7 @@ export const getServerSideProps = async ({ query }) => {
         return {
             props: {
                 postList: null,
+                commentList: null
             }
         };
     }
