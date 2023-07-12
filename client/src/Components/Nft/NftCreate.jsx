@@ -62,16 +62,6 @@ const NftCreate = () => {
         }
     }
 
-    const createAssets = async () => {
-        console.log(fileUrl);
-        console.log(uploadFile);
-        console.log(elements);
-    }
-
-    useEffect(() => { if (elements !== undefined) createAssets(); }, [elements]);
-
-    console.log(fileUrl);
-
     return (
         <>
             <div className='w-[50%] min-h-screen mx-auto mt-20 flex flex-col gap-20'>
