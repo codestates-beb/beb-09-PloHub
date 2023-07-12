@@ -9,7 +9,7 @@ exports.nftDetail = async (req,res) => {
     try{
     const {token_id} = req.body;
     
-    if (!token_id) res.status(400).json({message: 'TokenID is required'});
+    if (!token_id) return res.status(400).json({message: 'TokenID is required'});
     const nftInfo = await models.nfts.findOne({
         where: {
             token_id: token_id
