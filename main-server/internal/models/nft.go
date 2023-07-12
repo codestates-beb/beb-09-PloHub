@@ -50,7 +50,7 @@ type GetUserNFTsRequest struct {
 	UserID int32 `json:"user_id"`
 }
 
-type GetUserNFTsResponse struct {
+type GetNFTsResponse struct {
 	Message string `json:"message"`
 	Data    []struct {
 		ID           int32     `json:"id"`

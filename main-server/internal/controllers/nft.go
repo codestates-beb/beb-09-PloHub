@@ -38,6 +38,7 @@ func (c *nftController) Pattern() string {
 func (c *nftController) Handler() http.Handler {
 	mux := chi.NewRouter()
 
+	mux.Get("/list", c.getAllNFTs)
 	mux.Get("/detail/{id}", c.getNFTDetail)
 
 	mux.Group(func(r chi.Router) {
@@ -46,6 +47,24 @@ func (c *nftController) Handler() http.Handler {
 	})
 
 	return mux
+}
+
+// getAllNFTs handles GET /nft/list
+func (c *nftController) getAllNFTs(w http.ResponseWriter, r *http.Request) {
+	nfts, err := c.walletSvc.GetAllNFTs(r.Context())
+	if err != nil {
+		zap.L().Error("failed to get all nfts", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		NFTs []models.NFT `json:"nfts"`
+	}
+
+	resp.NFTs = nfts
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 // getNFTDetail handles GET /nft/detail/{id}
