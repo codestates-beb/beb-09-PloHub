@@ -63,11 +63,8 @@ DELETE FROM media WHERE post_id = $1;
 -- name: CreateComment :one
 INSERT INTO comments (post_id, user_id, content, reward_amount) VALUES ($1, $2, $3, $4) RETURNING id;
 
--- name: GetCommentByID :one
-SELECT * FROM comments WHERE id = $1;
-
 -- name: GetCommentsByPostID :many
-select c.id, c.post_id, c.user_id, u.nickname, u.level, c.content, c.reward_amount, c.created_at
+select c.id, c.post_id, c.user_id, u.nickname, u.email, u.level, c.content, c.reward_amount, c.created_at
 from comments as c
 left join users as u on c.user_id = u.id
 where post_id = $1;
