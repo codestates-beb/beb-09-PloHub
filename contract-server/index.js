@@ -11,6 +11,7 @@ const userNFT = require("./routes/userNFT");
 const transferToken = require("./routes/transferToken");
 const tokenSwap = require("./routes/tokenSwap");
 const nftDetail = require("./routes/nftDetail");
+const nftList = require("./routes/nftList");
 
 // const mainRouter = require('./router/main');
 
@@ -31,6 +32,7 @@ app.use("/api/v1/nft", userNFT);
 app.use("/api/v1/wallets", transferToken);
 app.use("/api/v1/wallets", tokenSwap);
 app.use("/api/v1/nft", nftDetail);
+app.use("/api/v1/nft",nftList);
 
 connectToDatabase;
 
