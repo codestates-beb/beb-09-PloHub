@@ -9,7 +9,7 @@ exports.transferToken = async (req,res) => {
         const {sender_id, receiver_id, token_amount} = req.body   
 
         if (!sender_id || !receiver_id || token_amount){
-            res.status(400).json({message: 'Invalid request'});
+            return res.status(400).json({message: 'Invalid request'});
         }
 
         const sender = await models.Wallets.findOne({

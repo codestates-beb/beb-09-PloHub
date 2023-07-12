@@ -9,7 +9,7 @@ exports.nftList = async (req,res) => {
 
         console.log(nftList);
         if (!nftList){
-            res.status(400).json({message: 'NFT data does not exist'})
+            return res.status(400).json({message: 'NFT data does not exist'})
         }
         res.status(200).json({message: 'OK', data: nftList});
     }catch(error){
