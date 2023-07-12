@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import axios from 'axios';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
+import { AiOutlineDelete } from 'react-icons/ai'
 import { ModalLayout } from '../Reference';
 
-const PostDetail = ({ postDetail }) => {
+const PostDetail = ({ postDetail, commentList }) => {
     const user = useSelector((state) => state.user);
     const router = useRouter();
 
@@ -17,6 +18,7 @@ const PostDetail = ({ postDetail }) => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
     const [comment, setComment] = useState('');
+    const [comments, setComments] = useState([]);
 
     // 카테고리 아이콘 매핑
     const categoryMappings = {
@@ -83,9 +85,11 @@ const PostDetail = ({ postDetail }) => {
                 setIsModalOpen(true);
                 setModalTitle('Success');
                 setModalBody('댓글이 등록되었습니다.');
-
+                
                 setTimeout(() => {
                     setIsModalOpen(false);
+                    setComment('');
+                    router.reload();
                 }, 3000);
             }
         } catch (error) {
@@ -100,13 +104,36 @@ const PostDetail = ({ postDetail }) => {
         }
     }
 
-    // const deleteComment = async () => {
-    //     try {
-    //         let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}`)
-    //     } catch (error) {
-            
-    //     }
-    // }
+    const deleteComment = async (id) => {
+        try {
+            let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/comments/${id}`, {
+                withCredentials: true
+            });
+
+            if (response.data.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('댓글이 삭제되었습니다.');
+
+                const updatedComments = comments.filter(comment => comment.id !== commentId);
+                setComments(updatedComments);
+                
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.reload();
+                }, 3000);
+            }
+        } catch (error) {
+            console.log('Error: ', error.message);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
 
     return (
         <>
@@ -160,6 +187,54 @@ const PostDetail = ({ postDetail }) => {
                         {postDetail.post_info.content}
                     </div>
                 </div>
+                <div className='w-full flex flex-col gap-4'>
+                    <h2 className='text-xl font-semibold'>Comment</h2>
+                    {commentList.slice().reverse().map((comment) => {
+                        return (
+                            <div className='w-full grid grid-cols-2 items-center border rounded-xl p-3' key={comment.id}>
+                                <div>
+                                    <p className='text-lg font-semibold'>{comment.content}</p>
+                                </div>
+                                <div className='text-right flex justify-end gap-6'>
+                                    <div>
+                                        <p className='font-bold text-lg'>{comment.author.nickname}</p>
+                                        <div>
+                                            <p className='text-sm'>{comment.created_at.split('T')[0]} {comment.created_at.substring(11,19)}</p>
+                                        </div>
+                                    </div>
+                                    {isAuthor &&
+                                        <div className='flex justify-end items-center' onClick={() => deleteComment(comment.id)}>
+                                            <AiOutlineDelete className="text-red-500 cursor-pointer" size={26} />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        )
+                    })}
+                    <textarea
+                        className='border border-gray-300 rounded-lg p-2 w-full outline-none'
+                        rows='4'
+                        placeholder='댓글을 입력하세요.'
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                    />
+                    <div className='flex justify-end'>
+                        <button className='
+                            py-2 
+                            px-4 
+                            bg-blue-500 
+                            text-white 
+                            text-lg
+                            rounded-md 
+                            hover:bg-blue-600 
+                            transition 
+                            duration-300
+                            w-[6rem]' 
+                            onClick={createComment}>
+                            Create
+                        </button>
+                    </div>
+                </div>
                 <div className='w-full flex gap-3 justify-end my-16'>
                     {isAuthor && 
                         <Link 
@@ -197,32 +272,7 @@ const PostDetail = ({ postDetail }) => {
                         </button>
                     </Link>
                 </div>
-                <div className='w-full flex flex-col gap-4'>
-                    <h2 className='text-xl font-semibold'>Comment</h2>
-                    <textarea
-                        className='border border-gray-300 rounded-lg p-2 w-full outline-none'
-                        rows='4'
-                        placeholder='댓글을 입력하세요.'
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                    />
-                    <div className='flex justify-end'>
-                        <button className='
-                            py-2 
-                            px-4 
-                            bg-blue-500 
-                            text-white 
-                            text-lg
-                            rounded-md 
-                            hover:bg-blue-600 
-                            transition 
-                            duration-300
-                            w-[6rem]' 
-                            onClick={createComment}>
-                            Create
-                        </button>
-                    </div>
-                </div>
+                
             </div>
             <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
