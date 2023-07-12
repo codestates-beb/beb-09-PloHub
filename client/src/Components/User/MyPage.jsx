@@ -33,7 +33,6 @@ const MyPage = () => {
     const [nickname, setNickname] = useState(user.nickname);
     const [errorMessage, setErrorMessage] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentItems, setCurrentItems] = useState([]);
     const [activeTab, setActiveTab] = useState('owned');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState(null);
@@ -64,11 +63,26 @@ const MyPage = () => {
             let response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/change-nickname`, formData, {
                 withCredentials: true
             });
-            dispatch({ type: SET_NICKNAME, payload: nickname });
-            router.reload();
 
+            dispatch({ type: SET_NICKNAME, payload: nickname });
+
+            setIsModalOpen(true);
+            setModalTitle('Success');
+            setModalBody('닉네임이 변경되었습니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+                router.reload();
+            }, 3000);
         } catch (error) {
             console.log('Error: ' + error.message);
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
         }
     };
 
@@ -201,7 +215,8 @@ const MyPage = () => {
                         <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
                             <p>My Token : {userInfo?.token_amount} PH</p>
                             <p>
-                                My ETH : {userInfo?.eth_amount ? web3Provider.utils?.fromWei(userInfo.eth_amount, 'ether') : 0} ETH
+                                My ETH : {userInfo?.eth_amount ? web3Provider.utils?.fromWei(Number(userInfo.eth_amount), 'ether') : 0} ETH
+                                {/* My ETH : {web3Provider?.utils?.fromWei(userInfo?.eth_amount, 'ether')} ETH */}
                             </p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
