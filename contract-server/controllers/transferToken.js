@@ -56,7 +56,6 @@ exports.transferToken = async (req,res) => {
             }
         }
         console.log('토큰 전송 권한 부여 성공!');
-        console.log(await web3.eth.getBalance(varEnv.senderAddress));
 
         const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, token_amount).send({ from: senderAddress, gas: 3000000 });
         if (!transferResult.status) {
@@ -84,9 +83,6 @@ exports.transferToken = async (req,res) => {
                     user_id : receiver_id
                 }
             });
-
-            console.log(senderBalance);
-            console.log(receiverBalance);
 
             return res.status(200).json({message: 'OK', sender_balance: senderBalance, sender_eth_balance: senderEthBalance, receiver_balance: receiverBalance});
         }

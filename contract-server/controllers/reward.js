@@ -90,7 +90,6 @@ exports.reward = async (req, res) => {
           }
         );
 
-        console.log(updateWallet);
         res.status(200).json({
           reward_amount: tokenAmount,
           token_amount: updatedTokenBalance,

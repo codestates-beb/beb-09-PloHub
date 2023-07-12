@@ -4,10 +4,8 @@ exports.nftList = async (req,res) => {
     try{
     const nftListData = await models.nfts.findAll()
 
-    console.log(nftListData);
     const nftList = nftListData.map(item => item.dataValues);
 
-        console.log(nftList);
         if (!nftList){
             return res.status(400).json({message: 'NFT data does not exist'})
         }

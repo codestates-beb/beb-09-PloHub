@@ -62,7 +62,6 @@ exports.tokenSwap = async (req,res) => {
         //서버 계좌에서 사용자 지갑으로 ETH전송(create 부분 ETH faucet과 같은 방식으로 전송)
         // 1token당 0.001ETH
         const eth_amount = token_amount/1000;
-        console.log(eth_amount);
 
         const transferETHAmount = web3.utils.toWei(eth_amount.toString(), "ether"); // ETH faucet에서 보낼 금액 (0.1 ETH)
         const gasPrice = web3.utils.toHex(100 * 10 ** 9); // 예시: 100 Gwei

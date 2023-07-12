@@ -59,12 +59,6 @@ exports.createNFT = async (req, res) => {
         return res.status(400).json({ message: "setToken is failed.." });
       }
 
-      console.log(await contractERC20.methods.balanceOf(data.address).call());
-      console.log(
-        await contractERC20.methods
-          .allowance(varEnv.senderAddress, data.address)
-          .call()
-      );
       //토큰 인출량 허용
       const tokenApprove = await contractERC20.methods
         .approve(data.address, 20)

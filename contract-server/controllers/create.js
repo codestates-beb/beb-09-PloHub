@@ -21,7 +21,6 @@ exports.createWallet = async (req, res) => {
     // Ethereum 지갑 생성
     const wallet = await web3.eth.accounts.create();
     const walletAddress = wallet.address;
-    console.log(wallet);
 
     // ETH faucet 기능 추가
     const faucetAmount = web3.utils.toWei("0.1", "ether"); // ETH faucet에서 보낼 금액 (0.1 ETH)
@@ -90,7 +89,6 @@ exports.createWallet = async (req, res) => {
       eth_amount: eth_amount,
       token_amount: token_amount,
     });
-    console.log(createdWallet);
 
     res.status(200).json({
       message: "OK",
