@@ -541,6 +541,31 @@ func (q *Queries) GetPostsByUserID(ctx context.Context, userID int32) ([]GetPost
 	return items, nil
 }
 
+const getUserByAddress = `-- name: GetUserByAddress :one
+SELECT id, email, hashed_password, nickname, level, is_admin, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE address = $1
+`
+
+func (q *Queries) GetUserByAddress(ctx context.Context, address string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByAddress, address)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.HashedPassword,
+		&i.Nickname,
+		&i.Level,
+		&i.IsAdmin,
+		&i.Address,
+		&i.EthAmount,
+		&i.TokenAmount,
+		&i.LatestLoginDate,
+		&i.DailyToken,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, hashed_password, nickname, level, is_admin, address, eth_amount, token_amount, latest_login_date, daily_token, created_at, updated_at FROM users WHERE email = $1
 `
