@@ -21,7 +21,7 @@ exports.tokenSwap = async (req,res) => {
         });
 
         if (!sender) {
-            res.status(400).json({message: 'Invalid userId'});
+            return res.status(400).json({message: 'Invalid userId'});
         }
 
         const senderAddress = sender.address;
@@ -89,7 +89,7 @@ exports.tokenSwap = async (req,res) => {
         console.log("ETH transfer 성공!!");
         } else {
         console.log("ETH transfer 실패!!");
-        res.status(400).json({message: 'failed ETH transfer'});
+        return res.status(400).json({message: 'failed ETH transfer'});
         }
 
         //데이터 베이스 최신화

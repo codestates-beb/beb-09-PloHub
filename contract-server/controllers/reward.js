@@ -37,7 +37,7 @@ exports.reward = async (req, res) => {
         tokenAmount = 1;
         break;
       default:
-        res.status(400).json({message: 'reward type error'});
+        return res.status(400).json({message: 'reward type error'});
     }
 
         const senderAddress = varEnv.senderAddress;
@@ -97,6 +97,6 @@ exports.reward = async (req, res) => {
         });
     }catch(error){
     console.log(error);
-    res.status(500).json({error: error});
+    return res.status(500).json({error: error});
   }
 };

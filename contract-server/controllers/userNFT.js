@@ -10,7 +10,7 @@ exports.userNFT = async(req,res) => {
     try{
         const {user_id} = req.body;
 
-        if (!user_id) res.status(400).json({message: 'UserID is required'});
+        if (!user_id) return res.status(400).json({message: 'UserID is required'});
 
         const userNFTs = await models.nfts.findAll({
             where:{

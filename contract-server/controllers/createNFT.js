@@ -41,7 +41,7 @@ exports.createNFT = async (req, res) => {
 
     //만약 보유 토큰이 20보다 작다면 사용자는 토큰을 구매(민팅할 수가 없다.)
     if (data.token_amount < 20) {
-      res.status(400).json({ message: "Insufficient token balance" });
+      return res.status(400).json({ message: "Insufficient token balance" });
     } else {
       //만약 많다면 NFT 발행 가능
 
@@ -56,7 +56,7 @@ exports.createNFT = async (req, res) => {
         console.log("토큰 등록 완료!");
       } else {
         console.log("토큰 등록 실패");
-        res.status(400).json({ message: "setToken is failed.." });
+        return res.status(400).json({ message: "setToken is failed.." });
       }
 
       console.log(await contractERC20.methods.balanceOf(data.address).call());
@@ -157,10 +157,10 @@ exports.createNFT = async (req, res) => {
           });
         } else {
           console.log("data upload is failed..");
-          res.status(400).json({ message: "data upload is failed.." });
+          return res.status(400).json({ message: "data upload is failed.." });
         }
       }else{
-        res.status(400).json({message: 'NFT minting is failed..'})
+        return res.status(400).json({message: 'NFT minting is failed..'})
       }
     }
   } catch (error) {
