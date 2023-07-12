@@ -89,14 +89,16 @@ func (tc *tokenController) transferTokens(w http.ResponseWriter, r *http.Request
 	}
 
 	var resp struct {
-		SenderTokenAmount   string `json:"sender_token_amount"`
-		SenderEthAmount     string `json:"sender_eth_amount"`
-		ReceiverTokenAmount string `json:"receiver_token_amount"`
+		Transferred struct {
+			SenderTokenAmount   string `json:"sender_token_amount"`
+			SenderEthAmount     string `json:"sender_eth_amount"`
+			ReceiverTokenAmount string `json:"receiver_token_amount"`
+		} `json:"transferred"`
 	}
 
-	resp.SenderTokenAmount = tokenTransferred.SenderBalance
-	resp.SenderEthAmount = tokenTransferred.SenderEthBalance
-	resp.ReceiverTokenAmount = tokenTransferred.ReceiverBalance
+	resp.Transferred.SenderTokenAmount = tokenTransferred.SenderBalance
+	resp.Transferred.SenderEthAmount = tokenTransferred.SenderEthBalance
+	resp.Transferred.ReceiverTokenAmount = tokenTransferred.ReceiverBalance
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
