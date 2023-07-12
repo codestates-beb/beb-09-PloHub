@@ -56,6 +56,9 @@ Solidity Node.js express Ganache web3.js mysql pinata truffle
 **7. tokenSwap** : 보유한 토큰을 ETH로 교환할 수 있다.(단, **ETH는 토큰으로 교환 불가능하다 왜냐하면 커뮤니티 활동 더욱 장려하기 위해 토큰은 오로지 커뮤니티 활동으로만 얻을 수 있다**) 1Token === 0.001ETH
 ![](https://velog.velcdn.com/images/psh03225/post/85e458b7-7059-41c5-aaf4-f92113732c98/image.png)
 
+**8. NFTlist** : 발행되어있는 전체 NFT를 가져온다
+![](https://velog.velcdn.com/images/psh03225/post/0b065de3-9ac8-41a5-a2ca-b854bd36f902/image.png)
+
 ---
 
 ## Daemon
