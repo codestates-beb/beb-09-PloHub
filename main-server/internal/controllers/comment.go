@@ -33,6 +33,8 @@ func (cc *commentController) Pattern() string {
 func (cc *commentController) Handler() http.Handler {
 	mux := chi.NewRouter()
 
+	mux.Get("/list/{post_id}", cc.getComments)
+
 	mux.Group(func(r chi.Router) {
 		r.Use(middlewares.AccessTokenRequired(cc.authSvc))
 		r.Post("/create", cc.createComment)
@@ -40,6 +42,32 @@ func (cc *commentController) Handler() http.Handler {
 	})
 
 	return mux
+}
+
+// getComments handles GET /comments/list/{post_id}
+func (cc *commentController) getComments(w http.ResponseWriter, r *http.Request) {
+	postID := chi.URLParam(r, "post_id")
+
+	postIDInt, err := strconv.ParseInt(postID, 10, 32)
+	if err != nil {
+		zap.L().Error("failed to parse post_id", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	comments, err := cc.postSvc.GetComments(r.Context(), int32(postIDInt))
+	if err != nil {
+		zap.L().Error("failed to get comments", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		Comments []models.CommentInfo `json:"comments"`
+	}
+	resp.Comments = comments
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
 
 // createComment handles POST /comments/create

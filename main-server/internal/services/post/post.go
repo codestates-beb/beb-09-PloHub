@@ -18,6 +18,7 @@ type Service interface {
 	GetPosts(ctx context.Context, limit, page int32) ([]models.PostInfo, error)
 	GetPostsByCategory(ctx context.Context, category int16, limit, page int32) ([]models.PostInfo, error)
 	GetPostDetail(ctx context.Context, id int32) (*models.PostDetail, error)
+	GetComments(ctx context.Context, postID int32) ([]models.CommentInfo, error)
 	CreatePost(ctx context.Context, params models.CreatePostParams) error
 	EditPost(ctx context.Context, params models.EditPostParams) error
 	DeletePost(ctx context.Context, userID, postID int32) ([]string, error)
@@ -196,6 +197,45 @@ func (s *service) GetPostDetail(ctx context.Context, id int32) (*models.PostDeta
 
 	// return postDetail
 	return &postDetail, nil
+}
+
+// GetComments returns list of comments by post id
+func (s *service) GetComments(ctx context.Context, postID int32) ([]models.CommentInfo, error) {
+	var commentInfos []models.CommentInfo
+
+	fn := func(q plohub.Querier) error {
+		// get comments from db
+		comments, err := q.GetCommentsByPostID(ctx, postID)
+		if err != nil {
+			return err
+		}
+
+		// convert comments to commentInfos
+		commentInfos = make([]models.CommentInfo, 0, len(comments))
+
+		for _, comment := range comments {
+			var commentInfo models.CommentInfo
+			commentInfo.ID = comment.ID
+			commentInfo.PostID = comment.PostID
+			commentInfo.Author.ID = comment.UserID
+			commentInfo.Author.Nickname = comment.Nickname.String
+			commentInfo.Author.Level = comment.Level.Int16
+			commentInfo.Content = comment.Content
+			commentInfo.RewardAmount = comment.RewardAmount
+			commentInfo.CreatedAt = comment.CreatedAt
+
+			commentInfos = append(commentInfos, commentInfo)
+		}
+
+		return nil
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return commentInfos, nil
 }
 
 // CreatePost creates a new post and returns post id
@@ -379,7 +419,7 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 		}
 
 		// create comment
-		err = q.CreateComment(ctx, plohub.CreateCommentParams{
+		commentID, err := q.CreateComment(ctx, plohub.CreateCommentParams{
 			PostID:  params.PostID,
 			UserID:  params.UserID,
 			Content: params.Content,
@@ -411,6 +451,15 @@ func (s *service) LeaveComment(ctx context.Context, params models.AddCommentPara
 			if tokenAmount >= 40 {
 				level = 2
 			}
+		}
+
+		err = q.UpdateComment(ctx, plohub.UpdateCommentParams{
+			ID:           commentID,
+			RewardAmount: reward.RewardAmount,
+			Content:      params.Content,
+		})
+		if err != nil {
+			return err
 		}
 
 		// update user with reward
