@@ -35,6 +35,7 @@ func (tc *tokenController) Handler() http.Handler {
 
 	mux.Use(middlewares.AccessTokenRequired(tc.authSvc))
 	mux.Post("/swap", tc.swapTokens)
+	mux.Post("/transfer", tc.transferTokens)
 
 	return mux
 }
@@ -63,6 +64,39 @@ func (tc *tokenController) swapTokens(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Balance = *balance
+
+	_ = utils.WriteJSON(w, http.StatusOK, resp)
+}
+
+func (tc *tokenController) transferTokens(w http.ResponseWriter, r *http.Request) {
+	toAddress := r.FormValue("to_address")
+	tokenAmount := r.FormValue("token_amount")
+
+	tokenAmountInt, err := strconv.ParseInt(tokenAmount, 10, 32)
+	if err != nil {
+		zap.L().Error("failed to parse token amount", zap.Error(err))
+		utils.ErrorJSON(w, err)
+		return
+	}
+
+	senderID := r.Context().Value(middlewares.UserIDKey).(int32)
+
+	tokenTransferred, err := tc.userSvc.TransferTokens(r.Context(), senderID, int32(tokenAmountInt), toAddress)
+	if err != nil {
+		zap.L().Error("failed to transfer tokens", zap.Error(err))
+		utils.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		SenderTokenAmount   string `json:"sender_token_amount"`
+		SenderEthAmount     string `json:"sender_eth_amount"`
+		ReceiverTokenAmount string `json:"receiver_token_amount"`
+	}
+
+	resp.SenderTokenAmount = tokenTransferred.SenderBalance
+	resp.SenderEthAmount = tokenTransferred.SenderEthBalance
+	resp.ReceiverTokenAmount = tokenTransferred.ReceiverBalance
 
 	_ = utils.WriteJSON(w, http.StatusOK, resp)
 }
