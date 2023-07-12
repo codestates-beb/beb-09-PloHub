@@ -1,21 +1,70 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import cookie from 'cookie';
 import { FaArrowCircleDown, FaEthereum } from 'react-icons/fa'
-import { ploHub } from '../Reference'
+import { ploHub, ModalLayout } from '../Reference'
 
 const TokenSwapModal = ({ setIsModalOpen }) => {
+    const [tokenAmount, setTokenAmount] = useState('');
+    const [ethAmount, setEthAmount] = useState('');
+    const [modalOpen, setModalOpen] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
 
-    const handleTokenAmountChange = (e) => {
-        // ERC-20 수량 변경 시 처리 로직
+    const router = useRouter();
+  
+    const tokenAmountChange = (e) => {
+        const inputTokenAmount = e.target.value;
+        setTokenAmount(inputTokenAmount);
+  
+        // 토큰 스왑 비율 계산
+        const tokenToEthRatio = 1000; // 토큰 1000개당 이더 1개로 가정
+        const calculatedEthAmount = inputTokenAmount / tokenToEthRatio;
+        setEthAmount(calculatedEthAmount);
     };
 
-    const handleEthAmountChange = (e) => {
-        // ETH 수량 변경 시 처리 로직
-    };
+    const tokenSwap = async () => {
+        const formData = new FormData();
+        const token = cookie.parse(document.cookie || '');
+
+        formData.append('token_amount', tokenAmount);
+
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/token/swap`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                withCredentials: true
+            });
+
+            if (response.status === 200) {
+                setModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('토큰 교환이 완료되었습니다.');
+
+                setTimeout(() => {
+                    setModalOpen(false);
+                    router.reload();
+                }, 3000);
+            }
+            console.log(response);
+        } catch (error) {
+            console.log(error)
+            setModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setModalOpen(false);
+            }, 3000);
+        }
+    }
 
     return (
         <>
-            <form className='
+            <div className='
                 flex 
                 flex-col 
                 justify-center 
@@ -30,8 +79,9 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
                         rounded-lg 
                         w-full
                         p-2'
-                        type="number" 
-                        onChange={handleTokenAmountChange} />
+                        type="text" 
+                        value={tokenAmount}
+                        onChange={tokenAmountChange} />
                 </div>
                 <FaArrowCircleDown size={50}  className="text-gray-500" />
                 <div className='w-full flex items-center gap-3'>
@@ -43,7 +93,8 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
                         w-full
                         p-2'
                         type="number" 
-                        onChange={handleEthAmountChange} />
+                        value={ethAmount}
+                        disabled />
                 </div>
                 <div className='w-[60%] flex justify-center items-center gap-3'>
                     <button className='
@@ -70,11 +121,12 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
                         hover:bg-blue-dark 
                         transition 
                         duration-300' 
-                        type='submit'>
-                        전송
+                        onClick={tokenSwap}>
+                        교환
                     </button>
                 </div>
-            </form>
+            </div>
+            <ModalLayout isOpen={modalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
 }
