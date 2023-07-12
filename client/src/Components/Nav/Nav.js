@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { FiMenu, FiX } from 'react-icons/fi';
 
 const Navbar = () => {
+    const router = useRouter();
     const [isNavOpen, setIsNavOpen] = useState(false);
+
     const handleToggle = () => {
         setIsNavOpen(!isNavOpen);
     };
 
+    const categoryChange = (category) => {
+        router.push({
+            pathname: '/',
+            query: { category }
+        })
+    }
+    
     return (
         <div className='relative h-full'>
             <div className={
@@ -50,17 +59,69 @@ const Navbar = () => {
                 transform ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}`
             }>
                 <ul className='flex flex-col justify-center items-center py-8'>
-                    <li className='hover:bg-blue-skin hover:text-white font-bold text-lg w-full flex items-center justify-center h-16 transition-all duration-200'>
-                        <Link href='/all'>All</Link>
+                    <li className='
+                        hover:bg-blue-skin 
+                        hover:text-white 
+                        font-bold 
+                        text-lg 
+                        w-full 
+                        flex 
+                        items-center 
+                        justify-center 
+                        h-16 
+                        transition-all 
+                        duration-200
+                        cursor-pointer'
+                        onClick={() => categoryChange()}>
+                        All
                     </li>
-                    <li className='hover:bg-blue-skin hover:text-white font-bold text-lg w-full flex items-center justify-center h-16 transition-all duration-200'>
-                        <Link href='/eventinfo'>행사 정보</Link>
+                    <li className='
+                        hover:bg-blue-skin 
+                        hover:text-white 
+                        font-bold 
+                        text-lg 
+                        w-full 
+                        flex 
+                        items-center 
+                        justify-center 
+                        h-16 
+                        transition-all 
+                        duration-200
+                        cursor-pointer'
+                        onClick={() => categoryChange(1)}>
+                        행사 정보
                     </li>
-                    <li className='hover:bg-blue-skin hover:text-white font-bold text-lg w-full flex items-center justify-center h-16 transition-all duration-200'>
-                        <Link href='/courseinfo'>코스 정보</Link>
+                    <li className='
+                        hover:bg-blue-skin 
+                        hover:text-white 
+                        font-bold 
+                        text-lg 
+                        w-full 
+                        flex 
+                        items-center 
+                        justify-center 
+                        h-16 
+                        transition-all 
+                        duration-200
+                        cursor-pointer'
+                        onClick={() => categoryChange(2)}>
+                        코스 정보
                     </li>
-                    <li className='hover:bg-blue-skin hover:text-white font-bold text-lg w-full flex items-center justify-center h-16 transition-all duration-200'>
-                        <Link href='/review'>참여 후기</Link>
+                    <li className='
+                        hover:bg-blue-skin 
+                        hover:text-white 
+                        font-bold 
+                        text-lg 
+                        w-full 
+                        flex 
+                        items-center 
+                        justify-center 
+                        h-16 
+                        transition-all 
+                        duration-200
+                        cursor-pointer'
+                        onClick={() => categoryChange(3)}>
+                        참여 후기
                     </li>
                 </ul>
             </div>
