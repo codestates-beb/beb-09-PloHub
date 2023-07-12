@@ -58,3 +58,15 @@ type SwapTokensResponse struct {
 	TokenAmount string `json:"token_amount"`
 	EthAmount   string `json:"eth_amount"`
 }
+
+type TransferTokensRequest struct {
+	SenderID    int32 `json:"sender_id"`
+	ReceiverID  int32 `json:"receiver_id"`
+	TokenAmount int32 `json:"token_amount"`
+}
+
+type TokenTransferred struct {
+	SenderBalance    string `json:"sender_balance"`
+	SenderEthBalance string `json:"sender_eth_balance"`
+	ReceiverBalance  string `json:"receiver_balance"`
+}

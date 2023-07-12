@@ -17,6 +17,7 @@ type Service interface {
 	GetUserNFTs(ctx context.Context, userID int32) ([]models.NFT, error)
 	IssueReward(ctx context.Context, userID int32, rewardType models.RewardType) (*models.Reward, error)
 	SwapTokens(ctx context.Context, userID int32, tokenAmount int32) (*models.Balance, error)
+	TransferTokens(ctx context.Context, senderID, receiverID int32, tokenAmount int32) (*models.TokenTransferred, error)
 }
 
 type service struct {
@@ -375,4 +376,47 @@ func (s *service) SwapTokens(ctx context.Context, userID int32, tokenAmount int3
 	balance.EthAmount = swapResp.EthAmount
 
 	return &balance, nil
+}
+
+func (s *service) TransferTokens(ctx context.Context, senderID, receiverID int32, tokenAmount int32) (*models.TokenTransferred, error) {
+	body := models.TransferTokensRequest{
+		SenderID:    senderID,
+		ReceiverID:  receiverID,
+		TokenAmount: tokenAmount,
+	}
+
+	jsonBody, err := json.MarshalIndent(body, "", "\t")
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/api/v1/wallets/transferToken", s.baseURL)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error transferring tokens: %s", resp.Status)
+	}
+
+	var transferResp models.TokenTransferred
+
+	err = json.NewDecoder(resp.Body).Decode(&transferResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &transferResp, nil
 }
