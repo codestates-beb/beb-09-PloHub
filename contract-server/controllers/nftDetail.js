@@ -15,12 +15,12 @@ exports.nftDetail = async (req,res) => {
         }
     })
 
+    if (!nftInfo) res.status(400).json({message: 'Invalid tokenID'});
+
     const nftData = nftInfo.dataValues;
     console.log(nftData);
 
-    res.status(200).json({message: 'OK', owner_address: nftData.owner_address, price: nftData.price, name:nftData.name, description: nftData.description, image: nftData.image});
-    //  
-
+    res.status(200).json({message: 'OK', owner_address: nftData.owner_address, price: nftData.price, name:nftData.name, description: nftData.description, image: nftData.image, user_id: nftData.user_id, created_at: nftData.created_at});
     }catch(error){
         console.log(error);
         res.status(500).json({error: error});

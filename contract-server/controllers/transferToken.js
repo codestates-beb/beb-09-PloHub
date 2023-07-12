@@ -8,6 +8,10 @@ exports.transferToken = async (req,res) => {
     try{
         const {sender_id, receiver_id, token_amount} = req.body   
 
+        if (!sender_id || !receiver_id || token_amount){
+            res.status(400).json({message: 'Invalid request'});
+        }
+
         const sender = await models.Wallets.findOne({
             where: {
                 user_id: sender_id
@@ -48,7 +52,7 @@ exports.transferToken = async (req,res) => {
             const approveResult = await contract.methods.approve(receiverAddress, token_amount).send({ from: senderAddress, gas: 3000000});
             if (!approveResult.status) {
                 console.log('토큰 전송 권한 부여 실패!');
-                return res.status(500).json({ error: '토큰 전송 권한 부여 실패!' });
+                return res.status(400).json({ error: '토큰 전송 권한 부여 실패!' });
             }
         }
         console.log('토큰 전송 권한 부여 성공!');
@@ -57,7 +61,7 @@ exports.transferToken = async (req,res) => {
         const transferResult = await contract.methods.transferFrom(senderAddress, receiverAddress, token_amount).send({ from: senderAddress, gas: 3000000 });
         if (!transferResult.status) {
             console.log('토큰 전송 실패!');
-            return res.status(500).json({ error: '토큰 전송 실패!' });
+            return res.status(400).json({ error: '토큰 전송 실패!' });
         }else{
             updateTransaction("token");
             console.log("토큰 전송 성공!")
