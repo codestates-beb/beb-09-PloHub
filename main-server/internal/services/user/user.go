@@ -212,7 +212,7 @@ func (s *service) UserInfo(ctx context.Context, userID int32) (*models.UserInfo,
 
 // MyPage returns my page info
 func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo, error) {
-	var myPageInfo *models.MyPageInfo
+	mypageInfo := &models.MyPageInfo{}
 
 	// transaction function
 	fn := func(q plohub.Querier) error {
@@ -228,14 +228,26 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 			return err
 		}
 
-		// TODO: request NFTs by user id
+		nfts, err := s.walletSvc.GetUserNFTs(ctx, userID)
+		if err != nil {
+			return err
+		}
 
-		myPageInfo.UserInfo = *models.ToUserInfo(user)
+		mypageInfo.UserInfo = models.UserInfo{
+			ID:          user.ID,
+			Email:       user.Email,
+			Nickname:    user.Nickname,
+			Level:       user.Level,
+			Address:     user.Address,
+			EthAmount:   user.EthAmount,
+			TokenAmount: user.TokenAmount,
+			DailyToken:  user.DailyToken,
+		}
 
-		myPageInfo.Posts = make([]models.PostInfo, len(posts))
+		mypageInfo.Posts = make([]models.PostInfo, len(posts))
 
 		for i, post := range posts {
-			myPageInfo.Posts[i] = models.PostInfo{
+			mypageInfo.Posts[i] = models.PostInfo{
 				ID: post.ID,
 				Author: models.Author{
 					ID:       post.UserID,
@@ -254,7 +266,7 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 			}
 		}
 
-		myPageInfo.NFTs = nil
+		mypageInfo.NFTs = nfts
 
 		return nil
 	}
@@ -265,7 +277,7 @@ func (s *service) MyPage(ctx context.Context, userID int32) (*models.MyPageInfo,
 		return nil, err
 	}
 	// return result
-	return myPageInfo, nil
+	return mypageInfo, nil
 }
 
 // SignUp signs up the user

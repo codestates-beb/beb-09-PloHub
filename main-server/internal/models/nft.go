@@ -9,6 +9,7 @@ type NFT struct {
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`
 	Image        string    `json:"image"`
+	TokenURI     string    `json:"token_uri"`
 	Price        string    `json:"price"`
 	CreatedAt    time.Time `json:"created_at"`
 }
@@ -43,4 +44,24 @@ type GetNFTDetailsResponse struct {
 	Image        string    `json:"image"`
 	Price        string    `json:"price"`
 	CreatedAt    time.Time `json:"created_at"`
+}
+
+type GetUserNFTsRequest struct {
+	UserID int32 `json:"user_id"`
+}
+
+type GetUserNFTsResponse struct {
+	Message string `json:"message"`
+	Data    []struct {
+		ID           int32     `json:"id"`
+		UserID       int32     `json:"user_id"`
+		OwnerAddress string    `json:"owner_address"`
+		TokenID      int32     `json:"token_id"`
+		TokenURI     string    `json:"token_uri"`
+		Price        string    `json:"price"`
+		Name         string    `json:"name"`
+		Description  string    `json:"description"`
+		Image        string    `json:"image"`
+		CreatedAt    time.Time `json:"created_at"`
+	} `json:"data"`
 }

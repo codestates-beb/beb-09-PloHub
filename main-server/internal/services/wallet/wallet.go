@@ -14,7 +14,7 @@ type Service interface {
 	MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (*models.NFTMinted, error)
 	GetAllNFTs(ctx context.Context) ([]*models.NFT, error)
 	GetNFTDetails(ctx context.Context, tokenID int32) (*models.NFT, error)
-	GetUserNFTs(ctx context.Context, userID int32) ([]*models.NFT, error)
+	GetUserNFTs(ctx context.Context, userID int32) ([]models.NFT, error)
 	IssueReward(ctx context.Context, userID int32, rewardType models.RewardType) (*models.Reward, error)
 }
 
@@ -179,9 +179,63 @@ func (s *service) GetNFTDetails(ctx context.Context, tokenID int32) (*models.NFT
 	return &nft, nil
 }
 
-// GetUserNFTs implements Service.
-func (*service) GetUserNFTs(ctx context.Context, userID int32) ([]*models.NFT, error) {
-	panic("unimplemented")
+func (s *service) GetUserNFTs(ctx context.Context, userID int32) ([]models.NFT, error) {
+	body := models.GetUserNFTsRequest{
+		UserID: userID,
+	}
+
+	jsonBody, err := json.MarshalIndent(body, "", "\t")
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/api/v1/nft/userNFT", s.baseURL)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error getting user nfts: %s", resp.Status)
+	}
+
+	var nftResp models.GetUserNFTsResponse
+
+	err = json.NewDecoder(resp.Body).Decode(&nftResp)
+	if err != nil {
+		return nil, err
+	}
+
+	var nfts []models.NFT
+
+	for _, rawNFT := range nftResp.Data {
+		var nft models.NFT
+
+		nft.UserID = rawNFT.UserID
+		nft.OwnerAddress = rawNFT.OwnerAddress
+		nft.TokenID = rawNFT.TokenID
+		nft.Name = rawNFT.Name
+		nft.Description = rawNFT.Description
+		nft.Image = rawNFT.Image
+		nft.TokenURI = rawNFT.TokenURI
+		nft.Price = rawNFT.Price
+		nft.CreatedAt = rawNFT.CreatedAt
+
+		nfts = append(nfts, nft)
+	}
+
+	return nfts, nil
 }
 
 func (s *service) IssueReward(ctx context.Context, userID int32, rewardType models.RewardType) (*models.Reward, error) {
