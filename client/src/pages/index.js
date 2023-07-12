@@ -118,7 +118,9 @@ export default function Home({ postList }) {
                                         <p className="text-gray-600"> {post.content}</p>
                                     </td>
                                     <td className="border-b p-6">
-                                        <p className="text-gray-600"> {post.author.nickname}</p>
+                                        <p className="text-gray-600">
+                                        {post.author.nickname.length >= 8 ? post.author.nickname.slice(0, 8) + '...' + post.author.nickname.slice(-5) : post.author.nickname}
+                                        </p>
                                     </td>
                                     <td className="border-b p-6">
                                         <p className="text-gray-600"> 
