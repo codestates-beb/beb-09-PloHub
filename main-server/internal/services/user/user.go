@@ -32,6 +32,7 @@ type Service interface {
 	Withdraw(ctx context.Context, userID int32) error
 	MintNFT(ctx context.Context, userID int32, name, description, imageUrl string) (int32, error)
 	SwapTokens(ctx context.Context, userID, tokenAmount int32) (*models.Balance, error)
+	TransferTokens(ctx context.Context, senderID, tokenAmount int32, receiverAddress string) (*models.TokenTransferred, error)
 }
 
 type service struct {
@@ -455,6 +456,72 @@ func (s *service) SwapTokens(ctx context.Context, userID, tokenAmount int32) (*m
 	}
 
 	return balance, nil
+}
+
+// TransferTokens transfers tokens
+func (s *service) TransferTokens(ctx context.Context, senderID, tokenAmount int32, receiverAddress string) (*models.TokenTransferred, error) {
+	var tokenTransferred *models.TokenTransferred
+
+	fn := func(q plohub.Querier) error {
+		// check user's token amount
+		sender, err := q.GetUserByID(ctx, senderID)
+		if err != nil {
+			return err
+		}
+
+		tokenAmountInt32, err := strconv.ParseInt(sender.TokenAmount, 10, 32)
+		if err != nil {
+			return err
+		}
+
+		if int32(tokenAmountInt32) < tokenAmount {
+			return ErrInsufficientToken
+		}
+
+		// get receiver id by address
+		receiver, err := q.GetUserByAddress(ctx, receiverAddress)
+		if err != nil {
+			return err
+		}
+
+		// transfer tokens
+		tokenTransferred, err = s.walletSvc.TransferTokens(ctx, senderID, receiver.ID, tokenAmount)
+		if err != nil {
+			return err
+		}
+
+		err = q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        receiver.Nickname,
+			Level:           receiver.Level,
+			Address:         receiver.Address,
+			EthAmount:       receiver.EthAmount,
+			TokenAmount:     tokenTransferred.ReceiverBalance,
+			LatestLoginDate: receiver.LatestLoginDate,
+			DailyToken:      receiver.DailyToken,
+			ID:              receiver.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		return q.UpdateUser(ctx, plohub.UpdateUserParams{
+			Nickname:        sender.Nickname,
+			Level:           sender.Level,
+			Address:         sender.Address,
+			EthAmount:       tokenTransferred.SenderEthBalance,
+			TokenAmount:     tokenTransferred.SenderBalance,
+			LatestLoginDate: sender.LatestLoginDate,
+			DailyToken:      sender.DailyToken,
+			ID:              sender.ID,
+		})
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokenTransferred, nil
 }
 
 func matchPassword(hashedPassword, password string) (bool, error) {
