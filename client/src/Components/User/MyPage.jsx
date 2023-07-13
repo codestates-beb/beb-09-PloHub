@@ -386,7 +386,7 @@ const MyPage = () => {
                                         hover:-translate-y-2 
                                         cursor-pointer"
                                         key={item.id}
-                                        onClick={() => router.push(`/nft/${item.id}`)}>
+                                        onClick={() => router.push(`/nft/${item.token_id}`)}>
                                         <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
                                             <Image 
                                                 className='rounded-t-3xl'
