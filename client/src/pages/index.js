@@ -29,6 +29,8 @@ export default function Home({ postList }) {
         3: { text: '참여 후기' },
     };
 
+    const postsPerPage = 10;
+
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
         router.push({
@@ -36,10 +38,15 @@ export default function Home({ postList }) {
             query: { page: pageNumber, limit: 10, category }
         })
     };
+
+    // Calculate total pages
+    const totalPages = Math.ceil(postList.length / postsPerPage);
     
     useEffect(() => {
-        router.push(`/?page=${currentPage}`);
-    }, [currentPage]);
+        // currentPage가 바뀔 때마다 실행되도록 설정
+        const indexOfLastPost = currentPage * postsPerPage;
+        const indexOfFirstPost = indexOfLastPost - postsPerPage;
+    }, [currentPage]); // currentPage를 dependency로 추가해주세요.
 
     const loginCheck = (e) => {
         
@@ -97,12 +104,12 @@ export default function Home({ postList }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {postList.posts.length === 0 ? (
+                            {postList.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="p-6 text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
                             ) : (
-                                postList.posts.map((post) => (
+                                postList.map((post) => (
                                     <tr className="
                                         hover:bg-gray-200 
                                         transition-all 
@@ -142,7 +149,7 @@ export default function Home({ postList }) {
                     </table>
                     <div className='w-full mt-16 flex justify-center'>
                         <div className='flex items-center'>
-                        {Array.from({ length: postList.totalPages }, (_, i) => (
+                        {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i + 1}
                                 className={`px-2 py-2 mx-1 ${
@@ -189,7 +196,9 @@ export const getServerSideProps = async ({ query }) => {
             withCredentials: true
         });
     
-        const postList = res.data;
+        const postList = res.data.posts;
+
+        console.log(postList);
 
         return {
             props: {
