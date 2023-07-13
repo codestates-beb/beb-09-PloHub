@@ -248,6 +248,11 @@ func (s *service) CreatePost(ctx context.Context, params models.CreatePostParams
 			return err
 		}
 
+		// check if user is level 1 and category is course info
+		if user.Level == 1 && params.Category == models.PostCategoryCourseInfo {
+			return ErrUnauthorizedAccess
+		}
+
 		// create post
 		postID, err := q.CreatePost(ctx, plohub.CreatePostParams{
 			UserID:       params.UserID,
