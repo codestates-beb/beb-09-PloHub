@@ -26,8 +26,8 @@ function App({ Component, pageProps }) {
                 console.log(error);
             }
 
-            refresh();
         };
+        refresh();
         
         // 10분마다 실행
         const intervalId = setInterval(refresh, 10 * 60 * 1000);
