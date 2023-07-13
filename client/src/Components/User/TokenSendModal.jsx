@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import axios from 'axios';
 import cookie from 'cookie';
+import { useRouter } from 'next/router';
 import { FaAddressCard } from 'react-icons/fa'
 import { ploHub, ModalLayout } from '../Reference'
 
 const TokenSendModal = ({ setIsModalOpen }) => {
+    const router = useRouter();
     const [toAddr, setToAddr] = useState('');
     const [tokenAmount, setTokenAmount] = useState(0);
     const [modalOpen, setModalOpen] = useState('');

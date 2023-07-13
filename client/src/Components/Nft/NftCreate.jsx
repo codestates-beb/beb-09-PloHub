@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { BsFillImageFill } from 'react-icons/bs';
+import { FaSpinner } from 'react-icons/fa';
 import { ModalLayout } from '../../Components/Reference';
 
 const EXTENSIONS = [
@@ -61,6 +62,10 @@ const NftCreate = () => {
         formData.append('name', name);
         formData.append('description', desc);
         formData.append('image', uploadFile);
+
+        setIsModalOpen(true);
+        setModalTitle('Minting');
+        setModalBody(<FaSpinner size={50} className="animate-spin" />);
 
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/nft/mint`, formData, {

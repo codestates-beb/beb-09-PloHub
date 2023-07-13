@@ -134,7 +134,6 @@ const PostCreate = () => {
                         onChange={categoryChange}
                         required>
                         <option className="text-sm" value="" disabled>카테고리를 선택해 주세요.</option>
-                        <option className="text-sm" value="all">All</option>
                         <option className="text-sm" value="eventinfo">행사 정보</option>
                         <option className="text-sm" value="courseinfo">코스 정보</option>
                         <option className="text-sm" value="review">참여 후기</option>
