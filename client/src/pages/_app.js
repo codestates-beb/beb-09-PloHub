@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { Provider } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 import axios from 'axios';
 import '@/styles/globals.css'
@@ -7,8 +7,6 @@ import { store } from '../Components/Redux/store'
 import HeadMeta from '../Components/Common/HeadMeta'
 
 function App({ Component, pageProps }) {
-    const user = useSelector((state) => state.user);
-    const dispatch = useDispatch();
 
     useEffect(() => {
         /**
@@ -28,8 +26,8 @@ function App({ Component, pageProps }) {
                 console.log(error);
             }
 
+            refresh();
         };
-        refresh();
         
         // 10분마다 실행
         const intervalId = setInterval(refresh, 10 * 60 * 1000);

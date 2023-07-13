@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
-import { format } from 'date-fns';
 import axios from 'axios';
 import DefaultLayout from '../Components/Layout/DefaultLayout'
 import Nav from '../Components/Nav/Nav';
@@ -12,14 +11,13 @@ import { ModalLayout } from '../Components/Reference';
 
 export default function Home({ postList }) {
     const user = useSelector((state) => state.user);
-    console.log(user)
-    console.log(postList.posts);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [currentItems, setCurrentItems] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
+    const [category, setCategory] = useState(0);
 
     const router = useRouter();
 
@@ -33,6 +31,10 @@ export default function Home({ postList }) {
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
+        router.push({
+            pathname: '/',
+            query: { page: pageNumber, limit: 10, category }
+        })
     };
     
     useEffect(() => {
@@ -41,7 +43,7 @@ export default function Home({ postList }) {
 
     const loginCheck = (e) => {
         
-        if (!user.email) {
+        if (user.email === '') {
             e.preventDefault();
             setIsModalOpen(true);
             setModalTitle('Error');
@@ -167,19 +169,22 @@ export default function Home({ postList }) {
 }
 
 export const getServerSideProps = async ({ query }) => {
-    const { page = 1, limit = 10 } = query;
+    const page = query.page || 1; // Default page is 1
+    const limit = query.limit || 10; // Default limit is 10
+    const { category } = query;
 
     try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/list`, {
             params: {
             page,
             limit,
+            category,
             },
             withCredentials: true
         });
     
         const postList = res.data;
-    
+
         return {
             props: {
                 postList,
