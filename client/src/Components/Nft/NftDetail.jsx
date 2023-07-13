@@ -20,7 +20,7 @@ const NftDetail = ({ nftInfo }) => {
                 <div>
                     <div className='flex flex-col gap-6'>
                         <div className="w-full h-[30rem] flex items-center justify-center relative">
-                            <Image src={nftInfo.image}  layout="fill" objectFit="contain" style={{ padding: '1rem' }}/>
+                            <Image src={nftInfo.image}  layout="fill" objectFit="contain" style={{ padding: '1rem' }} alt='nft image' />
                         </div>
                         <div className='w-full flex justify-between border-b mt-16'>
                             <p className='mb-5 font-semibold text-xl'>{nftInfo.name}</p>
