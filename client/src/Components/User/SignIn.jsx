@@ -22,14 +22,13 @@ const SignIn = () => {
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const emailChange = (e) => {
-        setEmail(e.target.value);
-    }
-
-    const passwordChange = (e) => {
-        setPassword(e.target.value);
-    }
-
+    /**
+     * 사용자 로그인을 처리하는 비동기 함수
+     * 사용자의 이메일과 비밀번호를 사용하여 서버에 로그인 요청을 보내며,
+     * 응답이 성공적인 경우, 사용자 정보를 받아와 Redux Store에 저장하고,
+     * 홈 화면으로 이동하게 됨, 만약 요청이 실패한 경우, 오류 메시지를 모달로 표시
+     * 모든 모달은 자동적으로 3초 후에 닫히게 됨
+     */
     const signIn = async () => {
         const formData = new FormData();
 
@@ -95,7 +94,7 @@ const SignIn = () => {
                                         id='email'
                                         required
                                         placeholder="example@gmail.com"
-                                        onChange={emailChange} />
+                                        onChange={(e) => setEmail(e.target.value)} />
                                 </div>
                             </div>
                             <div className='flex flex-col w-4/12'>
@@ -107,7 +106,7 @@ const SignIn = () => {
                                         id='password'
                                         required
                                         placeholder='비밀번호를 입력하세요'
-                                        onChange={passwordChange} />
+                                        onChange={(e) => setPassword(e.target.value)} />
                                 </div>
                             </div>
                         </div>
@@ -127,7 +126,7 @@ const SignIn = () => {
                                 disabled={email.length === 0 && password.length === 0}>
                                 Sing In
                             </button>
-                            <Link href='/signup'>
+                            <Link href='/users/signup'>
                                 <span className='hover:underline transition duration-300 font-bold'>Sign Up</span>
                             </Link>
                         </div>

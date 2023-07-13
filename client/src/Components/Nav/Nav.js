@@ -6,10 +6,21 @@ const Navbar = () => {
     const router = useRouter();
     const [isNavOpen, setIsNavOpen] = useState(false);
 
+    /**
+     * `isNavOpen` 상태 값을 토글하는 함수
+     * 현재 상태가 `true`이면 `false`로, `false`이면 `true`로 변경
+     * 이 함수는 주로 네비게이션 메뉴의 열기/닫기를 제어하는데 사용
+     */
     const handleToggle = () => {
         setIsNavOpen(!isNavOpen);
     };
 
+    /**
+     * 선택한 카테고리에 따라 화면을 변경하는 함수
+     * 입력된 카테고리를 쿼리 파라미터로 추가하고, 메인 페이지('/')로 이동
+     * 
+     * @param {string} category - 사용자가 선택한 카테고리
+     */
     const categoryChange = (category) => {
         router.push({
             pathname: '/',

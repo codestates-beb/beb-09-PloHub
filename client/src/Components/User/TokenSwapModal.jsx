@@ -15,6 +15,13 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
 
     const router = useRouter();
   
+    /**
+     * 사용자가 입력한 토큰의 양에 따라 상응하는 이더리움의 양을 계산하고 설정하는 함수
+     * 이 함수는 입력 이벤트에서 호출되며, 토큰과 이더리움의 교환 비율을 기반으로 계산
+     * 이 경우, 토큰 1000개당 이더리움 1개로 계산
+     *
+     * @param {object} e - 이벤트 객체
+     */
     const tokenAmountChange = (e) => {
         const inputTokenAmount = e.target.value;
         setTokenAmount(inputTokenAmount);
@@ -25,6 +32,13 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
         setEthAmount(calculatedEthAmount);
     };
 
+    /**
+     * 토큰과 이더리움 간의 교환을 처리하는 비동기 함수
+     * 사용자가 입력한 토큰 양을 사용하여 서버에 토큰 교환 요청을 보내며,
+     * 응답이 성공적인 경우, 토큰 교환 성공 메시지를 모달로 표시하고 페이지를 새로 고침
+     * 만약 요청이 실패한 경우, 오류 메시지를 모달로 표시
+     * 모든 모달은 자동적으로 3초 후에 닫히게 됨
+     */
     const tokenSwap = async () => {
         const formData = new FormData();
         const token = cookie.parse(document.cookie || '');

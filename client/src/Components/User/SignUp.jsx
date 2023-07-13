@@ -14,20 +14,9 @@ const SignUp = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
     const [signUpDisabled, setSignUpDisabled] = useState(true);
+    const [emailValidated, setEmailValidated] = useState(false);
 
     const router = useRouter();
-
-    const emailChange = (e) => {
-        setEmail(e.target.value);
-    }
-
-    const passwordChange = (e) => {
-        setPassword(e.target.value)
-    };
-
-    const passwordConfirmChange = (e) => {
-        setPwConfirm(e.target.value);
-    }
 
     /**
      * 이메일 확인을 위한 함수
@@ -54,6 +43,7 @@ const SignUp = () => {
                     }
                 );
                 if (response.data.status === 200) {
+                    setEmailValidated(true);
                     setIsModalOpen(true);
                     setModalTitle('Success');
                     setModalBody('이 이메일은 사용 가능합니다.');
@@ -62,6 +52,7 @@ const SignUp = () => {
                         setIsModalOpen(false);
                     }, 3000);
                 } else {
+                    setEmailValidated(false);
                     setIsModalOpen(true);
                     setModalTitle('Error');
                     setModalBody('오류가 발생했습니다.');
@@ -73,6 +64,7 @@ const SignUp = () => {
             } catch (error) {
                 console.log('Error', error.message);
                 if (error.response && error.response.status === 400) {
+                    setEmailValidated(false);
                     setIsModalOpen(true);
                     setModalTitle('Error');
                     setModalBody(error.message);
@@ -87,6 +79,11 @@ const SignUp = () => {
             }
         }
     
+        /**
+         * 비밀번호 유효성 검사를 수행하는 함수
+         * - 비밀번호는 최소 8자 이상이어야 하며,
+         * - 대문자, 소문자, 숫자, 특수기호가 모두 포함되어야 함
+         */
     const validatePassword = () => {
         const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         if (password.length < 8) {
@@ -98,6 +95,11 @@ const SignUp = () => {
         }
     };
 
+    /**
+     * 비밀번호 확인 유효성 검사를 수행하는 함수
+     * - 비밀번호 확인 입력값이 비어있지 않아야 하며,
+     * - 비밀번호 입력값과 비밀번호 확인 입력값이 동일해야 함
+     */
     const passwordConfirm = () => {
         if (pwConfirm.length === 0) {
         }
@@ -184,7 +186,7 @@ const SignUp = () => {
                                             id='email'
                                             required
                                             placeholder="example@gmail.com"
-                                            onChange={emailChange} />
+                                            onChange={(e) => setEmail(e.target.value)} />
                                         <button className={`
                                             ${email.length === 0 ? 'bg-gray-500' : 'bg-blue-main hover:bg-blue-dark '}
                                             border 
@@ -210,7 +212,7 @@ const SignUp = () => {
                                         name="password" 
                                         id='password'
                                         value={password} 
-                                        onChange={passwordChange}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         required
                                         placeholder='비밀번호를 입력하세요' />
                                     {password.length > 0 && <div className='text-left text-red-600'>{passwordError}</div>}
@@ -224,7 +226,7 @@ const SignUp = () => {
                                         name="password" 
                                         id='password' 
                                         value={pwConfirm}
-                                        onChange={passwordConfirmChange}
+                                        onChange={(e) => setPwConfirm(e.target.value)} 
                                         required
                                         placeholder='비밀번호를 입력하세요' />
                                     <span className='text-left text-red-600'>{pwConfirmError}</span>
@@ -232,7 +234,7 @@ const SignUp = () => {
                                 </div>
                             </div>
                         <button className={`
-                            ${signUpDisabled ? 'bg-gray-500' : 'bg-blue-dark hover:bg-blue-main'}
+                            ${signUpDisabled || !emailValidated ? 'bg-gray-500' : 'bg-blue-dark hover:bg-blue-main'}
                             text-semibold 
                             text-white 
                             mx-auto 
@@ -245,7 +247,7 @@ const SignUp = () => {
                             transition
                             duration-300`}
                             onClick={signUp}
-                            disabled={signUpDisabled}>
+                            disabled={signUpDisabled || !emailValidated}>
                             Sing Up
                         </button>
                         </div>

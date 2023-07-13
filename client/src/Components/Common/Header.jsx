@@ -32,11 +32,20 @@ const Header = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
 
+    /**
+     * 메뉴 열기/닫기 상태를 토글하고, 화살표의 회전 값을 조절하는 함수
+     * 메뉴의 열림 상태(`isMenuOpen`)를 반전시키고, 화살표의 회전 값(`arrowRotation`)을 180도 증가시킴
+     */
     const menuToggle = () => {
         setMenuOpen(!isMenuOpen);
         setArrowRotation(arrowRotation + 180);
     }
     
+    /**
+     * 사용자 정보를 비동기적으로 가져오는 함수
+     * 백엔드 서버의 `/users/myinfo` 엔드포인트에 GET 요청을 보내 사용자 정보를 요청하고,
+     * 응답으로 받은 사용자 정보를 앱의 상태에 업데이트함
+     */
     const userInfo = async () => {
         try {
             let response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/myinfo`, {
