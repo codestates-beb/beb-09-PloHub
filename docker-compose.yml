@@ -39,8 +39,24 @@ services:
     volumes:
       - /tmp/contract-server/npm_cache:/root/.npm:z
       - ./contract-server/src:/usr/src/app/src:z
+      - ./contract-server/.env:/usr/src/app/.env:z
     networks:
       - back-tier
+      - blockchain-tier
+    depends_on:
+      - mysql
+      - ganache
+
+  daemon:
+    container_name: daemon
+    build:
+      context: ./daemon
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - /tmp/daemon/npm_cache:/root/.npm:z
+      - ./daemon/src:/usr/src/app/src:z
+    networks:
       - blockchain-tier
     depends_on:
       - mysql

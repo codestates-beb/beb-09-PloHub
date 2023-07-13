@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx pm2 start index.js --watch --no-daemon",
+    "start": "npx pm2 start ./src/index.js --watch --no-daemon",
     "del": "pm2 del all"
   },
   "author": "",

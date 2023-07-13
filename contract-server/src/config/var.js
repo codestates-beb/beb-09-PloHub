@@ -10,4 +10,6 @@ const varEnv = {
   pinataAPI: process.env.PINATA_API,
   pinataSecret: process.env.PINATA_SECRET,
 };
+
+console.log(varEnv);
 module.exports = varEnv;

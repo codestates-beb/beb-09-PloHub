@@ -18,7 +18,8 @@ const sequelize = new Sequelize(
 
 db.nftTransaction = require("./nftTransaction")(sequelize, Sequelize);
 db.tokenTransaction = require("./tokenTransactions")(sequelize, Sequelize);
-db.ethTransaction = require("./ethTransaction")(sequelize,Sequelize);
+db.ethTransaction = require("./ethTransaction")(sequelize, Sequelize);
+db.transactions = require("./transactions")(sequelize, Sequelize);
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
