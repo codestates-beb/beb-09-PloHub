@@ -1,3 +1,7 @@
+up_client:
+	@echo "Starting client..."
+	cd client && npm run dev
+
 deploy_contract:
 	@echo "Deploying contract..."
 	cd contract && npx truffle migrate --network $(network)
