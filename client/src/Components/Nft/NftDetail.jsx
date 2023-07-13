@@ -13,7 +13,6 @@ const NftDetail = ({ nftInfo }) => {
 
     const user = useSelector((state) => state.user);
     const router = useRouter();
-    {console.log(nftInfo)}
 
     return (
         <>

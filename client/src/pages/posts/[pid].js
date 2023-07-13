@@ -20,8 +20,6 @@ export default PostDetailPage;
 export const getServerSideProps = async ({ query }) => {
     const { pid } = query;
 
-    console.log('pid', pid);
-
     try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/detail/${pid}`, {
             withCredentials: true
@@ -29,16 +27,12 @@ export const getServerSideProps = async ({ query }) => {
     
         const postDetail = res.data;
 
-        console.log(res.data);
-
         const res2 = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/comments/list/${postDetail.post_info.id}`, {
             withCredentials: true
         });
 
         const commentList = res2.data.comments;
 
-        console.log('commentList', commentList)
-    
         return {
             props: {
                 postDetail,

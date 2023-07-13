@@ -80,7 +80,7 @@ const Header = () => {
                 }, 3000);
             }
         } catch (error) {
-            console.log(error);
+            console.log('Error', error.message);
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);

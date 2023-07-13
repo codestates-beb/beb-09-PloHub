@@ -28,7 +28,6 @@ const PostDetail = ({ postDetail, commentList }) => {
         3: { text: '참여 후기' },
     };
 
-    console.log(commentList);
     const isPostAuthor = user && user.email === postDetail.post_info.author.email;
     // const isCommentAuthor = user && user.email === commentList.author.email;
 
@@ -82,7 +81,6 @@ const PostDetail = ({ postDetail, commentList }) => {
                 withCredentials: true
             });
 
-            console.log(response);
             if (response.data.status === 200) {
                 setIsModalOpen(true);
                 setModalTitle('Success');

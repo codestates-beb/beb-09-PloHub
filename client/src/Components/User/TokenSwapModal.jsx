@@ -49,9 +49,8 @@ const TokenSwapModal = ({ setIsModalOpen }) => {
                     router.reload();
                 }, 3000);
             }
-            console.log(response);
         } catch (error) {
-            console.log(error)
+            console.log('Error', error.message)
             setModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);
