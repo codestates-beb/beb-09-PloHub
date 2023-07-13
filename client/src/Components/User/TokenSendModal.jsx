@@ -28,7 +28,6 @@ const TokenSendModal = ({ setIsModalOpen }) => {
                 withCredentials: true
             });
 
-            console.log('response', response);
             if (response.status === 200) {
                 setModalOpen(true);
                 setModalTitle('Success');
@@ -39,9 +38,8 @@ const TokenSendModal = ({ setIsModalOpen }) => {
                     router.reload();
                 }, 3000);
             }
-            console.log(response);
         } catch (error) {
-            console.log(error);
+            console.log('Error', error.message);
             setModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);

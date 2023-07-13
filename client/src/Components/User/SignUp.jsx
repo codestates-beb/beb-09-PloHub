@@ -53,7 +53,6 @@ const SignUp = () => {
                     },
                     }
                 );
-                console.log(response);
                 if (response.data.status === 200) {
                     setIsModalOpen(true);
                     setModalTitle('Success');
@@ -72,12 +71,11 @@ const SignUp = () => {
                     }, 3000);
                 }
             } catch (error) {
-                console.log(error);
+                console.log('Error', error.message);
                 if (error.response && error.response.status === 400) {
                     setIsModalOpen(true);
                     setModalTitle('Error');
-                    setModalBody('이 이메일은 이미 사용 중입니다.');
-                    console.log(error.message);
+                    setModalBody(error.message);
                     document.getElementById('confirm-email').style.display = 'block';
     
                     setTimeout(() => {
@@ -145,7 +143,6 @@ const SignUp = () => {
                     "Accept": "application/json",
                 },
             });
-            console.log(response)
             if (response.status === 200) {
                 setIsModalOpen(true);
                 setModalTitle('Success');
@@ -157,7 +154,7 @@ const SignUp = () => {
                 }, 3000);
             }
         } catch (error) {
-            console.log(error);
+            console.log('Error', error.message);
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);

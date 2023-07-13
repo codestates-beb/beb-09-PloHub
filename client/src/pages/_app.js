@@ -23,7 +23,7 @@ function App({ Component, pageProps }) {
                 console.log('refresh message: ', response.data.message);
             
             } catch (error) {
-                console.log(error);
+                console.log('Error', error.message);
             }
 
         };

@@ -67,7 +67,6 @@ const NftCreate = () => {
                 withCredentials: true,
             });
 
-            console.log(response);
             if (response.status === 200) {
                 setIsModalOpen(true);
                 setModalTitle('Success');
@@ -82,7 +81,7 @@ const NftCreate = () => {
 
             }
         } catch (error) {
-            console.log(error)
+            console.log('Error', error.message)
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);

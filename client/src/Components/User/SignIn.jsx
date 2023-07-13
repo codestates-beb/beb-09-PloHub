@@ -44,7 +44,6 @@ const SignIn = () => {
                 },
                 withCredentials: true // Add this line
             });
-            console.log(response);
             if (response.status === 200) {
                 setIsModalOpen(true);
                 setModalTitle('Success');
@@ -52,17 +51,6 @@ const SignIn = () => {
 
                 const { email, nickname, level, address, eth_amount, token_amount, daily_token } = response.data.user_info;
                 const { access_token } = response.data;
-
-                console.log('response.data', response.data);
-
-                console.log('email: ' + email);
-                console.log('address: ' + address);
-                console.log('nickname: ' + nickname);
-                console.log('level: ' + level);
-                console.log('token: ' + token_amount);
-                console.log('daily: ' + daily_token);
-                console.log('eth_amount: ' + eth_amount);
-                console.log('access_token: ' + access_token);
 
                 dispatch({ type: SET_EMAIL, payload: email });
                 dispatch({ type: SET_ADDRESS, payload: address });
@@ -78,7 +66,7 @@ const SignIn = () => {
                 }, 3000);
             }
         } catch (error) {
-            console.log(error);
+            console.log('Error', error.message);
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody(error.message);

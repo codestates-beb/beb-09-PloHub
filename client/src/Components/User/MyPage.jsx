@@ -32,7 +32,7 @@ const MyPage = () => {
             web3Provider = new Web3(provider);
         }
     } catch (e) {
-        console.log(e);
+        console.log('Error', error.message);
     }
 
     const [isEditing, setIsEditing] = useState(false);
@@ -160,7 +160,6 @@ const MyPage = () => {
             });
 
             const { user_info, posts, nfts } = response.data;
-            console.log(response);
             setUserInfo(user_info);
             setPostInfo(posts);
             setNftInfo(nfts);
@@ -385,7 +384,7 @@ const MyPage = () => {
                                         duration-300 
                                         hover:-translate-y-2 
                                         cursor-pointer"
-                                        key={item.id}
+                                        key={item.token_id}
                                         onClick={() => router.push(`/nft/${item.token_id}`)}>
                                         <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
                                             <Image 
