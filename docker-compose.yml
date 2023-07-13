@@ -94,29 +94,12 @@ services:
     networks:
       - blockchain-tier
 
-  caddy:
-    container_name: caddy
-    image: caddy:2.6.4-alpine
-    command: caddy reverse-proxy --from localhost --to main-server:4000
-    ports:
-      - 80:80
-      - 443:443
-    restart: always
-    volumes:
-      - caddy-data:/data
-    networks:
-      - back-tier
-    depends_on:
-      - main-server
-
 volumes:
   ganache-data:
     driver: local
   postgres-data:
     driver: local
   mysql-data:
-    driver: local
-  caddy-data:
     driver: local
 
 networks:
