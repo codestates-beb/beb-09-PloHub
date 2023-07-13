@@ -2,9 +2,14 @@ module.exports = (sequelize,DataTypes) => {
     const tokenTransaction = sequelize.define(
         'tokenTransaction',
         {
+    id : {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     hash: {
         type: DataTypes.STRING,
-        primaryKey: true,
+        defaultValue: "",
     },
     nonce: {
         type: DataTypes.STRING,

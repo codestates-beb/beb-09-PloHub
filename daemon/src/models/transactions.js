@@ -2,9 +2,14 @@ module.exports = (sequelize,DataTypes) => {
     const transactions = sequelize.define(
         'transactions',
         {
+    id : {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     hash: {
         type: DataTypes.STRING,
-        primaryKey: true,
+        defaultValue: "",
     },
     nonce: {
         type: DataTypes.STRING,
