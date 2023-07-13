@@ -29,7 +29,6 @@ const PostDetail = ({ postDetail, commentList }) => {
     };
 
     const isPostAuthor = user && user.email === postDetail.post_info.author.email;
-    // const isCommentAuthor = user && user.email === commentList.author.email;
 
     const settings = {
         dots: true,
@@ -39,6 +38,35 @@ const PostDetail = ({ postDetail, commentList }) => {
         slidesToScroll: postDetail.media.length > 2 ? 3 : postDetail.media.length,
     };
 
+    /**
+     * 클립보드에 작성자의 지갑 주소를 복사하는 함수
+     * 복사가 성공하면 성공 메시지를, 실패하면 에러 메시지를 모달로 표시
+     */
+    const copyAddr = async () => {
+        try {
+            await navigator.clipboard.writeText(postDetail.post_info.author.address);
+            setIsModalOpen(true);
+            setModalTitle('Success');
+            setModalBody('지갑주소가 복사되었습니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        } catch (err) {
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody('지갑주소 복사가 실패되었습니다.');
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
+
+    /**
+     * 게시글을 삭제하는 함수입니다. 삭제 성공 시 성공 메시지를, 
+     * 실패 시 에러 메시지를 모달로 표시
+     */
     const deletePost = async () => {
         try {
             let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/posts/${postDetail.post_info.id}`, {
@@ -67,6 +95,11 @@ const PostDetail = ({ postDetail, commentList }) => {
         }
     }
 
+    /**
+     * 새로운 댓글을 생성하는 함수
+     * 게시글 ID와 댓글 내용을 서버에 POST 요청으로 보냄
+     * 댓글 생성 성공 시 성공 메시지를, 실패 시 에러 메시지를 모달로 표시
+     */
     const createComment = async () => {
         const formData = new FormData();
 
@@ -104,6 +137,10 @@ const PostDetail = ({ postDetail, commentList }) => {
         }
     }
 
+    /**
+     * 댓글을 삭제하는 함수입니다. 삭제 성공 시 성공 메시지를, 실패 시 에러 메시지를 모달로 표시
+     * @param {string} id - 삭제할 댓글의 ID
+     */
     const deleteComment = async (id) => {
         try {
             let response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/comments/${id}`, {
@@ -159,7 +196,7 @@ const PostDetail = ({ postDetail, commentList }) => {
                 <div className='w-full flex justify-between border-b'>
                     <p className='mb-5 font-semibold text-xl'>{postDetail.post_info.title}</p>
                     <div className='flex gap-20 font-semibold text-xl'>
-                        <p>
+                        <p onClick={copyAddr} className='cursor-pointer hover:underline' title="Click to copy the address">
                             {postDetail.post_info.author.nickname.length >= 8 
                                 ? postDetail.post_info.author.nickname.slice(0, 8) + '...' + postDetail.post_info.author.nickname.slice(-5) 
                                 : postDetail.post_info.author.nickname}

@@ -114,12 +114,6 @@ const MyPage = () => {
 
     const postsPerPage = 5;
 
-    const nfts = [
-        { id: 1, file: logoBlack, title: 'Card Title1', content: '', price: '1'},
-        { id: 2, file: logoBlack, title: 'Card Title2', content: '', price: '2'},
-        { id: 3, file: logoBlack, title: 'Card Title3', content: '', price: '3'},
-    ]
-
     /**
      * 페이지 변경 핸들러 함수
      * 선택한 페이지 번호를 받아와서 현재 페이지 상태(State)를 업데이트함
@@ -168,7 +162,7 @@ const MyPage = () => {
             dispatch({ type: SET_LEVEL, payload: user_info.level });
             dispatch({ type: SET_TOKEN_BALANCE, payload: user_info.token_amount });
             dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: user_info.daily_token });
-            dispatch({ type: SET_ETH_BALANCE, payload: user_info.eth_amount });
+            dispatch({ type: SET_ETH_BALANCE, payload: web3Provider.utils.fromWei(user_info.eth_amount, 'ether') });
             
         } catch (error) {
             console.log('Error: ' + error.message);
@@ -179,6 +173,18 @@ const MyPage = () => {
         myPageInfo();
     }, [])
 
+    /**
+     * 토큰 교환 혹은 토큰 전송 모달을 열기 위한 함수
+     * 해당 함수는 'tokenSwap' 혹은 'tokenSend'의 두 가지 modalType 중 하나를 인자로 받음
+     * 
+     * modalType이 'tokenSwap'인 경우, 토큰 교환에 대한 모달을 연 후, 모달의 제목을 '토큰 교환'으로 설정하고
+     * 모달의 본문에는 'TokenSwapModal' 컴포넌트를 렌더링
+     * 
+     * modalType이 'tokenSend'인 경우, 토큰 전송에 대한 모달을 열고, 모달의 제목을 '토큰 전송'으로 설정하며
+     * 모달의 본문에는 'TokenSendModal' 컴포넌트를 렌더링
+     * 
+     * @param {string} modalType - 열 모달의 타입 ('tokenSwap' 혹은 'tokenSend')
+     */
     const openTokenSendModal = (modalType) => {
         if (modalType === 'tokenSwap') {
             setIsModalOpen(true);
@@ -189,10 +195,6 @@ const MyPage = () => {
             setModalTitle('토큰 전송');
             setModalBody(<TokenSendModal setIsModalOpen={setIsModalOpen} />);
         }
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
     };
 
     return (
@@ -222,7 +224,7 @@ const MyPage = () => {
                         <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
                             <p>My Token : {user.tokenBalance} PH</p>
                             <p>
-                                My ETH : {user.ethBalance ? web3Provider.utils?.fromWei(Number(user.ethBalance), 'ether') : 0} ETH
+                                My ETH : {user.ethBalance ? Number(user.ethBalance).toFixed(6) : 0} ETH
                             </p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
@@ -373,12 +375,12 @@ const MyPage = () => {
                         </button>
                     </div>
                     <div className='flex items-center gap-10'>
-                        {nftInfo.length === 0 ? (
+                        {nftInfo?.length === 0 ? (
                             <div>
                                 보유 및 판매 중인 NFT가 없습니다.
                             </div>
                         ) : (
-                            nftInfo.map((item) => {
+                            nftInfo?.map((item) => {
                                 return (
                                     activeTab === 'owned' ? (
                                         <div className="

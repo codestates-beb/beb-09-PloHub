@@ -31,6 +31,13 @@ export default function Home({ postList }) {
 
     const postsPerPage = 10;
 
+    /**
+     * 페이지네이션을 위한 페이지 변경 이벤트를 처리
+     * 제공된 페이지 번호로 현재 페이지를 설정하고
+     * 새 페이지 번호를 라우터의 쿼리에 푸시
+     * 
+     * @param {number} pageNumber - 새 페이지 번호.
+     */
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
         router.push({
@@ -39,15 +46,27 @@ export default function Home({ postList }) {
         })
     };
 
-    // Calculate total pages
-    const totalPages = Math.ceil(postList.length / postsPerPage);
+    // 페이지네이션을 위한 총 페이지 수를 계산
+    // 총 페이지 수는 게시물 목록의 길이를 페이지 당 게시물 수로 나눈 값(올림)
+    const totalPages = Math.ceil(postList?.length / postsPerPage);
     
+    /**
+     * 현재 페이지 변경을 처리하기 위한 훅
+     * 이것은 새 페이지의 첫 번째와 마지막 게시물의 인덱스를 계산
+     * 이 값들은 새 페이지의 게시물 목록을 분할하는 데 사용될 수 있음
+     */
     useEffect(() => {
         // currentPage가 바뀔 때마다 실행되도록 설정
         const indexOfLastPost = currentPage * postsPerPage;
         const indexOfFirstPost = indexOfLastPost - postsPerPage;
     }, [currentPage]); // currentPage를 dependency로 추가해주세요.
 
+    /**
+     * 행동을 진행하기 전에 사용자가 로그인했는지 확인
+     * 사용자가 로그인하지 않은 경우, 기본 동작을 방지하고 사용자에게 알리는 모달을 띄움
+     *
+     * @param {Event} e - 로그인 확인을 트리거한 이벤트.
+     */
     const loginCheck = (e) => {
         
         if (user.email === '') {
@@ -104,12 +123,12 @@ export default function Home({ postList }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {postList.length === 0 ? (
+                            {postList?.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="p-6 text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
                             ) : (
-                                postList.map((post) => (
+                                postList?.map((post) => (
                                     <tr className="
                                         hover:bg-gray-200 
                                         transition-all 
@@ -181,6 +200,13 @@ export default function Home({ postList }) {
     )
 }
 
+/**
+ * 서버 사이드 렌더링(SSR)을 위한 함수
+ * 페이지, 제한값, 카테고리를 쿼리 파라미터로 받아 백엔드에서 게시물 리스트를 가져옴
+ * 
+ * @param {object} context - Next.js의 context 객체. 쿼리 파라미터 등 서버 사이드 렌더링에 필요한 정보를 담고 있음
+ * @returns {object} props - 컴포넌트로 전달될 props. 게시물 리스트를 포함
+ */
 export const getServerSideProps = async ({ query }) => {
     const page = query.page || 1; // Default page is 1
     const limit = query.limit || 10; // Default limit is 10
@@ -197,8 +223,6 @@ export const getServerSideProps = async ({ query }) => {
         });
     
         const postList = res.data.posts;
-
-        console.log(postList);
 
         return {
             props: {

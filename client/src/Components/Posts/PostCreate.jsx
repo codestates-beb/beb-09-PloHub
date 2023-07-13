@@ -18,12 +18,12 @@ const PostCreate = () => {
     const [videos, setVideos] = useState([]);
     const [selectedFile, setSelectedFile] = useState([]);
 
-    const categoryChange = (e) => {
-        setSelectCategory(e.target.value);
-    }
-
+    /**
+     * 사용자 레벨을 확인하여 'courseinfo' 카테고리가 선택되었지만 
+     * 사용자 레벨이 2가 아닌 경우 에러 메시지를 보여주는 함수
+     */
     const userLevelCheck = () => {
-        if(user.level !== '2' && selectCategory === 'courseinfo') {
+        if(user.level !== 2 && selectCategory === 'courseinfo') {
             setIsModalOpen(true);
             setModalTitle('Error');
             setModalBody('해당 카테고리는 2레벨만 작성 가능합니다.');
@@ -34,6 +34,9 @@ const PostCreate = () => {
         }
     }
 
+    /**
+     * selectCategory가 변경될 때마다 userLevelCheck 함수를 호출하여 사용자 레벨을 확인
+     */
     useEffect(() => {
         userLevelCheck()
     }, [selectCategory]);
@@ -44,6 +47,12 @@ const PostCreate = () => {
         fileInputRef.current.click();
     };
     
+    /**
+     * 사용자가 파일을 선택하면 이를 처리하는 함수
+     * 이 함수는 선택한 파일의 확장자를 확인하고,
+     * 확장자에 따라 이미지 또는 비디오를 각각의 상태에 저장
+     * @param {Event} e - 파일 입력 이벤트 객체
+     */
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files)
 
@@ -59,8 +68,12 @@ const PostCreate = () => {
         setSelectedFile(files)
     };
 
+    /**
+     * 사용자가 작성한 제목, 내용, 카테고리, 이미지, 비디오를 이용하여 새 게시글을 생성하는 함수
+     * 이 함수는 사용자가 제공한 정보를 FormData 객체에 저장하고,
+     * 해당 객체를 이용하여 서버에 POST 요청을 보냄
+     */
     const createPost = async () => {
-
         const formData = new FormData();
 
         formData.append('title', title);
@@ -131,7 +144,7 @@ const PostCreate = () => {
                         px-4 
                         w-full" 
                         value={selectCategory}
-                        onChange={categoryChange}
+                        onChange={(e) => setSelectCategory(e.target.value)}
                         required>
                         <option className="text-sm" value="" disabled>카테고리를 선택해 주세요.</option>
                         <option className="text-sm" value="eventinfo">행사 정보</option>

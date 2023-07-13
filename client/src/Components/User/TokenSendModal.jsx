@@ -14,7 +14,13 @@ const TokenSendModal = ({ setIsModalOpen }) => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
 
-
+    /**
+     * 토큰 전송을 처리하는 비동기 함수
+     * 사용자가 입력한 주소와 토큰 양을 사용하여 서버에 토큰 전송 요청을 보내며,
+     * 응답이 성공적인 경우, 토큰 전송 성공 메시지를 모달로 표시하고 페이지를 새로 고침
+     * 만약 요청이 실패한 경우, 오류 메시지를 모달로 표시
+     * 모든 모달은 자동적으로 3초 후에 닫히게 됨
+     */
     const tokenSend = async () => {
         const token = cookie.parse(document.cookie || '');
         const formData = new FormData();
@@ -50,7 +56,6 @@ const TokenSendModal = ({ setIsModalOpen }) => {
                 setModalOpen(false);
             }, 3000);
         }
-
     }
     return (
         <>

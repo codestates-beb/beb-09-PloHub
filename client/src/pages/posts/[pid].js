@@ -16,7 +16,14 @@ const PostDetailPage = ({ postDetail, commentList }) => {
 
 export default PostDetailPage;
 
-
+/**
+ * 서버 사이드 렌더링(SSR)을 위한 함수
+ * 주어진 게시물 ID(pid)에 해당하는 게시물의 상세 정보와, 해당 게시물에 달린 댓글들을 가져옴
+ * 
+ * @param {object} context - Next.js의 context 객체. 쿼리 파라미터, 쿠키 등 서버 사이드 렌더링에 필요한 정보를 담고 있음
+ * @returns {object} - props 객체를 반환, 
+ * 'postDetail' 키에는 게시물 상세 정보가, 'commentList' 키에는 해당 게시물에 달린 댓글들의 목록이 담겨 있음
+ */
 export const getServerSideProps = async ({ query }) => {
     const { pid } = query;
 
