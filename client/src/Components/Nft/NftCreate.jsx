@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from "react-hook-form";
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import Modal from 'react-modal';
+import axios from 'axios';
 import { BsFillImageFill } from 'react-icons/bs';
 import { ModalLayout } from '../../Components/Reference';
 
@@ -15,20 +13,15 @@ const EXTENSIONS = [
 ];
 
 const NftCreate = () => {
+    const router = useRouter()
     const [fileType, setFileType] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
     const [uploadFile, setUploadFile] = useState(null);
+    const [name, setName] = useState('');
+    const [desc, setDesc] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
-    const [elements, setElements] = useState();
-
-    const user = useSelector((state) => state.user);
-    const router = useRouter();
-
-    const { register, formState: { errors }, handleSubmit } = useForm();
-
-    const onSubmit = data => setElements({ ...data });
 
     /**
      * 파일 업로드 이벤트를 처리
@@ -62,6 +55,44 @@ const NftCreate = () => {
         }
     }
 
+    const minting = async () => {
+        const formData = new FormData();
+
+        formData.append('name', name);
+        formData.append('description', desc);
+        formData.append('image', uploadFile);
+
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/nft/mint`, formData, {
+                withCredentials: true,
+            });
+
+            console.log(response);
+            if (response.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('민팅되었습니다.');
+    
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.push('/users/mypage');
+                }, 3000);
+            }
+            if (response.status === 200) {
+
+            }
+        } catch (error) {
+            console.log(error)
+            setIsModalOpen(true);
+            setModalTitle('Error');
+            setModalBody(error.message);
+
+            setTimeout(() => {
+                setIsModalOpen(false);
+            }, 3000);
+        }
+    }
+
     return (
         <>
             <div className='w-[50%] min-h-screen mx-auto mt-20 flex flex-col gap-20'>
@@ -69,7 +100,7 @@ const NftCreate = () => {
                     <p className='font-bold text-5xl'>NFT Create</p>
                 </div>
                 <div>
-                    <form className='flex flex-col gap-12' onSubmit={handleSubmit(onSubmit)}>
+                    <div className='flex flex-col gap-12'>
                         <div className="w-full h-[30rem] border-2 border-dashed rounded-xl">
                             <label className="
                                 h-full 
@@ -114,10 +145,9 @@ const NftCreate = () => {
                                 py-2 
                                 px-3 
                                 focus:outline-none" 
-                                {...register("ASSET_TITLE", { required: true, maxLength: 20 })} 
-                                aria-invalid={errors.ASSET_TITLE ? "true" : "false"}
                                 id="nft-title" 
                                 type="text" 
+                                onChange={(e) => setName(e.target.value)}
                                 placeholder="NFT Title" />
                         </div>
                         <div className="mt-4">
@@ -133,10 +163,9 @@ const NftCreate = () => {
                                 px-3 
                                 focus:outline-none 
                                 h-[20rem]" 
-                                {...register("ASSET_DESC", { required: true, maxLength: 20 })} 
-                                aria-invalid={errors.ASSET_DESC ? "true" : "false"}
                                 id="nft-description" 
                                 type="text" 
+                                onChange={(e) => setDesc(e.target.value)}
                                 placeholder="NFT Description" />
                         </div>
                         <div className="mb-4 w-full">
@@ -153,11 +182,11 @@ const NftCreate = () => {
                                 duration-300 
                                 w-full 
                                 h-[3rem]" 
-                                type='submit'>
+                                onClick={minting}>
                                 Mint
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
             <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
