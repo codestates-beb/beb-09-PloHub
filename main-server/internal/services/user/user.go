@@ -26,6 +26,7 @@ type Service interface {
 	ChangeNickname(ctx context.Context, userID int32, nickname string) error
 	EmailExists(ctx context.Context, email string) error
 	Login(ctx context.Context, email, password string) (*models.UserInfo, error)
+	Refresh(ctx context.Context, userID int32) (*models.UserInfo, error)
 	UserInfo(ctx context.Context, userID int32) (*models.UserInfo, error)
 	MyPage(ctx context.Context, userID int32) (*models.MyPageInfo, error)
 	SignUp(ctx context.Context, email, password string) error
@@ -143,7 +144,7 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 
 			// if level is 1, check if token amount is greater than 40 which is the requirement for level 2
 			if level == 1 {
-				tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 64)
+				tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 32)
 				if err != nil {
 					return err
 				}
@@ -184,6 +185,70 @@ func (s *service) Login(ctx context.Context, email string, password string) (*mo
 	}
 	// return result
 	return userInfo, nil
+}
+
+// Refresh refreshes the user
+func (s *service) Refresh(ctx context.Context, userID int32) (*models.UserInfo, error) {
+	var userInfo models.UserInfo
+
+	fn := func(q plohub.Querier) error {
+		user, err := q.GetUserByID(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+		userInfo = *models.ToUserInfo(user)
+
+		// if user never logged in before or user logged in before but not today
+		if !user.LatestLoginDate.Valid || checkIfUserNotLoggedInToday(user.LatestLoginDate.Time) {
+			reward, err := s.walletSvc.IssueReward(ctx, user.ID, models.RewardTypeLogin)
+			if err != nil {
+				return err
+			}
+
+			level := user.Level
+
+			// if level is 1, check if token amount is greater than 40 which is the requirement for level 2
+			if level == 1 {
+				tokenAmount, err := strconv.ParseInt(reward.TokenAmount, 10, 32)
+				if err != nil {
+					return err
+				}
+
+				if tokenAmount >= 40 {
+					level = 2
+				}
+			}
+
+			err = q.UpdateUser(ctx, plohub.UpdateUserParams{
+				Nickname:    user.Nickname,
+				Level:       level,
+				Address:     user.Address,
+				EthAmount:   user.EthAmount,
+				TokenAmount: reward.TokenAmount,
+				LatestLoginDate: sql.NullTime{
+					Valid: true,
+					Time:  time.Now(),
+				},
+				DailyToken: reward.RewardAmount,
+				ID:         user.ID,
+			})
+			if err != nil {
+				return err
+			}
+
+			userInfo.TokenAmount = reward.TokenAmount
+			userInfo.DailyToken = reward.RewardAmount
+		}
+		return nil
+	}
+
+	err := s.repo.ExecTx(ctx, fn)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userInfo, nil
 }
 
 // UserInfo returns user info
@@ -373,9 +438,12 @@ func (s *service) MintNFT(ctx context.Context, userID int32, name, description, 
 			return err
 		}
 
+		// check if token amount is less than 20
 		if tokenAmount < 20 {
 			return ErrInsufficientToken
 		}
+
+		// TODO: check if user has enough eth
 
 		// mint NFT
 		minted, err := s.walletSvc.MintNFT(ctx, userID, name, description, imageUrl)
@@ -427,9 +495,12 @@ func (s *service) SwapTokens(ctx context.Context, userID, tokenAmount int32) (*m
 			return err
 		}
 
+		// check if token amount is less than token amount to swap
 		if int32(tokenAmountInt32) < tokenAmount {
 			return ErrInsufficientToken
 		}
+
+		// TODO: check if user has enough eth
 
 		// swap tokens
 		balance, err = s.walletSvc.SwapTokens(ctx, userID, tokenAmount)
@@ -474,9 +545,12 @@ func (s *service) TransferTokens(ctx context.Context, senderID, tokenAmount int3
 			return err
 		}
 
+		// check if token amount is less than token amount to transfer
 		if int32(tokenAmountInt32) < tokenAmount {
 			return ErrInsufficientToken
 		}
+
+		// TODO: check if user has enough eth
 
 		// get receiver id by address
 		receiver, err := q.GetUserByAddress(ctx, receiverAddress)

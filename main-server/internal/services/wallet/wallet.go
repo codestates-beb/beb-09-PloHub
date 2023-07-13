@@ -151,7 +151,7 @@ func (s *service) GetAllNFTs(ctx context.Context) ([]models.NFT, error) {
 		return nil, err
 	}
 
-	var nfts []models.NFT
+	nfts := make([]models.NFT, 0, len(nftResp.Data))
 
 	for _, rawNFT := range nftResp.Data {
 		var nft models.NFT
@@ -262,7 +262,7 @@ func (s *service) GetUserNFTs(ctx context.Context, userID int32) ([]models.NFT, 
 		return nil, err
 	}
 
-	var nfts []models.NFT
+	nfts := make([]models.NFT, 0, len(nftResp.Data))
 
 	for _, rawNFT := range nftResp.Data {
 		var nft models.NFT
