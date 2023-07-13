@@ -41,11 +41,11 @@ const MyPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [activeTab, setActiveTab] = useState('owned');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalType, setModalType] = useState(null);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
     const [userInfo, setUserInfo] = useState();
     const [postInfo, setPostInfo] = useState([]);
+    const [nftInfo, setNftInfo] = useState([]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -159,10 +159,11 @@ const MyPage = () => {
                 withCredentials: true
             });
 
-            const { user_info, posts } = response.data;
+            const { user_info, posts, nfts } = response.data;
             console.log(response);
             setUserInfo(user_info);
             setPostInfo(posts);
+            setNftInfo(nfts);
 
             dispatch({ type: SET_EMAIL, payload: userInfo.email });
             dispatch({ type: SET_ADDRESS, payload: userInfo.address });
@@ -370,7 +371,7 @@ const MyPage = () => {
                         </button>
                     </div>
                     <div className='flex items-center gap-10'>
-                        {nfts.map((item) => {
+                        {nftInfo.map((item) => {
                             return (
                                 activeTab === 'owned' ? (
                                     <div className="
@@ -386,16 +387,20 @@ const MyPage = () => {
                                         cursor-pointer"
                                         key={item.id}
                                         onClick={() => router.push(`/nft/${item.id}`)}>
-                                        <div className='border-b-2'>
-                                            <Image src={item.file} width={'100%'} height={'100%'} />
+                                        <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
+                                            <Image 
+                                                className='rounded-t-3xl'
+                                                src={item.image} 
+                                                layout='fill'
+                                                objectFit='cover' 
+                                                alt='nft image' 
+                                            />
                                         </div>
                                         <div className='p-6'>
                                             <div className="mb-4">
-                                                <Link href='/nft/detail/:id'>
-                                                    <h2 className="text-xl font-bold hover:underline">{item.title}</h2>
-                                                </Link>
+                                                <h2 className="text-xl font-bold hover:underline">{item.name}</h2>
                                             </div>
-                                            <p className="text-gray-700 font-semibold">{item.price} ETH</p>
+                                            <p className="text-gray-700 font-semibold">{item.price} PH</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -412,16 +417,22 @@ const MyPage = () => {
                                         cursor-pointer"
                                         key={item.id}
                                         onClick={() => router.push(`/nft/${item.id}`)}>
-                                        <div className='border-b-2'>
-                                            <Image src={item.file} width={'100%'} height={'100%'} />
+                                        <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
+                                            <Image 
+                                                className='rounded-t-3xl'
+                                                src={item.image} 
+                                                layout='fill'
+                                                objectFit='cover' 
+                                                alt='nft image' 
+                                            />
                                         </div>
                                         <div className='p-6'>
                                             <div className="mb-4">
                                                 <Link href='/nft/detail/:id'>
-                                                    <h2 className="text-xl font-bold hover:underline">{item.title}</h2>
+                                                    <h2 className="text-xl font-bold hover:underline">{item.name}</h2>
                                                 </Link>
                                             </div>
-                                            <p className="text-gray-700 font-semibold">{item.price} ETH</p>
+                                            <p className="text-gray-700 font-semibold">{item.price} PH</p>
                                         </div>
                                     </div>
                                 )
@@ -430,12 +441,6 @@ const MyPage = () => {
                     </div>
                 </div>
             </div>
-            {isModalOpen && modalType === 'tokenSwap' && (
-                <TokenSwapModal closeModal={closeModal} />
-            )}
-            {isModalOpen && modalType === 'tokenSend' && (
-                <TokenSendModal closeModal={closeModal} />
-            )}
             <ModalLayout isOpen={isModalOpen} modalTitle={modalTitle} modalBody={modalBody} />
         </>
     )
