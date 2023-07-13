@@ -97,41 +97,47 @@ export default function Home({ postList }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {postList.posts.map((post) => (
-                                <tr className="
-                                    hover:bg-gray-200 
-                                    transition-all 
-                                    duration-300 
-                                    cursor-pointer"
-                                    key={post.id}
-                                    onClick={() => router.push(`/posts/${post.id}`)}>
-                                    <td className="border-b p-6">
-                                        <p className="text-xl font-semibold">{post.id}</p>
-                                    </td>
-                                    <td className="border-b p-6">
-                                        <p className="text-gray-600"> 
-                                            {categoryMappings[post.category].text}
-                                        </p>
-                                    </td>
-                                    <td className="border-b p-6">
-                                        <p className="text-gray-600"> {post.title}</p>
-                                    </td>
-                                    <td className="border-b p-6">
-                                        <p className="text-gray-600"> {post.content}</p>
-                                    </td>
-                                    <td className="border-b p-6">
-                                        <p className="text-gray-600">
-                                        {post.author.nickname.length >= 8 ? post.author.nickname.slice(0, 8) + '...' + post.author.nickname.slice(-5) : post.author.nickname}
-                                        </p>
-                                    </td>
-                                    <td className="border-b p-6">
-                                        <p className="text-gray-600"> 
-                                            {post.created_at.split('T')[0]}<br />{post.created_at.substring(11,19)}
-                                        </p>
-                                        
-                                    </td>
+                            {postList.posts.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="p-6 text-center">등록된 게시글이 없습니다.</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                postList.posts.map((post) => (
+                                    <tr className="
+                                        hover:bg-gray-200 
+                                        transition-all 
+                                        duration-300 
+                                        cursor-pointer"
+                                        key={post.id}
+                                        onClick={() => router.push(`/posts/${post.id}`)}>
+                                        <td className="border-b p-6">
+                                            <p className="text-xl font-semibold">{post.id}</p>
+                                        </td>
+                                        <td className="border-b p-6">
+                                            <p className="text-gray-600"> 
+                                                {categoryMappings[post.category].text}
+                                            </p>
+                                        </td>
+                                        <td className="border-b p-6">
+                                            <p className="text-gray-600"> {post.title}</p>
+                                        </td>
+                                        <td className="border-b p-6">
+                                            <p className="text-gray-600"> {post.content}</p>
+                                        </td>
+                                        <td className="border-b p-6">
+                                            <p className="text-gray-600">
+                                            {post.author.nickname.length >= 8 ? post.author.nickname.slice(0, 8) + '...' + post.author.nickname.slice(-5) : post.author.nickname}
+                                            </p>
+                                        </td>
+                                        <td className="border-b p-6">
+                                            <p className="text-gray-600"> 
+                                                {post.created_at.split('T')[0]}<br />{post.created_at.substring(11,19)}
+                                            </p>
+                                            
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                     <div className='w-full mt-16 flex justify-center'>

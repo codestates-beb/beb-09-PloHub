@@ -32,7 +32,7 @@ const MyPage = () => {
             web3Provider = new Web3(provider);
         }
     } catch (e) {
-        console.log('Error', error.message);
+        console.log(e);
     }
 
     const [isEditing, setIsEditing] = useState(false);
@@ -43,7 +43,6 @@ const MyPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState('');
-    const [userInfo, setUserInfo] = useState();
     const [postInfo, setPostInfo] = useState([]);
     const [nftInfo, setNftInfo] = useState([]);
 
@@ -160,17 +159,16 @@ const MyPage = () => {
             });
 
             const { user_info, posts, nfts } = response.data;
-            setUserInfo(user_info);
             setPostInfo(posts);
             setNftInfo(nfts);
 
-            dispatch({ type: SET_EMAIL, payload: userInfo.email });
-            dispatch({ type: SET_ADDRESS, payload: userInfo.address });
-            dispatch({ type: SET_NICKNAME, payload: userInfo.nickname });
-            dispatch({ type: SET_LEVEL, payload: userInfo.level });
-            dispatch({ type: SET_TOKEN_BALANCE, payload: userInfo.token_amount });
-            dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: userInfo.daily_token });
-            dispatch({ type: SET_ETH_BALANCE, payload: userInfo.eth_amount });
+            dispatch({ type: SET_EMAIL, payload: user_info.email });
+            dispatch({ type: SET_ADDRESS, payload: user_info.address });
+            dispatch({ type: SET_NICKNAME, payload: user_info.nickname });
+            dispatch({ type: SET_LEVEL, payload: user_info.level });
+            dispatch({ type: SET_TOKEN_BALANCE, payload: user_info.token_amount });
+            dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: user_info.daily_token });
+            dispatch({ type: SET_ETH_BALANCE, payload: user_info.eth_amount });
             
         } catch (error) {
             console.log('Error: ' + error.message);
@@ -215,17 +213,16 @@ const MyPage = () => {
                             </div>
                         ) : (
                             <>
-                                <p>{userInfo?.nickname?.length >= 8 ? userInfo?.nickname.slice(0, 8) + '...' + userInfo.nickname.slice(-5) : userInfo?.nickname}</p>
+                                <p>{user.nickname?.length >= 8 ? user.nickname.slice(0, 8) + '...' + user.nickname.slice(-5) : user.nickname}</p>
                                 <p>|</p>
-                                <p>Lv. {userInfo?.level}</p>
+                                <p>Lv. {user.level}</p>
                             </>
                         )}
                         </div>
                         <div className='w-[45rem] flex gap-12 justify-center font-bold text-2xl'>
-                            <p>My Token : {userInfo?.token_amount} PH</p>
+                            <p>My Token : {user.tokenBalance} PH</p>
                             <p>
-                                My ETH : {userInfo?.eth_amount ? web3Provider.utils?.fromWei(Number(userInfo.eth_amount), 'ether') : 0} ETH
-                                {/* My ETH : {web3Provider?.utils?.fromWei(userInfo?.eth_amount, 'ether')} ETH */}
+                                My ETH : {user.ethBalance ? web3Provider.utils?.fromWei(Number(user.ethBalance), 'ether') : 0} ETH
                             </p>
                         </div>
                         <div className='flex gap-5 justify-end font-bold text-xl'>
@@ -305,7 +302,12 @@ const MyPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {postInfo.map((post) => (
+                            {postInfo.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="p-6 text-center">작성한 게시글이 없습니다.</td>
+                                </tr>
+                            ) : (
+                                postInfo.map((post) => (
                                 <tr 
                                     key={post.id} 
                                     className="hover:bg-gray-200 transition-all duration-300 cursor-pointer"
@@ -329,7 +331,8 @@ const MyPage = () => {
                                         <p className="text-gray-600"> {post.created_at.split('T')[0]}<br />{post.created_at.substring(11,19)}</p>
                                     </td>
                                 </tr>
-                                ))}
+                                ))
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -370,73 +373,79 @@ const MyPage = () => {
                         </button>
                     </div>
                     <div className='flex items-center gap-10'>
-                        {nftInfo.map((item) => {
-                            return (
-                                activeTab === 'owned' ? (
-                                    <div className="
-                                        w-[15%] 
-                                        bg-white 
-                                        shadow-lg 
-                                        border 
-                                        rounded-3xl 
-                                        transform 
-                                        transition-transform 
-                                        duration-300 
-                                        hover:-translate-y-2 
-                                        cursor-pointer"
-                                        key={item.token_id}
-                                        onClick={() => router.push(`/nft/${item.token_id}`)}>
-                                        <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
-                                            <Image 
-                                                className='rounded-t-3xl'
-                                                src={item.image} 
-                                                layout='fill'
-                                                objectFit='cover' 
-                                                alt='nft image' 
-                                            />
-                                        </div>
-                                        <div className='p-6'>
-                                            <div className="mb-4">
-                                                <h2 className="text-xl font-bold hover:underline">{item.name}</h2>
+                        {nftInfo.length === 0 ? (
+                            <div>
+                                보유 및 판매 중인 NFT가 없습니다.
+                            </div>
+                        ) : (
+                            nftInfo.map((item) => {
+                                return (
+                                    activeTab === 'owned' ? (
+                                        <div className="
+                                            w-[15%] 
+                                            bg-white 
+                                            shadow-lg 
+                                            border 
+                                            rounded-3xl 
+                                            transform 
+                                            transition-transform 
+                                            duration-300 
+                                            hover:-translate-y-2 
+                                            cursor-pointer"
+                                            key={item.id}
+                                            onClick={() => router.push(`/nft/${item.token_id}`)}>
+                                            <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
+                                                <Image 
+                                                    className='rounded-t-3xl'
+                                                    src={item.image} 
+                                                    layout='fill'
+                                                    objectFit='cover' 
+                                                    alt='nft image' 
+                                                />
                                             </div>
-                                            <p className="text-gray-700 font-semibold">{item.price} PH</p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="
-                                        w-[15%] 
-                                        bg-white 
-                                        shadow-lg 
-                                        border 
-                                        rounded-3xl 
-                                        transform 
-                                        transition-transform 
-                                        duration-300 
-                                        hover:-translate-y-2 
-                                        cursor-pointer"
-                                        key={item.id}
-                                        onClick={() => router.push(`/nft/${item.id}`)}>
-                                        <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
-                                            <Image 
-                                                className='rounded-t-3xl'
-                                                src={item.image} 
-                                                layout='fill'
-                                                objectFit='cover' 
-                                                alt='nft image' 
-                                            />
-                                        </div>
-                                        <div className='p-6'>
-                                            <div className="mb-4">
-                                                <Link href='/nft/detail/:id'>
+                                            <div className='p-6'>
+                                                <div className="mb-4">
                                                     <h2 className="text-xl font-bold hover:underline">{item.name}</h2>
-                                                </Link>
+                                                </div>
+                                                <p className="text-gray-700 font-semibold">{item.price} PH</p>
                                             </div>
-                                            <p className="text-gray-700 font-semibold">{item.price} PH</p>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="
+                                            w-[15%] 
+                                            bg-white 
+                                            shadow-lg 
+                                            border 
+                                            rounded-3xl 
+                                            transform 
+                                            transition-transform 
+                                            duration-300 
+                                            hover:-translate-y-2 
+                                            cursor-pointer"
+                                            key={item.id}
+                                            onClick={() => router.push(`/nft/${item.id}`)}>
+                                            <div className='border-b-2' style={{position: "relative", height: "0", paddingBottom: "100%"}}>
+                                                <Image 
+                                                    className='rounded-t-3xl'
+                                                    src={item.image} 
+                                                    layout='fill'
+                                                    objectFit='cover' 
+                                                    alt='nft image' 
+                                                />
+                                            </div>
+                                            <div className='p-6'>
+                                                <div className="mb-4">
+                                                    <Link href='/nft/detail/:id'>
+                                                        <h2 className="text-xl font-bold hover:underline">{item.name}</h2>
+                                                    </Link>
+                                                </div>
+                                                <p className="text-gray-700 font-semibold">{item.price} PH</p>
+                                            </div>
+                                        </div>
+                                    )
                                 )
-                            )
-                        })}
+                            })
+                        )}
                     </div>
                 </div>
             </div>
