@@ -9,10 +9,26 @@ const mypage = () => {
     return (
         <>
             <Header />
-            <MyPage />
+            <MyPage/>
             <Footer />
         </>
     )
 }
 
 export default mypage;
+
+export const getServerSideProps = async (context) => {
+    const cookies = cookie.parse(context.req.headers.cookie || '');
+    if (!cookies.access_token) {
+        return {
+            redirect: {
+                destination: '/users/signin',
+                permanent: false,
+            },
+        }
+    }
+    
+    return {
+        props: {},
+    }
+}

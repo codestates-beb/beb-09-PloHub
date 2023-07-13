@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { SET_NICKNAME } from '../Redux/ActionTypes';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +9,14 @@ import Web3 from 'web3';
 import { logoBlack, ModalLayout } from '../Reference'
 import TokenSwapModal from './TokenSwapModal';
 import TokenSendModal from './TokenSendModal';
+import { SET_EMAIL,
+    SET_ADDRESS,
+    SET_NICKNAME, 
+    SET_LEVEL, 
+    SET_TOKEN_BALANCE, 
+    SET_DAILY_TOKEN_BALANCE,
+    SET_ETH_BALANCE } from '../Redux/ActionTypes';
+
 
 const MyPage = () => {
     const router = useRouter();
@@ -20,14 +27,13 @@ const MyPage = () => {
     let web3Provider;
     
     try {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        provider = window.ethereum;
-        web3Provider = new Web3(provider);
-      }
+        if (typeof window !== 'undefined' && window.ethereum) {
+            provider = window.ethereum;
+            web3Provider = new Web3(provider);
+        }
     } catch (e) {
-      console.log(e);
+        console.log(e);
     }
-    
 
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState(user.nickname);
@@ -66,14 +72,17 @@ const MyPage = () => {
 
             dispatch({ type: SET_NICKNAME, payload: nickname });
 
-            setIsModalOpen(true);
-            setModalTitle('Success');
-            setModalBody('닉네임이 변경되었습니다.');
+            if (response.status === 200) {
+                setIsModalOpen(true);
+                setModalTitle('Success');
+                setModalBody('닉네임이 변경되었습니다.');
+    
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    router.reload();
+                }, 3000);
+            }
 
-            setTimeout(() => {
-                setIsModalOpen(false);
-                router.reload();
-            }, 3000);
         } catch (error) {
             console.log('Error: ' + error.message);
             setIsModalOpen(true);
