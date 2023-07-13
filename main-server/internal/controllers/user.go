@@ -104,7 +104,7 @@ func (uc *userController) login(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := uc.userSvc.Login(r.Context(), email, password)
 	if err != nil {
 		zap.L().Error("failed to login", zap.Error(err), zap.String("email", email))
-		utils.ErrorJSON(w, errors.New("unable to login, please check youc email and password"), http.StatusBadRequest)
+		utils.ErrorJSON(w, errors.New("unable to login, please check your email and password"), http.StatusBadRequest)
 		return
 	}
 
@@ -164,7 +164,7 @@ func (uc *userController) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user info
-	userInfo, err := uc.userSvc.UserInfo(r.Context(), jwtUser.ID)
+	userInfo, err := uc.userSvc.Refresh(r.Context(), jwtUser.ID)
 	if err != nil {
 		zap.L().Error("failed to get user info", zap.Error(err), zap.Int32("user_id", jwtUser.ID))
 		utils.ErrorJSON(w, errors.New("unable to get user info"), http.StatusInternalServerError)
