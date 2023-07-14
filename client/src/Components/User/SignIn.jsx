@@ -124,7 +124,7 @@ const SignIn = () => {
                                 h-1/6`}
                                 onClick={signIn}
                                 disabled={email.length === 0 && password.length === 0}>
-                                Sing In
+                                Sign In
                             </button>
                             <Link href='/users/signup'>
                                 <span className='hover:underline transition duration-300 font-bold'>Sign Up</span>
