@@ -1,0 +1,34 @@
+{
+  "development": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "port": "",
+    "host": "",
+    "dialect": ""
+  },
+  "docker": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "port": "",
+    "host": "",
+    "dialect": ""
+  },
+  "test": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "port": "",
+    "host": "",
+    "dialect": ""
+  },
+  "production": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "port": "",
+    "host": "",
+    "dialect": ""
+  }
+}

@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+* {
+  @apply font-common;
+}
+
+input {
+  outline: none;
+}
+
+select {
+  appearance: none;
+  background-image: url('../assets/image/down-filled-triangular-arrow.png');
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+}
+
+.slick-track {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.slick-prev::before,
+.slick-next::before {
+  color: black !important;
+}
+
+.slick-list {
+  width: 100%;
+}
+
+.slick-slide {
+  width: 100%;
+
+}
+
+.slick-slide > div {
+  position: relative;
+  height: 300px;
+  margin: 0 20px;
+}

@@ -1,0 +1,29 @@
+{
+  "postgres": {
+    "host": "",
+    "port": "",
+    "user": "",
+    "password": "",
+    "database": "",
+    "ssl_mode": "",
+    "timezone": "",
+    "timeout": ""
+  },
+  "jwt": {
+    "issuer": "",
+    "audience": "",
+    "access_token_secret": "",
+    "refresh_token_secret": ""
+  },
+  "server": {
+    "port": "",
+    "domain": "",
+    "contract_server_base_url": ""
+  },
+  "s3": {
+    "region": "",
+    "access_key": "",
+    "secret_key": "",
+    "bucket": ""
+  }
+}

@@ -1,0 +1,115 @@
+version: '3.9'
+services:
+  ganache:
+    container_name: ganache
+    image: trufflesuite/ganache:latest
+    command: --database.dbPath=/data --wallet.accounts 0xf3aff74e76ab06ba866303284853ab6eef61028409b85d918dbd65ddbb6cf879,10000000000000000000000 --wallet.accounts 0x81adba35ea1df077bcd938abc83ee1fa3635da98f9c075892f16a458c071fbd3,10000000000000000000000
+    ports:
+      - 8545:8545
+    restart: always
+    volumes:
+      - ganache-data:/data
+    networks:
+      - blockchain-tier
+
+  main-server:
+    container_name: main-server
+    build: 
+      context: ./main-server
+      dockerfile: Dockerfile
+    ports:
+      - 4000:4000
+    restart: always
+    configs:
+      - source: main-server-config
+        target: /app/config/config.json
+    networks:
+      - back-tier
+    depends_on:
+      - postgres
+
+  contract-server:
+    container_name: contract-server
+    build:
+      context: ./contract-server
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    restart: always
+    volumes:
+      - /tmp/contract-server/npm_cache:/root/.npm:z
+      - ./contract-server/src:/usr/src/app/src:z
+      - ./contract-server/.env:/usr/src/app/.env:z
+    networks:
+      - back-tier
+      - blockchain-tier
+    depends_on:
+      - mysql
+      - ganache
+
+  daemon:
+    container_name: daemon
+    build:
+      context: ./daemon
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - /tmp/daemon/npm_cache:/root/.npm:z
+      - ./daemon/src:/usr/src/app/src:z
+    networks:
+      - blockchain-tier
+    depends_on:
+      - mysql
+      - ganache
+
+  postgres:
+    container_name: postgres
+    image: postgres:15.3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: plohub
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - back-tier
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.33
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=plohub
+    ports:
+      - 6000:3306
+    restart: always
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./scripts/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - blockchain-tier
+
+volumes:
+  ganache-data:
+    driver: local
+  postgres-data:
+    driver: local
+  mysql-data:
+    driver: local
+
+networks:
+  back-tier:
+    name: back-tier
+    driver: bridge
+  blockchain-tier:
+    name: blockchain-tier
+    driver: bridge
+  
+configs:
+  main-server-config:
+    file: ./main-server/config/config.docker.json
