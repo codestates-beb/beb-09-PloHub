@@ -155,6 +155,7 @@ const MyPage = () => {
             const { user_info, posts, nfts } = response.data;
             setPostInfo(posts);
             setNftInfo(nfts);
+            const ethAmount = web3Provider.utils.fromWei(user_info.eth_amount, 'ether');
 
             dispatch({ type: SET_EMAIL, payload: user_info.email });
             dispatch({ type: SET_ADDRESS, payload: user_info.address });
@@ -162,7 +163,7 @@ const MyPage = () => {
             dispatch({ type: SET_LEVEL, payload: user_info.level });
             dispatch({ type: SET_TOKEN_BALANCE, payload: user_info.token_amount });
             dispatch({ type: SET_DAILY_TOKEN_BALANCE, payload: user_info.daily_token });
-            dispatch({ type: SET_ETH_BALANCE, payload: web3Provider.utils.fromWei(user_info.eth_amount, 'ether') });
+            dispatch({ type: SET_ETH_BALANCE, payload: ethAmount});
             
         } catch (error) {
             console.log('Error: ' + error.message);
