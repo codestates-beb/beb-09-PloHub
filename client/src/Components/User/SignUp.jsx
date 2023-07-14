@@ -248,7 +248,7 @@ const SignUp = () => {
                             duration-300`}
                             onClick={signUp}
                             disabled={signUpDisabled || !emailValidated}>
-                            Sing Up
+                            Sign Up
                         </button>
                         </div>
                     </div>
