@@ -9,8 +9,6 @@ services:
     restart: always
     volumes:
       - ganache-data:/data
-    networks:
-      - blockchain-tier
 
   main-server:
     container_name: main-server
@@ -23,8 +21,6 @@ services:
     configs:
       - source: main-server-config
         target: /app/config/config.json
-    networks:
-      - back-tier
     depends_on:
       - postgres
 
@@ -40,9 +36,6 @@ services:
       - /tmp/contract-server/npm_cache:/root/.npm:z
       - ./contract-server/src:/usr/src/app/src:z
       - ./contract-server/.env:/usr/src/app/.env:z
-    networks:
-      - back-tier
-      - blockchain-tier
     depends_on:
       - mysql
       - ganache
@@ -56,8 +49,6 @@ services:
     volumes:
       - /tmp/daemon/npm_cache:/root/.npm:z
       - ./daemon/src:/usr/src/app/src:z
-    networks:
-      - blockchain-tier
     depends_on:
       - mysql
       - ganache
@@ -76,8 +67,6 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - back-tier
 
   mysql:
     container_name: mysql
@@ -91,8 +80,6 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./scripts/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - blockchain-tier
 
 volumes:
   ganache-data:
@@ -101,14 +88,6 @@ volumes:
     driver: local
   mysql-data:
     driver: local
-
-networks:
-  back-tier:
-    name: back-tier
-    driver: bridge
-  blockchain-tier:
-    name: blockchain-tier
-    driver: bridge
   
 configs:
   main-server-config:
