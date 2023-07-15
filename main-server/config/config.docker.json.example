@@ -1,29 +1,30 @@
 {
   "postgres": {
-    "host": "",
-    "port": "",
-    "user": "",
-    "password": "",
-    "database": "",
-    "ssl_mode": "",
-    "timezone": "",
-    "timeout": ""
+    "host": "postgres",
+    "port": "5432",
+    "user": "postgres",
+    "password": "postgres",
+    "database": "plohub",
+    "ssl_mode": "disable",
+    "timezone": "Asia/Seoul",
+    "timeout": "10"
   },
   "jwt": {
-    "issuer": "",
-    "audience": "",
-    "access_token_secret": "",
-    "refresh_token_secret": ""
+    "issuer": "plohub",
+    "audience": "plohub",
+    "access_token_secret": "YOUR ACCESS TOKEN SECRET",
+    "refresh_token_secret": "YOUR REFRESH TOKEN SECRET"
   },
   "server": {
-    "port": "",
-    "domain": "",
-    "contract_server_base_url": ""
+    "port": "4000",
+    "domain": "localhost",
+    "contract_server_base_url": "http://contract-server:8080"
   },
   "s3": {
-    "region": "",
-    "access_key": "",
-    "secret_key": "",
-    "bucket": ""
+    "region": "YOUR AWS REGION",
+    "access_key": "YOUR AWS ACCESS KEY",
+    "secret_key": "YOUR AWS SECRET KEY",
+    "main_bucket": "YOUR MAIN BUCKET NAME",
+    "nft_bucket": "YOUR NFT BUCKET NAME"
   }
 }
